@@ -31,7 +31,7 @@ private fun loadFixturePacket(index: Int): ByteArray {
 class AirPodsRepositoryTest {
     @Test
     fun `initial state is disconnected with unknown capabilities`() = runTest {
-        val repository = AirPodsRepository(FakeAirPodsTransport(), backgroundScope)
+        val repository = AirPodsRepository(FakeAirPodsTransport(), backgroundScope, FakeTierProbeCache())
 
         val state = repository.state.value
 
@@ -42,7 +42,7 @@ class AirPodsRepositoryTest {
     @Test
     fun `device info event resolves capabilities from the model number`() = runTest(UnconfinedTestDispatcher()) {
         val transport = FakeAirPodsTransport()
-        val repository = AirPodsRepository(transport, backgroundScope)
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
 
         transport.emit(loadFixturePacket(3)) // INFORMATION, modelNumber A3050
 
@@ -54,7 +54,7 @@ class AirPodsRepositoryTest {
     @Test
     fun `battery event updates battery state`() = runTest(UnconfinedTestDispatcher()) {
         val transport = FakeAirPodsTransport()
-        val repository = AirPodsRepository(transport, backgroundScope)
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
 
         transport.emit(loadFixturePacket(21)) // BATTERY_INFO
 
@@ -66,7 +66,7 @@ class AirPodsRepositoryTest {
     @Test
     fun `ear detection event updates ear detection state`() = runTest(UnconfinedTestDispatcher()) {
         val transport = FakeAirPodsTransport()
-        val repository = AirPodsRepository(transport, backgroundScope)
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
 
         transport.emit(loadFixturePacket(27)) // EAR_DETECTION
 
@@ -76,7 +76,7 @@ class AirPodsRepositoryTest {
     @Test
     fun `connect drives the transport and starts the AAP handshake`() = runTest {
         val transport = FakeAirPodsTransport()
-        val repository = AirPodsRepository(transport, backgroundScope)
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
 
         repository.connect()
 
@@ -88,7 +88,7 @@ class AirPodsRepositoryTest {
     fun `connect leaves state Failed instead of throwing when the transport fails to connect`() = runTest {
         val failure = AirPodsTransport.ConnectionState.Failed("ACL connection failed")
         val transport = FakeAirPodsTransport(connectOutcome = failure)
-        val repository = AirPodsRepository(transport, backgroundScope)
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
 
         repository.connect()
 
@@ -97,9 +97,12 @@ class AirPodsRepositoryTest {
     }
 
     @Test
-    fun `connect skips the transport when the tier probe cache already says unsupported`() = runTest {
+    fun `connect skips the transport when the tier probe cache already confirms unsupported`() = runTest {
         val transport = FakeAirPodsTransport()
-        val cache = FakeTierProbeCache().apply { recordProbeResult(transport.deviceAddress, supported = false) }
+        val cache = FakeTierProbeCache().apply {
+            recordProbeResult(transport.deviceAddress, supported = false)
+            recordProbeResult(transport.deviceAddress, supported = false)
+        }
         val repository = AirPodsRepository(transport, backgroundScope, cache)
 
         repository.connect()
@@ -120,13 +123,37 @@ class AirPodsRepositoryTest {
     }
 
     @Test
-    fun `connect records a failed probe in the cache when none exists yet`() = runTest {
+    fun `a single failed probe does not yet skip the next connect attempt`() = runTest {
         val transport = FakeAirPodsTransport(connectOutcome = AirPodsTransport.ConnectionState.Failed("ACL connection failed"))
         val cache = FakeTierProbeCache()
         val repository = AirPodsRepository(transport, backgroundScope, cache)
 
         repository.connect()
 
+        assertEquals(null, cache.tierBSupported(transport.deviceAddress))
+        assertEquals(1, transport.connectCallCount)
+    }
+
+    @Test
+    fun `only a second consecutive failed probe confirms unsupported and starts skipping`() = runTest {
+        val transport = FakeAirPodsTransport(connectOutcome = AirPodsTransport.ConnectionState.Failed("ACL connection failed"))
+        val cache = FakeTierProbeCache()
+        val repository = AirPodsRepository(transport, backgroundScope, cache)
+
+        repository.connect()
+        repository.connect()
+        repository.connect()
+
         assertEquals(false, cache.tierBSupported(transport.deviceAddress))
+        assertEquals(2, transport.connectCallCount)
+    }
+
+    @Test
+    fun `a successful probe resets a prior single failure`() = runTest {
+        val cache = FakeTierProbeCache().apply { recordProbeResult("02:00:00:00:00:01", supported = false) }
+
+        cache.recordProbeResult("02:00:00:00:00:01", supported = true)
+
+        assertEquals(true, cache.tierBSupported("02:00:00:00:00:01"))
     }
 }

@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class AirPodsRepository(
     private val transport: AirPodsTransport,
     scope: CoroutineScope,
-    private val tierProbeCache: TierProbeCache? = null,
+    private val tierProbeCache: TierProbeCache,
 ) {
     private val session = AapSession(transport)
     private val _state = MutableStateFlow(AirPodsState.INITIAL)
@@ -35,9 +35,10 @@ class AirPodsRepository(
     }
 
     suspend fun connect() {
-        // §13.6: a cached "unsupported" skips the guarded PSM 0x1001 attempt (and its retry
-        // backoff, §14 battery policy) instead of re-probing a build already known to reject it.
-        if (tierProbeCache?.tierBSupported(transport.deviceAddress) == false) {
+        // §13.6: a confirmed-unsupported cache entry skips the guarded PSM 0x1001 attempt (and
+        // its retry backoff, §14 battery policy) instead of re-probing a build already known to
+        // reject it. See TierProbeCache's doc comment for why "confirmed" requires two failures.
+        if (tierProbeCache.tierBSupported(transport.deviceAddress) == false) {
             _state.update {
                 it.copy(connection = AirPodsTransport.ConnectionState.Failed(TIER_B_CACHED_UNAVAILABLE_REASON))
             }
@@ -46,7 +47,7 @@ class AirPodsRepository(
 
         transport.connect()
         val supported = transport.state.value == AirPodsTransport.ConnectionState.Connected
-        tierProbeCache?.recordProbeResult(transport.deviceAddress, supported)
+        tierProbeCache.recordProbeResult(transport.deviceAddress, supported)
         // A failed transport.connect() already recorded itself as Failed (§2.6: honest failure,
         // not a crash) -- starting the AAP session on top of a socket that doesn't exist would
         // throw instead.
