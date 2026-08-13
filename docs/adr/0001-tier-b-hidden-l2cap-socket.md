@@ -97,3 +97,14 @@ Implemented in `AapTransport` (`core.bluetooth`).
   connect attempt that looks identical to a structural rejection. Mitigated with a bounded retry
   (3 attempts, 2s backoff) in `AapTransport.connect()` — a one-shot probe would permanently
   mis-cache a capable device as unsupported.
+  **Known gap, not yet closed**: the plan's own PAGE_TIMEOUT investigation (M2 section) calls for
+  treating `PAGE_TIMEOUT` as *inconclusive* (retry later, never cache as negative), not merely
+  retried-then-negative. `AapTransport.connect()`'s `catch (e: IOException)` has no way to tell a
+  `PAGE_TIMEOUT` apart from a structural PSM rejection — both surface as the same exception type
+  with only a message string, and the native log line that discriminates them
+  (`GAP_ConnOpen: Failure registering PSM`) is only visible via `dumpsys`/logcat, not through the
+  Java exception object. So today, 3 consecutive page timeouts (e.g. AirPods idle in the case
+  across both `connect()` calls) still reach `STATE_CONFIRMED_UNSUPPORTED` in
+  `DataStoreTierProbeCache` exactly like a real structural rejection would. Left open rather than
+  guessed at: closing it needs either a native-log signal wired into the Kotlin layer or an
+  ACL-active precondition check, both of which need the deferred real-hardware pass to verify.
