@@ -80,10 +80,12 @@ Implemented in `AapTransport` (`core.bluetooth`).
 
 ### Risks
 
-- **OEM/version fragmentation**: mitigated by treating Tier B availability as a runtime probe
-  result, cached per device address and OS build fingerprint (§13.6), never inferred from
-  `Build.VERSION`. A build where the hidden method breaks degrades honestly to Tier A instead of
-  crashing or presenting a dead control (§2.6).
+- **OEM/version fragmentation**: §13.6 calls for treating Tier B availability as a runtime probe
+  result, cached per device address and OS build fingerprint, never inferred from `Build.VERSION`.
+  That cache is **not yet implemented** — today's probe result lives only for the process/session
+  lifetime (`AapTransport`'s connect-time retry, surfaced as `ConnectionState.Failed` and rendered
+  honestly per §2.6, but re-probed from scratch on every connection attempt). The DataStore-backed
+  cache is still open work, tracked as an M2 item.
 - **PAGE_TIMEOUT false negatives**: an idle/asleep classic ACL causes a page timeout on the first
   connect attempt that looks identical to a structural rejection. Mitigated with a bounded retry
   (3 attempts, 2s backoff) in `AapTransport.connect()` — a one-shot probe would permanently

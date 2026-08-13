@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.view.KeyEvent
 import androidx.core.content.getSystemService
 import dev.androidpods.core.airpods.EarDetectionState
+import dev.androidpods.core.bluetooth.AirPodsTransport
 import dev.androidpods.core.data.AirPodsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +25,13 @@ fun observeAutoPause(context: Context, states: Flow<AirPodsState>, scope: Corout
     var previous: EarDetectionState? = null
     states
         .onEach { state ->
+            if (state.connection !is AirPodsTransport.ConnectionState.Connected) {
+                // A reconnect delivers a fresh snapshot of physical ear state, not a live
+                // transition -- comparing it against pre-disconnect state would misfire a
+                // pause for whatever's playing on an unrelated app.
+                previous = null
+                return@onEach
+            }
             val current = state.earDetection
             if (current != null) {
                 if (AutoPauseDecider.shouldPause(previous, current)) {
