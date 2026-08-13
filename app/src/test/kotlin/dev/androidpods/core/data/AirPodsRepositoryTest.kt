@@ -83,4 +83,16 @@ class AirPodsRepositoryTest {
         assertEquals(AirPodsTransport.ConnectionState.Connected, transport.state.value)
         assertEquals(3, transport.sent.size)
     }
+
+    @Test
+    fun `connect leaves state Failed instead of throwing when the transport fails to connect`() = runTest {
+        val failure = AirPodsTransport.ConnectionState.Failed("ACL connection failed")
+        val transport = FakeAirPodsTransport(connectOutcome = failure)
+        val repository = AirPodsRepository(transport, backgroundScope)
+
+        repository.connect()
+
+        assertEquals(failure, transport.state.value)
+        assertTrue(transport.sent.isEmpty())
+    }
 }

@@ -35,7 +35,12 @@ class AirPodsRepository(
 
     suspend fun connect() {
         transport.connect()
-        session.start()
+        // A failed transport.connect() already recorded itself as Failed (§2.6: honest failure,
+        // not a crash) -- starting the AAP session on top of a socket that doesn't exist would
+        // throw instead.
+        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
+            session.start()
+        }
     }
 
     suspend fun disconnect() = transport.disconnect()

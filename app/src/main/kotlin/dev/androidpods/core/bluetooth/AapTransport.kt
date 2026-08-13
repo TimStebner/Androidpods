@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +40,9 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
     )
     override val state = _state.asStateFlow()
 
-    private val _packets = MutableSharedFlow<ByteArray>(extraBufferCapacity = 16)
+    // The session-start burst is 28 packets (session-start-capture.txt); sized above that so
+    // emit() never has to suspend the read loop waiting for AirPodsRepository's collector.
+    private val _packets = MutableSharedFlow<ByteArray>(extraBufferCapacity = 64)
     override val packets: Flow<ByteArray> = _packets
 
     private var socket: BluetoothSocket? = null
@@ -47,25 +50,36 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
 
     override suspend fun connect() {
         _state.value = AirPodsTransport.ConnectionState.Connecting
-        try {
-            val connected = withContext(Dispatchers.IO) {
-                HiddenApiBypass.addHiddenApiExemptions("Landroid/bluetooth/")
-                @Suppress("UNCHECKED_CAST")
-                val newSocket = HiddenApiBypass.invoke(
-                    BluetoothDevice::class.java,
-                    device,
-                    "createInsecureL2capSocket",
-                    AAP_PSM,
-                ) as BluetoothSocket
-                newSocket.connect()
-                newSocket
+        // A PAGE_TIMEOUT (radio-level, seen when the AirPods' classic ACL is idle/asleep) is a
+        // transient condition, not a structural rejection -- one-shot would misreport "unsupported"
+        // for a capable device that just wasn't actively paged yet (plan file M2 section,
+        // L2capTierBProbeTest.attempt()).
+        var lastFailure = "connect failed"
+        repeat(CONNECT_ATTEMPTS) { attempt ->
+            try {
+                val connected = withContext(Dispatchers.IO) {
+                    HiddenApiBypass.addHiddenApiExemptions("Landroid/bluetooth/")
+                    @Suppress("UNCHECKED_CAST")
+                    val newSocket = HiddenApiBypass.invoke(
+                        BluetoothDevice::class.java,
+                        device,
+                        "createInsecureL2capSocket",
+                        AAP_PSM,
+                    ) as BluetoothSocket
+                    newSocket.connect()
+                    newSocket
+                }
+                socket = connected
+                _state.value = AirPodsTransport.ConnectionState.Connected
+                startReadLoop(connected)
+                return
+            } catch (e: IOException) {
+                lastFailure = e.message ?: lastFailure
+                ProtocolLogging.rawPacket(TAG) { "connect attempt ${attempt + 1}/$CONNECT_ATTEMPTS failed: $lastFailure" }
+                if (attempt < CONNECT_ATTEMPTS - 1) delay(CONNECT_RETRY_DELAY_MS)
             }
-            socket = connected
-            _state.value = AirPodsTransport.ConnectionState.Connected
-            startReadLoop(connected)
-        } catch (e: IOException) {
-            _state.value = AirPodsTransport.ConnectionState.Failed(e.message ?: "connect failed")
         }
+        _state.value = AirPodsTransport.ConnectionState.Failed(lastFailure)
     }
 
     override suspend fun disconnect() {
@@ -112,5 +126,7 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
     private companion object {
         const val TAG = "AapTransport"
         const val AAP_PSM = 0x1001
+        const val CONNECT_ATTEMPTS = 3
+        const val CONNECT_RETRY_DELAY_MS = 2_000L
     }
 }
