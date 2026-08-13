@@ -106,10 +106,22 @@ Unsupported features should be clearly marked as unavailable, experimental, or p
 ```text
 compileSdk = 37
 targetSdk  = 37
-minSdk     = 29
+minSdk     = 36
 ```
 
-`minSdk 29` is the initial compatibility floor because the project expects to use modern public Bluetooth/L2CAP APIs while still supporting a meaningful range of Android devices.
+The original `minSdk 31` reasoning still holds as a floor argument: API 31 introduced the
+`BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` runtime permission model with
+`usesPermissionFlags="neverForLocation"`, and API 29/30 would require `ACCESS_FINE_LOCATION`
+plus enabled location services purely to perform a BLE scan, which §23 explicitly rejects.
+
+`minSdk 36` is the binding constraint on top of that, discovered during M1 implementation:
+`CompanionDeviceManager#startObservingDevicePresence(ObservingDevicePresenceRequest)` — the
+non-deprecated presence API used for the event-gated wake trigger in §13.4 — requires API 36.
+Version-gating it down to a deprecated fallback for API 31-35 would add untestable code
+(no device or emulator in that range exists for this project) for a range that gets no
+working feature anyway: Tier B (§13.5), the app's core feature set, is itself unreachable
+below Android 16 QPR3. `minSdk 36` costs nothing this project can currently deliver and
+removes the version-gating entirely.
 
 Android 17 / API 37 is the **reference platform** and must receive first-class support.
 
@@ -148,9 +160,36 @@ The following baseline was verified on **2026-08-12**.
 | Kotlin | 2.4.10 |
 | compileSdk | 37 |
 | targetSdk | 37 |
-| Material 3 stable | 1.4.0 |
-| Material 3 Expressive track | 1.5.0-alpha25 |
-| Compose UI stable line | 1.11.4 |
+| Compose BOM | 2026.08.00 |
+| Compose UI stable line | 1.12.0 (via BOM) |
+| Material 3 stable | 1.4.0 (via BOM, non-expressive usage only) |
+| Material 3 Expressive track | 1.5.0-alpha26 (required override, see below) |
+
+### Compose BOM as the single pin, with one required override
+
+Compose artifacts are pinned through `androidx.compose:compose-bom:2026.08.00`, which
+resolves `compose-ui 1.12.0` and `compose-material3 1.4.0` as a tested pair. Individual
+Compose artifact versions must not be pinned alongside the BOM, with the one exception below.
+
+### Material 3 Expressive requires the alpha override
+
+Confirmed by compiler error, not just a decompiled signature check: in `material3 1.4.0`
+(stable), `MotionScheme`, `MotionScheme.expressive()` and `ExperimentalMaterial3ExpressiveApi`
+are Kotlin-`internal` (visible in bytecode as name-mangled, e.g. `expressive$material3()`) and
+cannot be called from application code. `MaterialExpressiveTheme` itself is public but takes an
+inaccessible `MotionScheme` parameter, so it cannot be used either. An earlier verification
+pass in this project incorrectly treated the presence of these symbols in the decompiled
+bytecode as proof of public access; it was wrong, and this note supersedes it.
+
+Everything §6 needs is available starting at `material3 1.5.0-alpha26`: `MaterialExpressiveTheme`,
+`MotionScheme.expressive()`, `ShortNavigationBar`, `WideNavigationRail`, plus `ButtonGroup`,
+`FloatingToolbar`, `LoadingIndicator`, `SplitButton` and `FloatingActionButtonMenu`.
+
+Policy: override `androidx.compose.material3:material3` to `1.5.0-alpha26` alongside the BOM
+(the BOM otherwise governs every other Compose artifact). Isolate all Material 3 Expressive
+usage behind `core/designsystem` so the alpha dependency and any future API churn stay
+contained there. Re-evaluate this override at every Compose BOM bump: drop it the moment a
+stable material3 release exposes these APIs publicly.
 
 ### Why Gradle 9.5.0 instead of 9.6.0?
 
@@ -203,7 +242,10 @@ Never use dynamic versions such as `1.+`, `latest.release`, or equivalent.
 ### Preferred
 
 - Hilt for dependency injection
-- Navigation 3 for app navigation when production-ready for the required use cases
+- `ShortNavigationBar` / `NavigationSuiteScaffold` driven by a sealed destination type for the
+  small, fixed set of top-level destinations. Navigation 3 (`androidx.navigation3`, currently
+  1.2.0-alpha07) is not production-ready and is not adopted in v1. Navigation Compose 2.9.8 is
+  the fallback if a real back-stack requirement appears.
 - Kotlin Serialization for internal structured data where useful
 - immutable UI state models
 - repository-based data boundaries
@@ -724,6 +766,17 @@ Scanning should be:
 - stopped immediately when unnecessary,
 - replaced with association/presence APIs where possible.
 
+Tier A requires BLE scanning by nature. It is made event-gated rather than continuous:
+
+1. `CompanionDeviceManager.startObservingDevicePresence()` for the associated device, or the
+   A2DP/HFP ACL-connected broadcast, acts as the trigger.
+2. The scan uses a `ScanFilter` on manufacturer ID `0x004C` and `SCAN_MODE_LOW_POWER`.
+3. The scan stops on audio-device disconnect, on screen-off without playback, and on any
+   Androidpods component teardown.
+
+While no associated AirPods device is connected to the audio profile, Androidpods performs no
+scanning at all.
+
 ### 13.4 No aggressive polling
 
 Never poll battery or device state every few seconds as a default design.
@@ -736,6 +789,49 @@ Preferred priority:
 4. conservative fallback polling only when unavoidable
 
 Fallback polling must be documented and measurable.
+
+### 13.5 Transport tiers
+
+AirPods expose two independent data channels. Androidpods must treat them separately.
+
+**Tier A — BLE proximity advertisement (read-only, every device Androidpods installs on)**
+
+Apple manufacturer data (company ID `0x004C`, type `0x07`) carries battery for left/right/case,
+charging flags, in-ear state, lid state and a model identifier. No pairing-level access is
+required, and no Android build newer than the app's `minSdk` (§3.1) is needed. Tier A alone
+supports the Home dashboard, widgets, the battery notification and ear-detection-driven
+auto-pause — it is the fallback for any supported device whose Tier B probe fails, not a path
+to supporting devices below `minSdk`.
+
+**Tier B — AAP/AACP over L2CAP PSM 0x1001 (read/write, restricted)**
+
+Apple's accessory protocol runs over a BR/EDR L2CAP channel on PSM `0x1001`. Every write
+operation in §8.1 (noise control, ear-detection toggle, stem actions, press behaviour) and all
+firmware/capability metadata require this channel.
+
+A defect in the AOSP Bluetooth stack (Fluoride channel-mode negotiation, Google issue
+371713238) previously made this channel unreachable for unprivileged apps. The defect is fixed
+in Android 17. Tier B is additionally reported to work unrooted on Pixel/Android 16 QPR3,
+ColorOS/OxygenOS 16 and realme UI 7.0. On other builds it fails and Androidpods must degrade to
+Tier A.
+
+**Tier C — privileged/Apple-spoofing (out of scope)**
+
+Spoofing the Bluetooth Device ID to Apple's vendor ID `0x004C` unlocks further accessory
+features but requires root/Xposed. Per §8.4 this is not part of Androidpods.
+
+### 13.6 Tier detection is a probe, not a version check
+
+Tier B availability must never be inferred from `Build.VERSION`, because vendor builds below
+Android 17 also support it and vendor builds at the same API level may not.
+
+The capability resolver performs one guarded connection attempt to PSM `0x1001` per known
+device and caches the outcome in DataStore, keyed by device address and OS build fingerprint.
+The cache is invalidated when the build fingerprint changes.
+
+A failed probe results in Tier A operation plus an honest explanation in the UI
+("this Android build does not allow the AirPods control channel"). It must never result in a
+control that appears functional and silently does nothing (§2.6).
 
 ---
 
@@ -989,6 +1085,19 @@ Potential Android permissions/API access may include:
 
 Do not request location merely because legacy Bluetooth implementations once required it on old Android versions.
 
+Concretely required:
+
+- `BLUETOOTH_SCAN` with `android:usesPermissionFlags="neverForLocation"` — Tier A advertisement
+  decoding.
+- `BLUETOOTH_CONNECT` — device metadata and the Tier B L2CAP channel.
+- `POST_NOTIFICATIONS` — connection and battery notifications.
+- Companion Device association — presence observation without polling.
+
+Media auto-pause uses `AudioManager.dispatchMediaKeyEvent()`, which requires no permission.
+`MediaSessionManager.getActiveSessions()` would require notification-listener access and is
+therefore not used for auto-pause; it may only be considered later, opt-in, if auto-resume
+demands session-level knowledge.
+
 ---
 
 ## 24. Privacy
@@ -1036,6 +1145,29 @@ Protocol work must be treated as a dedicated engineering/research area.
 The project must not claim affiliation with, endorsement by, or ownership by Apple.
 
 AirPods and Apple trademarks remain the property of their respective owner.
+
+### Project licence
+
+Androidpods is licensed under GPL-3.0-or-later. `LICENSE` at the repository root is
+authoritative.
+
+This makes the existing GPL-3.0 AirPods protocol implementations (LibrePods, CAPod) licence-
+compatible sources. Adaptation is therefore permitted, subject to:
+
+- every file containing adapted code carries an SPDX header and an attribution comment naming
+  the upstream project, the file, and the commit it was taken from,
+- upstream copyright notices are preserved,
+- `NOTICE.md` lists every upstream project, its licence and its scope of use,
+- adapted code is still reviewed against §11 layering and §30 coding standards rather than
+  merged verbatim,
+- the resulting binary is distributed under GPL-3.0 including a written offer for source.
+
+Protocol facts — PSM numbers, opcodes, packet field layouts, advertisement byte offsets — are
+factual interface information and remain usable regardless of source. Every protocol constant
+carries a comment naming the origin of the observation (own capture vs. upstream documentation).
+
+The VendorID-spoofing hook used by some GPL-3.0 reference implementations is root-based and is
+not adopted; §8.4 excludes it regardless of licence.
 
 ---
 
@@ -1114,6 +1246,15 @@ Captured or synthetic packet fixtures should verify:
 - unknown field tolerance,
 - malformed packet handling,
 - firmware variation behavior.
+
+**Pre-release scrubbing requirement:** early fixtures captured directly from real hardware
+(starting with M2's session-start capture) contain real, identifying data belonging to the
+capturing device's owner — AirPods serial numbers and Bluetooth MAC addresses of other paired
+devices observed in `CONNECTED_DEVICES`/`AUDIO_SOURCE` packets. These are left in place during
+early development for fixture fidelity. Before the first MVP's security pass (and before any
+public release or repository visibility change), every fixture must be re-reviewed and all
+real serials/MAC addresses replaced with synthetic placeholders of equal byte length. This is a
+blocking item for that security pass, not an optional cleanup.
 
 ### UI tests
 
@@ -1282,17 +1423,24 @@ When documentation and memory disagree, current official documentation wins.
 - connect/disconnect state machine
 - protocol logging in debug mode
 
-### Milestone 2 — Read-only AirPods state
+### Milestone 2 — Read-only state via AAP session (Tier B)
 
-- protocol decoding
-- capability resolver
-- battery L/R/case
-- charging state
-- wear detection
-- firmware/model info
+- L2CAP transport to PSM 0x1001
+- tier probe with cached result (§13.6)
+- AAP handshake, packet decoding, firmware/model metadata
+- battery L/R/case, charging state, wear detection, capability resolution
 - Home dashboard
+- read-only only: the session must be proven before any configuration command is sent
 
-This milestone should prove the architecture before sending configuration commands.
+### Milestone 2b — Advertisement fallback (Tier A)
+
+- BLE advertisement parser feeding the same `AirPodsState`
+- event-gated scan lifecycle per §13.4
+- serves devices where the Tier B probe fails
+
+Tier B is implemented first because it is the tier the reference hardware supports and because
+it carries the project's only genuine technical unknown. Tier A is a documented requirement of
+§13.5 but is scheduled once a device that needs it exists.
 
 ### Milestone 3 — Core controls
 
