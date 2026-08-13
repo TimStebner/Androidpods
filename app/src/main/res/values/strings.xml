@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Androidpods</string>
+    <string name="home_disconnected_title">No AirPods connected</string>
+    <string name="home_disconnected_body">Connect your AirPods to see their status here.</string>
+    <string name="onboarding_title">Connect your AirPods</string>
+    <string name="onboarding_rationale">Androidpods needs Bluetooth access to find and stay connected to your AirPods, and to read their battery and status.</string>
+    <string name="onboarding_grant_permissions">Grant Bluetooth access</string>
+    <string name="onboarding_pair_airpods">Pair AirPods</string>
+    <string name="onboarding_pairing_cancelled">Pairing was cancelled.</string>
+    <string name="onboarding_bluetooth_disabled">Turn on Bluetooth to connect your AirPods.</string>
+    <string name="onboarding_bluetooth_unsupported">This device has no Bluetooth radio, so Androidpods cannot connect to AirPods.</string>
+</resources>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Tier A advertisement decoding (PROJECT.md §13.4/§23); never used to derive location. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+    <!-- Device metadata and the Tier B L2CAP channel (§13.5/§23). -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Declared now, requested only once a notification actually exists (M5, §23 minimum-
+         permission rule); see core.bluetooth.RequiredPermissions. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Normal permission, auto-granted; lets AirPodsPresenceService be bound only while the
+         associated device is in range (§13.4 point 1), no polling needed. -->
+    <uses-permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE" />
+
+    <uses-feature
+        android:name="android.software.companion_device_setup"
+        android:required="true" />
+
+    <application
+        android:name=".AndroidpodsApp"
+        android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Androidpods">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Androidpods">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="dev.androidpods.core.bluetooth.AirPodsPresenceService"
+            android:exported="true"
+            android:permission="android.permission.BIND_COMPANION_DEVICE_SERVICE">
+            <intent-filter>
+                <action android:name="android.companion.CompanionDeviceService" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

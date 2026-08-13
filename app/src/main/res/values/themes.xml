@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <!-- Window-background-only theme: Compose owns everything else. The values-night variant
+         swaps the parent so the pre-Compose window background matches the device's light/dark
+         setting instead of always flashing light (there is no framework DayNight theme; that
+         is an AppCompat feature this project doesn't depend on). -->
+    <style name="Theme.Androidpods" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
