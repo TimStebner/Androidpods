@@ -55,7 +55,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
-    ) { granted -> if (granted) refreshBatteryNotification(context) }
+    ) { granted -> if (granted) refreshBatteryNotification(context, state) }
     // The battery notification (feature.notifications) is posted from AndroidpodsApp regardless
     // of whether this screen is open, but a runtime permission can only be requested from a
     // foreground Activity -- this is the one place that's guaranteed to run once a device is

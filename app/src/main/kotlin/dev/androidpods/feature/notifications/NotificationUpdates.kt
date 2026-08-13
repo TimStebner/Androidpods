@@ -2,7 +2,6 @@
 package dev.androidpods.feature.notifications
 
 import android.content.Context
-import dev.androidpods.core.data.AirPodsRepositoryProvider
 import dev.androidpods.core.data.AirPodsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +29,9 @@ fun observeBatteryNotifications(context: Context, states: Flow<AirPodsState>, sc
 // The observer above only re-posts on a *state* change; the POST_NOTIFICATIONS grant that lands
 // after the user taps Allow isn't one (distinctUntilChanged already remembered the pre-grant
 // "cancelled" emission), so without this the notification would only appear at the next battery
-// reading, which can be minutes away. Called from HomeScreen's permission-result callback.
-fun refreshBatteryNotification(context: Context) {
-    updateBatteryNotification(context, AirPodsRepositoryProvider.state.value.toBatteryNotificationUiState())
+// reading, which can be minutes away. Called from HomeScreen's permission-result callback with
+// the state HomeScreen already has from its own collectAsState() -- keeps this file free of a
+// direct AirPodsRepositoryProvider read, matching observeBatteryNotifications' own shape.
+fun refreshBatteryNotification(context: Context, state: AirPodsState) {
+    updateBatteryNotification(context, state.toBatteryNotificationUiState())
 }
