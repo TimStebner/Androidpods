@@ -17,6 +17,9 @@
     <string name="home_ear_detection_out_of_ear">Out of ear</string>
     <string name="widget_battery_no_data">Open Androidpods to connect</string>
     <string name="widget_battery_description">AirPods battery</string>
+    <string name="notification_channel_battery">AirPods battery</string>
+    <string name="notification_battery_title">AirPods connected</string>
+    <string name="notification_battery_text">Left %1$d%% · Right %2$d%% · Case %3$d%%</string>
     <string name="onboarding_title">Connect your AirPods</string>
     <string name="onboarding_rationale">Androidpods needs Bluetooth access to find and stay connected to your AirPods, and to read their battery and status.</string>
     <string name="onboarding_grant_permissions">Grant Bluetooth access</string>

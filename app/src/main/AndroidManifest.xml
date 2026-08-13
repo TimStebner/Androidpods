@@ -7,8 +7,9 @@
         android:usesPermissionFlags="neverForLocation" />
     <!-- Device metadata and the Tier B L2CAP channel (§13.5/§23). -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <!-- Declared now, requested only once a notification actually exists (M5, §23 minimum-
-         permission rule); see core.bluetooth.RequiredPermissions. -->
+    <!-- Requested from HomeScreen once connected (M5, §23 minimum-permission rule); see
+         core.bluetooth.RequiredPermissions.hasNotificationPermission and
+         feature.notifications. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Normal permission, auto-granted; lets AirPodsPresenceService be bound only while the
          associated device is in range (§13.4 point 1), no polling needed. -->

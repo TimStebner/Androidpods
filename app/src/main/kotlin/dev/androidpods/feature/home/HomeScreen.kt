@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.androidpods.feature.home
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateIntAsState
@@ -25,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,10 +39,12 @@ import dev.androidpods.core.airpods.BatteryState
 import dev.androidpods.core.airpods.CapabilityResolver
 import dev.androidpods.core.airpods.EarDetectionState
 import dev.androidpods.core.bluetooth.AirPodsTransport
+import dev.androidpods.core.bluetooth.hasNotificationPermission
 import dev.androidpods.core.data.AirPodsRepositoryProvider
 import dev.androidpods.core.data.AirPodsState
 import dev.androidpods.core.designsystem.AndroidpodsTheme
 import dev.androidpods.core.designsystem.androidpodsSpatialSpec
+import dev.androidpods.feature.notifications.refreshBatteryNotification
 
 // Presentation only: no Bluetooth access, no protocol calls here (PROJECT.md §30). Renders
 // AirPodsState, never infers it (§9) -- e.g. the ear-detection row only appears when
@@ -46,6 +52,19 @@ import dev.androidpods.core.designsystem.androidpodsSpatialSpec
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
     val state by AirPodsRepositoryProvider.state.collectAsState()
+    val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted -> if (granted) refreshBatteryNotification(context) }
+    // The battery notification (feature.notifications) is posted from AndroidpodsApp regardless
+    // of whether this screen is open, but a runtime permission can only be requested from a
+    // foreground Activity -- this is the one place that's guaranteed to run once a device is
+    // set up, and denying it must not block using the app (§23).
+    LaunchedEffect(Unit) {
+        if (!hasNotificationPermission(context)) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
     HomeScreenContent(state = state, modifier = modifier)
 }
 

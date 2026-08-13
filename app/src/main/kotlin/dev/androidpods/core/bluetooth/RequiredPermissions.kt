@@ -18,3 +18,12 @@ fun hasBluetoothPermissions(context: Context): Boolean =
     REQUIRED_BLUETOOTH_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
+
+// Requested separately from REQUIRED_BLUETOOTH_PERMISSIONS, once a notification actually exists
+// (see feature.notifications) -- it must not gate onboarding completion, and denying it must not
+// block using the app (§23).
+fun hasNotificationPermission(context: Context): Boolean =
+    ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.POST_NOTIFICATIONS,
+    ) == PackageManager.PERMISSION_GRANTED
