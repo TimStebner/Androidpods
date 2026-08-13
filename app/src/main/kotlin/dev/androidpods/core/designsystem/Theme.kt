@@ -11,7 +11,6 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Dp
 
 // This file is the isolation boundary for experimental Material 3 Expressive APIs
 // (PROJECT.md §6.1): callers only ever see AndroidpodsTheme, never MaterialExpressiveTheme
@@ -41,7 +40,8 @@ fun AndroidpodsTheme(
 
 // The one sanctioned way for feature code to reach the expressive motion scheme without
 // importing ExperimentalMaterial3ExpressiveApi itself (PROJECT.md §6.1 isolation boundary).
+// Generic so both Dp (size/position) and Int/Float (battery percentage) animations share it.
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun androidpodsSpatialSpec(): FiniteAnimationSpec<Dp> =
+fun <T> androidpodsSpatialSpec(): FiniteAnimationSpec<T> =
     MaterialTheme.motionScheme.defaultSpatialSpec()

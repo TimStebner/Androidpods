@@ -6,6 +6,10 @@ import dev.androidpods.core.bluetooth.AapTransport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 // Process-lifetime home for the one AirPodsState (§10). A manual singleton, not Hilt: this is
 // still the only injection site (AirPodsPresenceService) -- the plan defers Hilt to when a second
@@ -14,8 +18,18 @@ object AirPodsRepositoryProvider {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var repository: AirPodsRepository? = null
 
+    // Always available, even before any device has connected (INITIAL/Disconnected) -- so UI
+    // doesn't need to branch on "no repository yet" vs. "repository says disconnected".
+    private val _state = MutableStateFlow(AirPodsState.INITIAL)
+    val state: StateFlow<AirPodsState> = _state.asStateFlow()
+
     val current: AirPodsRepository? get() = repository
 
-    fun repositoryFor(device: BluetoothDevice): AirPodsRepository =
-        repository ?: AirPodsRepository(AapTransport(device), scope).also { repository = it }
+    fun repositoryFor(device: BluetoothDevice): AirPodsRepository {
+        repository?.let { return it }
+        val created = AirPodsRepository(AapTransport(device), scope)
+        repository = created
+        scope.launch { created.state.collect { _state.value = it } }
+        return created
+    }
 }

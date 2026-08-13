@@ -12,7 +12,7 @@ file is the project-wide index; it does not replace those per-file notices.
 
 | Project | License | Scope of use |
 |---|---|---|
-| _(none yet — first adaptation lands in Milestone 2, AAP protocol decoding)_ | | |
+| [LibrePods](https://github.com/kavishdevar/librepods) (commit `790e3963451002a3aabf8dcd71d40c635724176a`) | GPL-3.0-or-later | AAP packet field layouts and session-start handshake sequence, adapted into `core.airpods.AapPacketDecoder` and `core.airpods.AapSession`. Verified against this project's own real-hardware capture, not trusted blindly. |
 
 ## SPDX and attribution convention
 
