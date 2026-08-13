@@ -80,12 +80,15 @@ Implemented in `AapTransport` (`core.bluetooth`).
 
 ### Risks
 
-- **OEM/version fragmentation**: §13.6 calls for treating Tier B availability as a runtime probe
-  result, cached per device address and OS build fingerprint, never inferred from `Build.VERSION`.
-  That cache is **not yet implemented** — today's probe result lives only for the process/session
-  lifetime (`AapTransport`'s connect-time retry, surfaced as `ConnectionState.Failed` and rendered
-  honestly per §2.6, but re-probed from scratch on every connection attempt). The DataStore-backed
-  cache is still open work, tracked as an M2 item.
+- **OEM/version fragmentation**: mitigated by treating Tier B availability as a runtime probe
+  result, cached per device address and OS build fingerprint (§13.6), never inferred from
+  `Build.VERSION`. Implemented in `DataStoreTierProbeCache`/`TierProbeCache` (`core.data`),
+  consulted by `AirPodsRepository.connect()`: a cached "unsupported" result skips the guarded PSM
+  `0x1001` attempt (and its retry backoff) entirely instead of re-probing a build already known to
+  reject it, and reports the same honest §2.6 explanation
+  ("this Android build does not allow the AirPods control channel") without needing a live
+  connection attempt. Keying on the build fingerprint makes an OS update a cache miss for free, no
+  separate invalidation step needed.
 - **PAGE_TIMEOUT false negatives**: an idle/asleep classic ACL causes a page timeout on the first
   connect attempt that looks identical to a structural rejection. Mitigated with a bounded retry
   (3 attempts, 2s backoff) in `AapTransport.connect()` — a one-shot probe would permanently

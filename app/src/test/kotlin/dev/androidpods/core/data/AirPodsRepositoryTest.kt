@@ -95,4 +95,38 @@ class AirPodsRepositoryTest {
         assertEquals(failure, transport.state.value)
         assertTrue(transport.sent.isEmpty())
     }
+
+    @Test
+    fun `connect skips the transport when the tier probe cache already says unsupported`() = runTest {
+        val transport = FakeAirPodsTransport()
+        val cache = FakeTierProbeCache().apply { recordProbeResult(transport.deviceAddress, supported = false) }
+        val repository = AirPodsRepository(transport, backgroundScope, cache)
+
+        repository.connect()
+
+        assertEquals(0, transport.connectCallCount)
+        assertTrue(repository.state.value.connection is AirPodsTransport.ConnectionState.Failed)
+    }
+
+    @Test
+    fun `connect records a successful probe in the cache when none exists yet`() = runTest {
+        val transport = FakeAirPodsTransport()
+        val cache = FakeTierProbeCache()
+        val repository = AirPodsRepository(transport, backgroundScope, cache)
+
+        repository.connect()
+
+        assertEquals(true, cache.tierBSupported(transport.deviceAddress))
+    }
+
+    @Test
+    fun `connect records a failed probe in the cache when none exists yet`() = runTest {
+        val transport = FakeAirPodsTransport(connectOutcome = AirPodsTransport.ConnectionState.Failed("ACL connection failed"))
+        val cache = FakeTierProbeCache()
+        val repository = AirPodsRepository(transport, backgroundScope, cache)
+
+        repository.connect()
+
+        assertEquals(false, cache.tierBSupported(transport.deviceAddress))
+    }
 }

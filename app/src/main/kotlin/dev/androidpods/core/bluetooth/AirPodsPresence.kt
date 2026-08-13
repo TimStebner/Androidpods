@@ -28,7 +28,7 @@ class AirPodsPresenceService : CompanionDeviceService() {
         when (event.event) {
             DevicePresenceEvent.EVENT_BT_CONNECTED -> {
                 val device = resolveBluetoothDevice(event.associationId) ?: return
-                scope.launch { AirPodsRepositoryProvider.repositoryFor(device).connect() }
+                scope.launch { AirPodsRepositoryProvider.repositoryFor(device, applicationContext).connect() }
             }
             DevicePresenceEvent.EVENT_BT_DISCONNECTED -> {
                 scope.launch { AirPodsRepositoryProvider.current?.disconnect() }

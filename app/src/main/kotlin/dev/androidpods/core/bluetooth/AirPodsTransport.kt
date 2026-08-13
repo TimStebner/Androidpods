@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 // and M2 respectively (plan Teil B). This is socket-lifecycle-and-bytes only -- no packet parsing
 // here, that's `core.airpods`'s job (§11).
 interface AirPodsTransport {
+    val deviceAddress: String
     val state: StateFlow<ConnectionState>
     val packets: Flow<ByteArray>
 

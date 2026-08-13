@@ -35,6 +35,8 @@ import org.lsposed.hiddenapibypass.HiddenApiBypass
 // AapPacketDecoderTest against a fake transport. This class is unverified until run on the
 // reference Pixel + AirPods 4 hardware.
 class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
+    override val deviceAddress: String = device.address
+
     private val _state = MutableStateFlow<AirPodsTransport.ConnectionState>(
         AirPodsTransport.ConnectionState.Disconnected,
     )

@@ -2,6 +2,7 @@
 package dev.androidpods.core.data
 
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import dev.androidpods.core.bluetooth.AapTransport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,9 +26,13 @@ object AirPodsRepositoryProvider {
 
     val current: AirPodsRepository? get() = repository
 
-    fun repositoryFor(device: BluetoothDevice): AirPodsRepository {
+    fun repositoryFor(device: BluetoothDevice, context: Context): AirPodsRepository {
         repository?.let { return it }
-        val created = AirPodsRepository(AapTransport(device), scope)
+        val created = AirPodsRepository(
+            AapTransport(device),
+            scope,
+            DataStoreTierProbeCache(context.applicationContext),
+        )
         repository = created
         scope.launch { created.state.collect { _state.value = it } }
         return created

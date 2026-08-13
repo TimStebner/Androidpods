@@ -10,14 +10,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 // real one without touching Bluetooth.
 class FakeAirPodsTransport(
     private val connectOutcome: AirPodsTransport.ConnectionState = AirPodsTransport.ConnectionState.Connected,
+    override val deviceAddress: String = "02:00:00:00:00:01",
 ) : AirPodsTransport {
     override val state = MutableStateFlow<AirPodsTransport.ConnectionState>(AirPodsTransport.ConnectionState.Disconnected)
     private val inbound = MutableSharedFlow<ByteArray>(extraBufferCapacity = 16)
     override val packets: Flow<ByteArray> = inbound
 
     val sent = mutableListOf<ByteArray>()
+    var connectCallCount = 0
+        private set
 
     override suspend fun connect() {
+        connectCallCount++
         state.value = connectOutcome
     }
 
