@@ -18,7 +18,7 @@ Real-hardware pass (Pixel 9 Pro XL, Android 17/API 37, AirPods 4, wireless debug
 - Confirmed notifications via `dumpsys` (on the normal-paced connect, not the fast-toggle case above): `POST_NOTIFICATIONS` granted, `battery_status` channel posts/updates with live, correct content (`IMPORTANCE_LOW`, `ONLY_ALERT_ONCE`), and is cancelled on disconnect.
 - Environment/tooling notes (not app bugs, worth remembering for next time): `./gradlew :app:connectedDebugAndroidTest` uninstalls both the app and androidTest APKs as a finalizer step, wiping DataStore/permission grants/CDM association — workaround is `adb install -r` (preserves data) + `adb shell am instrument -w -e class <FQN>#<method> dev.androidpods.app.test/androidx.test.runner.AndroidJUnitRunner` directly. `com.google.android.bluetooth` was killed once for cached-process memory reclaim during testing and auto-restarted by the system, unrelated to any of the above.
 - Temporary diagnostic logging (`ProtocolLogging.rawPacketLoggingEnabled`, a hex-dump variant of the read-loop log) was used twice during investigation and reverted both times before this handoff. `./gradlew :app:testDebugUnitTest` green after the final revert.
-- Commits: none this session — nothing has been committed yet, per the repo's commit-only-when-asked policy. All fixes above are uncommitted working-tree changes.
+- Commits: all three fixes plus `ForceTierBUnsupportedTest` and this doc committed as `5f475ac` ("Fix MAC-case crash and AapSession handshake pacing found on real hardware").
 
 ## Plan state (`~/.claude/plans/bitte-lies-dir-einmal-smooth-meerkat.md`)
 

@@ -4,7 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-This repository currently contains only `PROJECT.md` (the project specification) — there is no Android/Gradle project, source code, or build system yet. There are no build/lint/test commands to run until the project is bootstrapped (Milestone 0 in `PROJECT.md` §32).
+**Read `ROADMAP.md` first, every session** — it is the living session-handoff doc ("overwrite next session, don't append") and has the actual current state: what's hardware-confirmed, what's mid-flight, what's explicitly out of scope right now. This file (`CLAUDE.md`) only covers the stable architectural rules that don't change session to session.
+
+The project is bootstrapped and past Milestone 0. M0–M2 (Bluetooth transport, AAP protocol, capability resolution) and the read-only slice of M5 (battery widget, battery notification) are hardware-confirmed on a real Pixel + AirPods 4. M3 (write controls: ANC/Transparency/Adaptive, ear-detection toggle) is **explicitly hard-gated** — do not start it under any framing without the user's explicit go-ahead, independent of any other milestone's status. Check `ROADMAP.md` before assuming any milestone is further along or less started than it says.
+
+Build/lint/test commands (single `app` Gradle module, no multi-module split yet):
+
+```
+./gradlew :app:assembleDebug          # build debug APK
+./gradlew :app:testDebugUnitTest      # JVM unit tests
+./gradlew :app:lintDebug              # lint
+./gradlew :app:connectedDebugAndroidTest   # instrumented tests — WARNING: uninstalls the app afterward as a finalizer, wiping on-device app data (DataStore, permission grants, CDM association). For manual on-device test tools, prefer `adb install -r` + `adb shell am instrument -w -e class <FQN>#<method> dev.androidpods.app.test/androidx.test.runner.AndroidJUnitRunner` instead.
+```
 
 When bootstrapping or writing any code here, **read `PROJECT.md` in full first** — it is the authoritative source of truth for this project (see its §31 "Source of Truth Rules for AI Coding Agents") and takes precedence over default assumptions. What follows is a condensed pointer to its key sections, not a replacement for it.
 
@@ -35,17 +46,17 @@ Everything (Compose UI, Glance widgets, Quick Settings, notifications) derives f
 
 Battery efficiency is a first-class requirement. Priority order: AirPods protocol event → Bluetooth system event → cached state → conservative documented fallback polling only when unavoidable. No continuous BLE scanning, no permanent wake locks/foreground services, no high-frequency timers (§14).
 
-## Suggested module structure (§12)
+## Module structure (§12)
 
-Start simple — package boundaries inside few modules are fine initially; only split into a Gradle module when it provides a real build/ownership boundary:
+Still one `app` Gradle module with package boundaries, per §12's "start simple" guidance — no Gradle module split has been needed yet. Current packages under `dev.androidpods`:
 
 ```
-app/
-core/{common,model,bluetooth,airpods,data,designsystem}/
-feature/{onboarding,home,controls,widgets,settings}/
-build-logic/
-gradle/libs.versions.toml
+app/                                   (Application, MainActivity)
+core/{airpods,bluetooth,data,designsystem,media}/
+feature/{home,notifications,onboarding,widgets}/
 ```
+
+`core/media` (auto-pause) and `feature/notifications` were added after the structure was first suggested — both fit the existing layering without needing a new module. `feature/controls`, `feature/settings`, and a `core/common`/`core/model` split don't exist yet — add them when M3/M4 or a second consumer of shared types actually needs them, not preemptively.
 
 ## Toolchain baseline (§4)
 
