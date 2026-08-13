@@ -40,6 +40,9 @@ class AirPodsPresenceService : CompanionDeviceService() {
         val manager = getSystemService<CompanionDeviceManager>() ?: return null
         val mac = manager.myAssociations.firstOrNull { it.id == associationId }?.deviceMacAddress
             ?: return null
-        return getSystemService<BluetoothManager>()?.adapter?.getRemoteDevice(mac.toString())
+        // MacAddress.toString() is lowercase; BluetoothAdapter.getRemoteDevice(String) validates
+        // against an uppercase-only pattern and throws IllegalArgumentException otherwise --
+        // crashed AirPodsPresenceService on every real presence event before this fix.
+        return getSystemService<BluetoothManager>()?.adapter?.getRemoteDevice(mac.toString().uppercase())
     }
 }

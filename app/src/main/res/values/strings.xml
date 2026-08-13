@@ -5,7 +5,7 @@
     <string name="home_disconnected_body">Connect your AirPods to see their status here.</string>
     <string name="home_connecting_title">Connecting…</string>
     <string name="home_tier_b_unavailable_title">Control channel unavailable</string>
-    <string name="home_tier_b_unavailable_body">This Android build does not allow the AirPods control channel: %1$s</string>
+    <string name="home_tier_b_unavailable_body">%1$s</string>
     <string name="home_battery_left">Left</string>
     <string name="home_battery_right">Right</string>
     <string name="home_battery_case">Case</string>

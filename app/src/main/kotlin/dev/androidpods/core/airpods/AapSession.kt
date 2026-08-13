@@ -2,6 +2,7 @@
 package dev.androidpods.core.airpods
 
 import dev.androidpods.core.bluetooth.AirPodsTransport
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -14,8 +15,15 @@ class AapSession(private val transport: AirPodsTransport) {
     val events: Flow<AapEvent> = transport.packets.map(AapPacketDecoder::decode)
 
     suspend fun start() {
+        // The 200ms gaps replicate captureAapFixture's harness exactly (real hardware capture
+        // that reached BATTERY_INFO/EAR_DETECTION) -- back-to-back sends with no delay were
+        // observed on hardware to get the AirPods past HANDSHAKE/SET_FEATURE_FLAGS but never
+        // deliver the REQUEST_NOTIFICATIONS-gated battery/ear-detection pushes, even across
+        // repeated real physical ear-detection changes (hardware pass, 2026-08-13).
         transport.send(HANDSHAKE_PACKET)
+        delay(200)
         transport.send(SET_FEATURE_FLAGS_PACKET)
+        delay(200)
         transport.send(REQUEST_NOTIFICATIONS_PACKET)
     }
 
