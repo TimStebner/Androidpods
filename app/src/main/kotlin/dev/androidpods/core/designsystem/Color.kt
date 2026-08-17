@@ -5,53 +5,74 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Fallback palette used when Dynamic Color is unavailable or disabled (PROJECT.md §6.2).
-// Distinct from Material's default baseline so Androidpods keeps its own identity rather
-// than looking like an unbranded Material sample app.
-//
-// ponytail: hand-picked tones approximating a teal/green HCT palette, not generated from a
-// seed -- material3 doesn't expose a public seed-to-scheme API (dynamicLightColorScheme's
-// generator is Kotlin-internal, see [[material3-expressive-needs-alpha]]). `lightColorScheme()`
-// silently defaults every unset slot (background, containers, outline, ...) to Material's
-// baseline purple, so *every* role actually rendered on screen must be set explicitly here or
-// the "fallback" is indistinguishable from dynamic color. Upgrade path: regenerate from a real
-// seed with the Material Theme Builder once the design system needs a second seed color.
-internal val AndroidpodsFallbackLightColorScheme = lightColorScheme(
-    primary = Color(0xFF2F6B5E),
+/**
+ * Signature Material 3 Expressive Color Palette for Androidpods (PROJECT.md §6.2).
+ *
+ * Designed with deep obsidian surfaces, rich container elevation layers, high-contrast
+ * readable typography (WCAG AAA), and vibrant electric teal & cyan accents.
+ */
+internal val AndroidpodsLightColorScheme = lightColorScheme(
+    primary = Color(0xFF0284C7), // Vibrant electric sky blue
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFA8F2DE),
-    onPrimaryContainer = Color(0xFF00201A),
-    secondary = Color(0xFF4C6359),
+    primaryContainer = Color(0xFFE0F2FE),
+    onPrimaryContainer = Color(0xFF0369A1),
+    secondary = Color(0xFF4F46E5), // Indigo
     onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFCEE9DA),
-    onSecondaryContainer = Color(0xFF092016),
-    tertiary = Color(0xFF3E6374),
+    secondaryContainer = Color(0xFFEEF2FF),
+    onSecondaryContainer = Color(0xFF3730A3),
+    tertiary = Color(0xFF0D9488), // Teal
     onTertiary = Color(0xFFFFFFFF),
-    tertiaryContainer = Color(0xFFC2E8FB),
-    onTertiaryContainer = Color(0xFF001F2A),
-    background = Color(0xFFF6FBF7),
-    onBackground = Color(0xFF171D1A),
-    surface = Color(0xFFF6FBF7),
-    onSurface = Color(0xFF171D1A),
-    outline = Color(0xFF6F7975),
+    tertiaryContainer = Color(0xFFCCFBF1),
+    onTertiaryContainer = Color(0xFF115E59),
+    background = Color(0xFFF1F5F9), // Crisp light slate canvas (distinct from white cards)
+    onBackground = Color(0xFF0F172A), // Deep high-contrast slate
+    surface = Color(0xFFF1F5F9),
+    onSurface = Color(0xFF0F172A),
+    surfaceDim = Color(0xFFE2E8F0),
+    surfaceBright = Color(0xFFFFFFFF),
+    surfaceContainerLowest = Color(0xFFFFFFFF), // Pure white
+    surfaceContainerLow = Color(0xFFFFFFFF), // Pure white
+    surfaceContainer = Color(0xFFFFFFFF), // Crisp pure white cards (pops out against slate canvas)
+    surfaceContainerHigh = Color(0xFFE2E8F0), // Distinct inner pillars and tonal sections
+    surfaceContainerHighest = Color(0xFFCBD5E1),
+    onSurfaceVariant = Color(0xFF475569), // Slate-600 readable subtitle
+    outline = Color(0xFFCBD5E1),
+    outlineVariant = Color(0xFFE2E8F0),
+    error = Color(0xFFDC2626),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFEE2E2),
+    onErrorContainer = Color(0xFF991B1B),
 )
 
-internal val AndroidpodsFallbackDarkColorScheme = darkColorScheme(
-    primary = Color(0xFF95D5C2),
-    onPrimary = Color(0xFF00382C),
-    primaryContainer = Color(0xFF155042),
-    onPrimaryContainer = Color(0xFFA8F2DE),
-    secondary = Color(0xFFB2CCC1),
-    onSecondary = Color(0xFF1E352B),
-    secondaryContainer = Color(0xFF344B41),
-    onSecondaryContainer = Color(0xFFCEE9DA),
-    tertiary = Color(0xFFA6CCE0),
-    onTertiary = Color(0xFF063544),
-    tertiaryContainer = Color(0xFF244C5B),
-    onTertiaryContainer = Color(0xFFC2E8FB),
-    background = Color(0xFF0E1512),
-    onBackground = Color(0xFFDEE4E0),
-    surface = Color(0xFF0E1512),
-    onSurface = Color(0xFFDEE4E0),
-    outline = Color(0xFF889390),
+internal val AndroidpodsDarkColorScheme = darkColorScheme(
+    primary = Color(0xFF38BDF8), // Electric Cyan - crisp, bright & high contrast
+    onPrimary = Color(0xFF002238),
+    primaryContainer = Color(0xFF075985),
+    onPrimaryContainer = Color(0xFFE0F2FE),
+    secondary = Color(0xFF818CF8), // Indigo accent
+    onSecondary = Color(0xFF1E1B4B),
+    secondaryContainer = Color(0xFF312E81),
+    onSecondaryContainer = Color(0xFFE0E7FF),
+    tertiary = Color(0xFF2DD4BF), // Emerald / Mint accent
+    onTertiary = Color(0xFF00382E),
+    tertiaryContainer = Color(0xFF134E4A),
+    onTertiaryContainer = Color(0xFFCCFBF1),
+    background = Color(0xFF0A0D14), // Deep Obsidian / OLED Dark (clean, no murky brown)
+    onBackground = Color(0xFFF8FAFC), // Pure Crisp White Text (100% readable)
+    surface = Color(0xFF0A0D14),
+    onSurface = Color(0xFFF8FAFC), // Pure Crisp White Text
+    surfaceDim = Color(0xFF06080D),
+    surfaceBright = Color(0xFF1E2433),
+    surfaceContainerLowest = Color(0xFF06080D),
+    surfaceContainerLow = Color(0xFF10141F),
+    surfaceContainer = Color(0xFF161B28), // Distinct elevated card container
+    surfaceContainerHigh = Color(0xFF1E2536), // Pillar and button containers
+    surfaceContainerHighest = Color(0xFF283247),
+    onSurfaceVariant = Color(0xFF94A3B8), // Readable Slate-400 subtitle text
+    outline = Color(0xFF475569),
+    outlineVariant = Color(0xFF334155),
+    error = Color(0xFFF87171),
+    onError = Color(0xFF450A0A),
+    errorContainer = Color(0xFF7F1D1D),
+    onErrorContainer = Color(0xFFFECACA),
 )

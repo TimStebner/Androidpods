@@ -5,11 +5,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
 import dev.androidpods.core.bluetooth.hasBluetoothPermissions
 import dev.androidpods.core.bluetooth.hasCompanionAssociation
 import dev.androidpods.core.data.AppSettingsRepositoryProvider
@@ -31,13 +35,18 @@ class MainActivity : ComponentActivity() {
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor,
             ) {
-                var onboardingDone by remember {
-                    mutableStateOf(hasBluetoothPermissions(this) && hasCompanionAssociation(this))
-                }
-                if (onboardingDone) {
-                    AppScaffold()
-                } else {
-                    OnboardingScreen(onAssociated = { onboardingDone = true })
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surface,
+                ) {
+                    var onboardingDone by remember {
+                        mutableStateOf(hasBluetoothPermissions(this) && hasCompanionAssociation(this))
+                    }
+                    if (onboardingDone) {
+                        AppScaffold()
+                    } else {
+                        OnboardingScreen(onAssociated = { onboardingDone = true })
+                    }
                 }
             }
         }
@@ -46,7 +55,8 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         dev.androidpods.core.telecom.CallGestureManagerProvider.registerIfPossible()
-        if (AirPodsRepositoryProvider.state.value.connection != AirPodsTransport.ConnectionState.Connected) {
+        val connection = AirPodsRepositoryProvider.state.value.connection
+        if (connection != AirPodsTransport.ConnectionState.Connected && connection != AirPodsTransport.ConnectionState.Connecting) {
             resumeObservingAssociatedDevices(this)
         }
     }

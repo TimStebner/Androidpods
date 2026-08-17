@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import dev.androidpods.app.R
 import dev.androidpods.core.airpods.HoldDuration
 import dev.androidpods.core.airpods.PressSpeed
+import dev.androidpods.core.designsystem.ExpressiveScreenHeader
 import dev.androidpods.core.bluetooth.AirPodsTransport
 import dev.androidpods.core.data.AirPodsRepositoryProvider
 import dev.androidpods.core.data.AirPodsState
@@ -149,23 +152,25 @@ internal fun ControlsScreenContent(
             .padding(bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = stringResource(R.string.controls_title),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 4.dp),
+        ExpressiveScreenHeader(
+            title = stringResource(R.string.controls_title),
+            subtitle = "Custom Gestures & Audio Tuning",
+            icon = Icons.Default.Tune,
+            iconBadgeColor = MaterialTheme.colorScheme.primaryContainer,
+            iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         )
 
         // Section 1: Ear Detection & Auto-Pause/Resume
         Text(
             text = stringResource(R.string.controls_ear_detection_header),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
             color = MaterialTheme.colorScheme.primary,
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Auto-Pause
@@ -260,73 +265,75 @@ internal fun ControlsScreenContent(
         }
 
         // Section 2: Head Gestures (AirPods 4 & AirPods Pro 2)
-        Text(
-            text = stringResource(R.string.controls_head_gestures_header),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        if (state.capabilities.supportsHeadGestures) {
+            Text(
+                text = stringResource(R.string.controls_head_gestures_header),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary,
+            )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        ) {
-            val supportsHeadGestures = state.capabilities.supportsHeadGestures
-            Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
-                        Text(
-                            text = stringResource(R.string.controls_head_gestures_title),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            text = stringResource(
-                                if (supportsHeadGestures) R.string.controls_head_gestures_desc else R.string.controls_head_gestures_unsupported,
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp),
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            ) {
+                val supportsHeadGestures = state.capabilities.supportsHeadGestures
+                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                            Text(
+                                text = stringResource(R.string.controls_head_gestures_title),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            )
+                            Text(
+                                text = stringResource(
+                                    if (supportsHeadGestures) R.string.controls_head_gestures_desc else R.string.controls_head_gestures_unsupported,
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                        }
+                        Switch(
+                            checked = if (supportsHeadGestures) headGesturesEnabled else false,
+                            onCheckedChange = if (supportsHeadGestures) { enabled ->
+                                if (enabled && !hasCallPerms) {
+                                    callPermLauncher.launch(dev.androidpods.core.bluetooth.CALL_PERMISSIONS)
+                                }
+                                onHeadGesturesChanged(enabled)
+                            } else null,
+                            enabled = supportsHeadGestures,
                         )
                     }
-                    Switch(
-                        checked = if (supportsHeadGestures) headGesturesEnabled else false,
-                        onCheckedChange = if (supportsHeadGestures) { enabled ->
-                            if (enabled && !hasCallPerms) {
-                                callPermLauncher.launch(dev.androidpods.core.bluetooth.CALL_PERMISSIONS)
-                            }
-                            onHeadGesturesChanged(enabled)
-                        } else null,
-                        enabled = supportsHeadGestures,
-                    )
-                }
 
-                if (supportsHeadGestures && headGesturesEnabled) {
-                    if (!hasCallPerms) {
-                        Button(
-                            onClick = { callPermLauncher.launch(dev.androidpods.core.bluetooth.CALL_PERMISSIONS) },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        ) {
-                            Text(stringResource(R.string.controls_head_gestures_grant_btn))
-                        }
-                    } else {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(
-                                text = stringResource(R.string.controls_head_gestures_ready),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                            )
+                    if (supportsHeadGestures && headGesturesEnabled) {
+                        if (!hasCallPerms) {
+                            Button(
+                                onClick = { callPermLauncher.launch(dev.androidpods.core.bluetooth.CALL_PERMISSIONS) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            ) {
+                                Text(stringResource(R.string.controls_head_gestures_grant_btn))
+                            }
+                        } else {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.controls_head_gestures_ready),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                )
+                            }
                         }
                     }
                 }
@@ -337,21 +344,21 @@ internal fun ControlsScreenContent(
         if (state.capabilities.supportsPressSpeed) {
             Text(
                 text = stringResource(R.string.controls_timing_header),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary,
             )
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
             ) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     // Press Speed
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
                             text = stringResource(R.string.controls_press_speed_title),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         )
                         Text(
                             text = stringResource(R.string.controls_press_speed_desc),
@@ -388,7 +395,7 @@ internal fun ControlsScreenContent(
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
                             text = stringResource(R.string.controls_hold_duration_title),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         )
                         Text(
                             text = stringResource(R.string.controls_hold_duration_desc),
@@ -425,67 +432,57 @@ internal fun ControlsScreenContent(
         }
 
         // Section 4: Digital Assistant (Gemini / Google Assistant)
-        Text(
-            text = stringResource(R.string.controls_assistant_header),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        if (state.capabilities.supportsStemConfiguration) {
+            Text(
+                text = stringResource(R.string.controls_assistant_header),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary,
+            )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        ) {
-            val context = LocalContext.current
-            val isSupported = state.capabilities.supportsStemConfiguration
-            Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
-                        Text(
-                            text = stringResource(R.string.controls_assistant_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (isSupported) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        )
-                        Text(
-                            text = stringResource(
-                                if (isSupported) R.string.controls_assistant_desc_supported else R.string.controls_assistant_desc_unsupported,
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp),
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            ) {
+                val context = LocalContext.current
+                val isSupported = state.capabilities.supportsStemConfiguration
+                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                            Text(
+                                text = stringResource(R.string.controls_assistant_title),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            )
+                            Text(
+                                text = stringResource(
+                                    if (isSupported) R.string.controls_assistant_desc_supported else R.string.controls_assistant_desc_unsupported,
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                        }
+                        Switch(
+                            checked = if (isSupported) assistantTriggerEnabled else false,
+                            onCheckedChange = if (isSupported) onAssistantTriggerChanged else null,
+                            enabled = isSupported,
                         )
                     }
-                    Switch(
-                        checked = if (isSupported) assistantTriggerEnabled else true,
-                        onCheckedChange = if (isSupported) onAssistantTriggerChanged else null,
-                        enabled = isSupported,
-                    )
-                }
 
-                InfoRow(
-                    label = stringResource(R.string.controls_assistant_gesture_label),
-                    value = stringResource(R.string.controls_assistant_gesture_value),
-                )
-
-                if (!isSupported) {
                     OutlinedButton(
                         onClick = {
                             val intent = Intent(Settings.ACTION_VOICE_INPUT_SETTINGS).apply {
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             }
-                            val fallback = Intent(Settings.ACTION_SETTINGS).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            }
-                            runCatching { context.startActivity(intent) }.onFailure {
-                                runCatching { context.startActivity(fallback) }
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(intent)
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium,
                     ) {
                         Text(stringResource(R.string.controls_assistant_settings_button))
                     }
@@ -493,20 +490,20 @@ internal fun ControlsScreenContent(
             }
         }
 
-        // Section 5: Noise Control
-        Text(
-            text = stringResource(R.string.controls_noise_header),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        // Section 5: Noise Control (Only if supported by hardware)
+        if (state.capabilities.supportsNoiseControl) {
+            Text(
+                text = stringResource(R.string.controls_noise_header),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary,
+            )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                if (state.capabilities.supportsNoiseControl) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
                     Text(
                         text = stringResource(R.string.controls_noise_gated_desc),
                         style = MaterialTheme.typography.bodyMedium,
@@ -539,12 +536,6 @@ internal fun ControlsScreenContent(
                             modifier = Modifier.weight(1f),
                         )
                     }
-                } else {
-                    Text(
-                        text = stringResource(R.string.controls_noise_unsupported_hint),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 }
             }
         }
@@ -552,14 +543,14 @@ internal fun ControlsScreenContent(
         // Section 6: Device Information
         Text(
             text = stringResource(R.string.controls_info_header),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary,
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),

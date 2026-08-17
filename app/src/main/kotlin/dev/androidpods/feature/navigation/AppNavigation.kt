@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,8 +13,10 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -46,10 +49,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.androidpods.app.R
 import dev.androidpods.core.designsystem.androidpodsSpatialSpec
@@ -75,65 +80,48 @@ fun AppScaffold(modifier: Modifier = Modifier) {
     val slideSpec = androidpodsSpatialSpec<androidx.compose.ui.unit.IntOffset>()
     val fadeSpec = androidpodsSpatialSpec<Float>()
 
-    Box(modifier = modifier.fillMaxSize()) {
-        // 1. Edge-to-Edge Animated Screen Content
-        AnimatedContent(
-            targetState = currentDestination,
-            transitionSpec = {
-                val isForward = targetState.ordinal > initialState.ordinal
-                (fadeIn(animationSpec = fadeSpec) + slideInHorizontally(animationSpec = slideSpec) { width -> if (isForward) width / 6 else -width / 6 })
-                    .togetherWith(fadeOut(animationSpec = fadeSpec) + slideOutHorizontally(animationSpec = slideSpec) { width -> if (isForward) -width / 6 else width / 6 })
-            },
-            label = "tab-screen-transition",
-            modifier = Modifier
-                .fillMaxSize()
-                .clipToBounds(),
-        ) { destination ->
-            when (destination) {
-                AppDestination.HOME -> HomeScreen(modifier = Modifier.fillMaxSize())
-                AppDestination.CONTROLS -> ControlsScreen(modifier = Modifier.fillMaxSize())
-                AppDestination.WIDGETS -> WidgetsScreen(modifier = Modifier.fillMaxSize())
-                AppDestination.SETTINGS -> SettingsScreen(modifier = Modifier.fillMaxSize())
-            }
-        }
-
-        // 2. Status Bar Scrim (Seamless Edge-to-Edge Scrim)
-        StatusBarScrim(modifier = Modifier.align(Alignment.TopCenter))
-
-        // 3. Floating Navigation Pill (Material 3 Expressive)
-        FloatingNavigationPill(
-            currentDestination = currentDestination,
-            onDestinationSelected = { dest ->
-                if (dest != currentDestination) {
-                    haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                    currentDestination = dest
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surface,
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 1. Edge-to-Edge Animated Screen Content
+            AnimatedContent(
+                targetState = currentDestination,
+                transitionSpec = {
+                    val isForward = targetState.ordinal > initialState.ordinal
+                    (fadeIn(animationSpec = fadeSpec) + slideInHorizontally(animationSpec = slideSpec) { width -> if (isForward) width / 6 else -width / 6 })
+                        .togetherWith(fadeOut(animationSpec = fadeSpec) + slideOutHorizontally(animationSpec = slideSpec) { width -> if (isForward) -width / 6 else width / 6 })
+                },
+                label = "tab-screen-transition",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clipToBounds(),
+            ) { destination ->
+                when (destination) {
+                    AppDestination.HOME -> HomeScreen(modifier = Modifier.fillMaxSize())
+                    AppDestination.CONTROLS -> ControlsScreen(modifier = Modifier.fillMaxSize())
+                    AppDestination.WIDGETS -> WidgetsScreen(modifier = Modifier.fillMaxSize())
+                    AppDestination.SETTINGS -> SettingsScreen(modifier = Modifier.fillMaxSize())
                 }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 16.dp),
-        )
-    }
-}
+            }
 
-@Composable
-private fun StatusBarScrim(modifier: Modifier = Modifier) {
-    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(statusBarHeight + 8.dp)
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.70f),
-                        Color.Transparent,
-                    ),
-                ),
-            ),
-    )
+            // 2. Floating Navigation Pill (Material 3 Expressive)
+            FloatingNavigationPill(
+                currentDestination = currentDestination,
+                onDestinationSelected = { dest ->
+                    if (dest != currentDestination) {
+                        haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        currentDestination = dest
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 16.dp),
+            )
+        }
+    }
 }
 
 @Composable
@@ -145,9 +133,8 @@ private fun FloatingNavigationPill(
     Surface(
         modifier = modifier.padding(horizontal = 16.dp),
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 6.dp,
-        shadowElevation = 8.dp,
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        shadowElevation = 6.dp,
     ) {
         Row(
             modifier = Modifier
@@ -174,13 +161,21 @@ private fun FloatingNavPillItem(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val itemScale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1f,
+        animationSpec = androidpodsSpatialSpec(),
+        label = "nav-item-press-scale",
+    )
+
     val containerColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
         animationSpec = androidpodsSpatialSpec(),
         label = "pill-container-color",
     )
     val contentColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = androidpodsSpatialSpec(),
         label = "pill-content-color",
     )
@@ -190,12 +185,16 @@ private fun FloatingNavPillItem(
         shape = CircleShape,
         color = containerColor,
         contentColor = contentColor,
-        interactionSource = remember { MutableInteractionSource() },
+        interactionSource = interactionSource,
+        modifier = Modifier.graphicsLayer {
+            scaleX = itemScale
+            scaleY = itemScale
+        },
     ) {
         Row(
             modifier = Modifier
                 .animateContentSize(animationSpec = androidpodsSpatialSpec())
-                .padding(horizontal = if (selected) 14.dp else 12.dp, vertical = 10.dp),
+                .padding(horizontal = if (selected) 16.dp else 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
@@ -203,6 +202,7 @@ private fun FloatingNavPillItem(
                 imageVector = destination.icon,
                 contentDescription = stringResource(destination.labelRes),
                 modifier = Modifier.size(22.dp),
+                tint = contentColor,
             )
             AnimatedVisibility(
                 visible = selected,
@@ -213,7 +213,9 @@ private fun FloatingNavPillItem(
             ) {
                 Text(
                     text = stringResource(destination.labelRes),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
                     color = contentColor,
                     modifier = Modifier.padding(start = 8.dp),
                     maxLines = 1,

@@ -40,6 +40,12 @@ class AirPodsRepository(
     }
 
     suspend fun connect() {
+        if (_state.value.connection == AirPodsTransport.ConnectionState.Connected ||
+            _state.value.connection == AirPodsTransport.ConnectionState.Connecting
+        ) {
+            return
+        }
+
         // §13.6: a confirmed-unsupported cache entry skips the guarded PSM 0x1001 attempt (and
         // its retry backoff, §14 battery policy) instead of re-probing a build already known to
         // reject it. See TierProbeCache's doc comment for why "confirmed" requires two failures.

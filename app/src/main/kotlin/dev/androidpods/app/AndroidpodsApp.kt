@@ -7,6 +7,7 @@ import dev.androidpods.core.data.AirPodsRepositoryProvider
 import dev.androidpods.core.media.observeAutoPause
 import dev.androidpods.feature.notifications.observeBatteryNotifications
 import dev.androidpods.feature.notifications.observeConnectionNotifications
+import dev.androidpods.feature.popup.observeBatteryPopup
 import dev.androidpods.feature.widgets.observeWidgetUpdates
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,7 @@ class AndroidpodsApp : Application() {
         observeWidgetUpdates(this, AirPodsRepositoryProvider.state, scope)
         observeBatteryNotifications(this, AirPodsRepositoryProvider.state, scope)
         observeConnectionNotifications(this, AirPodsRepositoryProvider.state, scope)
+        observeBatteryPopup(this, AirPodsRepositoryProvider.state, scope)
         dev.androidpods.feature.tiles.observeTileUpdates(this, AirPodsRepositoryProvider.state, scope)
         dev.androidpods.core.telecom.CallGestureManagerProvider.get(this, scope)
     }

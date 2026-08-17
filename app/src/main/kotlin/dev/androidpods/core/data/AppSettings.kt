@@ -21,5 +21,6 @@ data class AppSettings(
     val headGesturesEnabled: Boolean = true,
     val connectionBannerEnabled: Boolean = true,
     val batteryNotificationEnabled: Boolean = true,
+    val batteryPopupEnabled: Boolean = true,
     val protocolLoggingEnabled: Boolean = false,
 )

@@ -1,75 +1,138 @@
 {
   "communities": {
     "0": [
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createheadgesturespacket",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createholddurationpacket",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createmotionstreampacket",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createpressspeedpacket",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createstemconfigpacket",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setassistanttriggerenabled",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setheadgesturesenabled",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setholdduration",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setpressspeed",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setstemaction",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_start",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_startmotionstream",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_stopmotionstream",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_kt_bytearray",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction_disabled",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction_fromraw",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction_noise_control",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction_voice_assistant",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_connect",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_disconnect",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_setassistanttriggerenabled",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_setheadgesturesenabled",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_startmotionstream",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_stopmotionstream",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_inbound_transport_packets_are_decoded_into_aap_events",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setassistanttriggerenabled_dispatches_configuration_for_both_earbuds",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setheadgesturesenabled_sends_config_0x3e_packet",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setholdduration_sends_config_0x26_packet",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setpressspeed_sends_config_0x25_packet",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setstemaction_sends_correctly_formatted_configuration_packet",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_start_sends_handshake_then_feature_flags_then_notification_request_in_order",
-      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_startmotionstream_and_stopmotionstream_send_opcode_0x17_packets",
-      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport",
-      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport",
-      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport_connect",
-      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport_disconnect",
-      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport_emit",
-      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport_send",
-      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_kt_bytearray",
-      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_kt_flow",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_a_single_failed_probe_does_not_yet_skip_the_next_connect_attempt",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_a_successful_probe_resets_a_prior_single_failure",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_battery_event_updates_battery_state",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_connect_drives_the_transport_and_starts_the_aap_handshake",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_connect_leaves_state_failed_instead_of_throwing_when_the_transport_fails_to_connect",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_connect_records_a_successful_probe_in_the_cache_when_none_exists_yet",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_connect_skips_the_transport_when_the_tier_probe_cache_already_confirms_unsupported",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_device_info_event_resolves_capabilities_from_the_model_number",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_ear_detection_event_updates_ear_detection_state",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_initial_state_is_disconnected_with_unknown_capabilities",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_only_a_second_consecutive_failed_probe_confirms_unsupported_and_starts_skipping",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_kt_bytearray",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_loadfixturepacket",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_loadfixturepacket_object_object_l21_l21",
-      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache",
-      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache",
-      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache_clear",
-      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache_recordproberesult",
-      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache_tierbsupported"
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_audiowaveformvisualizer",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_audiowaveformvisualizer_audiowaveformvisualizer",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_audiowaveformvisualizer_kt_color",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_audiowaveformvisualizer_kt_dp",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_audiowaveformvisualizer_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_color",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_expressivescreenheader",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_expressivescreenheader_expressivescreenheader",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_expressivescreenheader_kt_color",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_expressivescreenheader_kt_dp",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_expressivescreenheader_kt_imagevector",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_expressivescreenheader_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_expressivescreenheader_morphingbadge",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_apphaptics",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_apphaptics_click",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_apphaptics_confirm",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_apphaptics_impact",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_apphaptics_reject",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_apphaptics_tick",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_rememberapphaptics",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_rememberapphaptics_object_apphaptics_l29",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_rememberapphaptics_object_apphaptics_l29_click",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_rememberapphaptics_object_apphaptics_l29_confirm",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_rememberapphaptics_object_apphaptics_l29_impact",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_rememberapphaptics_object_apphaptics_l29_reject",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_rememberapphaptics_object_apphaptics_l29_tick",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_androidpodsreducemotion",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_androidpodsspatialspec",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_autopausecard",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_connectionbadge",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_description",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_disconnectedguidecard",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_headgesturesquickcard",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_herodevicecard",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_homescreen",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_homescreenconnecteddarkpreview",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_homescreencontent",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_airpodsstate",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_airpodstransport",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_batterycomponentstate",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_imagevector",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_noisecontrolsection",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_noisemodepill",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_spatialaudioquickcard",
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_unifiedbatterypillar",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination_controls",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination_home",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination_settings",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination_widgets",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appscaffold",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_floatingnavigationpill",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_floatingnavpillitem",
+      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_guidesteprow",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_kt_airpodsstate",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_kt_batterycomponentstate",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_widgetbatterycard",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_widgetsscreen",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_widgetsscreencontent",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_widgetsscreenpreview",
+      "color",
+      "composable",
+      "finiteanimationspec",
+      "t"
     ],
     "1": [
-      "airpodstransport",
+      "app_src_androidtest_kotlin_dev_androidpods_core_data_forcetierbunsupportedtest",
+      "app_src_androidtest_kotlin_dev_androidpods_core_data_forcetierbunsupportedtest_forcetierbunsupportedtest",
+      "app_src_androidtest_kotlin_dev_androidpods_core_data_forcetierbunsupportedtest_forcetierbunsupportedtest_forceconfirmedunsupported",
+      "app_src_androidtest_kotlin_dev_androidpods_core_data_forcetierbunsupportedtest_forcetierbunsupportedtest_resettosupported",
+      "app_src_main_kotlin_dev_androidpods_app_mainactivity",
+      "app_src_main_kotlin_dev_androidpods_app_mainactivity_mainactivity",
+      "app_src_main_kotlin_dev_androidpods_app_mainactivity_mainactivity_oncreate",
+      "app_src_main_kotlin_dev_androidpods_app_mainactivity_mainactivity_onresume",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate_object_companiondevicemanager_l81",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate_object_companiondevicemanager_l81_onassociationcreated",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate_object_companiondevicemanager_l81_onassociationpending",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate_object_companiondevicemanager_l81_onfailure",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_hascompanionassociation",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_observepresencequietly",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_resumeobservingassociateddevices",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions_hasbluetoothpermissions",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions_hascallpermissions",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions_hasnotificationpermission",
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions_kt_context",
+      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache",
+      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache",
+      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache_clear",
+      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache_keyfor",
+      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache_recordproberesult",
+      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache_tierbsupported",
+      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache",
+      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache_tierprobecache",
+      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache_tierprobecache_clear",
+      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache_tierprobecache_recordproberesult",
+      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache_tierprobecache_tierbsupported",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_androidpodstheme",
+      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen",
+      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen_featurepill",
+      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen_kt_imagevector",
+      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen_onboardingscreen",
+      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen_onboardingscreendarkpreview",
+      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen",
+      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_settingsscreen",
+      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_settingsscreencontent",
+      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_settingsscreenpreview",
+      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_settingswitchrow",
+      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_themeoptionrow",
+      "appsettings",
+      "associationinfo",
+      "bundle",
+      "componentactivity",
+      "context",
+      "coroutinescope",
+      "dev",
+      "intentsender"
+    ],
+    "2": [
       "app_src_main_kotlin_dev_androidpods_core_airpods_aapinteractionsettings",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aapinteractionsettings_headgesturesstate",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aapinteractionsettings_headgesturesstate_disabled",
@@ -85,39 +148,32 @@
       "app_src_main_kotlin_dev_androidpods_core_airpods_aapinteractionsettings_pressspeed_fromraw",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aapinteractionsettings_pressspeed_slow",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aapinteractionsettings_pressspeed_slowest",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_kt_flow",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_airpodscapabilities",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_capabilityresolver",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_capabilityresolver_resolve",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode_adaptive",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode_noise_cancellation",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode_off",
-      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode_transparency",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_reduce",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_setholdduration",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_setpressspeed",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_kt_flow",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_kt_stateflow",
       "app_src_main_kotlin_dev_androidpods_core_data_airpodsstate",
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsstate_headorientation",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettings",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_appsettings",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_thememode",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_thememode_dark",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_thememode_light",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_thememode_system",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setassistanttrigger",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setautopause",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setautoresume",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setbatterynotification",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setconnectionbanner",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setdynamiccolor",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setheadgestures",
       "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setholdduration",
       "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setpressspeed",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_controlsscreen",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_controlsscreencontent",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_controlsscreenpreview",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_inforow",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_kt_modifier",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_noisemodechip",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_segmentoption",
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_sensorstatuspill",
-      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest"
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setprotocollogging",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setthememode",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepositoryprovider",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepositoryprovider_get",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_kt_context",
+      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_kt_stateflow"
     ],
-    "2": [
+    "3": [
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_batterychargestatus",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_batterychargestatus_charging",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_batterychargestatus_disconnected",
@@ -126,7 +182,6 @@
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_batterycomponentstate",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_batterystate",
       "app_src_main_kotlin_dev_androidpods_core_data_airpodsstate_airpodsstate",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_homescreenconnectedpreview",
       "app_src_main_kotlin_dev_androidpods_feature_notifications_batterynotificationcontent",
       "app_src_main_kotlin_dev_androidpods_feature_notifications_batterynotificationcontent_batterynotificationuistate",
       "app_src_main_kotlin_dev_androidpods_feature_notifications_batterynotificationcontent_tobatterynotificationuistate",
@@ -135,12 +190,11 @@
       "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetcontent_batterywidgetuistate",
       "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetcontent_nodata",
       "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetcontent_tobatterywidgetuistate",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_kt_modifier",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_widgetbatterycard",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_widgetsscreen",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_widgetsscreencontent",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_widgetsscreenpreview",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates_kt_context",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates_kt_coroutinescope",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates_kt_flow",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates_observewidgetupdates",
       "app_src_test_kotlin_dev_androidpods_feature_notifications_batterynotificationcontenttest",
       "app_src_test_kotlin_dev_androidpods_feature_notifications_batterynotificationcontenttest_batterynotificationcontenttest",
       "app_src_test_kotlin_dev_androidpods_feature_notifications_batterynotificationcontenttest_batterynotificationcontenttest_a_disconnect_after_being_connected_maps_back_to_null",
@@ -158,48 +212,7 @@
       "app_src_test_kotlin_dev_androidpods_feature_widgets_batterywidgetcontenttest_batterywidgetcontenttest_initial_state_maps_to_nodata",
       "app_src_test_kotlin_dev_androidpods_feature_widgets_batterywidgetcontenttest_batterywidgetcontenttest_state_with_a_battery_reading_maps_to_battery_with_the_same_values"
     ],
-    "3": [
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration_airpodsillustration",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration_drawairpod",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration_kt_color",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration_kt_modifier",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_androidpodsreducemotion",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_androidpodsspatialspec",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_batterycard",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_connectedcontent",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_connectingcontent",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_connectionbadge",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_connectionillustration",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_description",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_disconnectedcontent",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_eardetectionstatusitem",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_failedcontent",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_homescreen",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_homescreencontent",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_airpodstransport",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_modifier",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_labelres",
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_tint",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination_controls",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination_home",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination_settings",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appdestination_widgets",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_appscaffold",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_floatingnavigationpill",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_floatingnavpillitem",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_kt_modifier",
-      "app_src_main_kotlin_dev_androidpods_feature_navigation_appnavigation_statusbarscrim",
-      "color",
-      "finiteanimationspec",
-      "t"
-    ],
     "4": [
-      "app_src_main_kotlin_dev_androidpods_app_mainactivity_mainactivity_onresume",
       "app_src_main_kotlin_dev_androidpods_core_gestures_headgesturedetector",
       "app_src_main_kotlin_dev_androidpods_core_gestures_headgesturedetector_headgesture",
       "app_src_main_kotlin_dev_androidpods_core_gestures_headgesturedetector_headgesture_nod",
@@ -226,6 +239,7 @@
       "app_src_main_kotlin_dev_androidpods_core_telecom_callgesturemanager_kt_coroutinescope",
       "app_src_main_kotlin_dev_androidpods_feature_spatial_spatialmotionvisualizer",
       "app_src_main_kotlin_dev_androidpods_feature_spatial_spatialmotionvisualizer_headorientation3dview",
+      "app_src_main_kotlin_dev_androidpods_feature_spatial_spatialmotionvisualizer_kt_airpodsstate",
       "app_src_main_kotlin_dev_androidpods_feature_spatial_spatialmotionvisualizer_kt_modifier",
       "app_src_main_kotlin_dev_androidpods_feature_spatial_spatialmotionvisualizer_orientationpill",
       "app_src_main_kotlin_dev_androidpods_feature_spatial_spatialmotionvisualizer_spatialmotioncard",
@@ -237,43 +251,6 @@
       "app_src_test_kotlin_dev_androidpods_core_gestures_headgesturedetectortest_headgesturedetectortest_returns_none_on_static_head_tilt_without_oscillation"
     ],
     "5": [
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettings",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_appsettings",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_thememode",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_thememode_dark",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_thememode_light",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettings_thememode_system",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setassistanttrigger",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setautopause",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setautoresume",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setbatterynotification",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setconnectionbanner",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setdynamiccolor",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setheadgestures",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setprotocollogging",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository_setthememode",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepositoryprovider",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepositoryprovider_get",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_kt_context",
-      "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_kt_stateflow",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_androidpodstheme",
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_isreducedmotion",
-      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen",
-      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_kt_modifier",
-      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_settingsscreen",
-      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_settingsscreencontent",
-      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_settingsscreenpreview",
-      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_settingswitchrow",
-      "app_src_main_kotlin_dev_androidpods_feature_settings_settingsscreen_themeoptionrow",
-      "app_src_test_kotlin_dev_androidpods_core_designsystem_themetest",
-      "app_src_test_kotlin_dev_androidpods_core_designsystem_themetest_themetest",
-      "app_src_test_kotlin_dev_androidpods_core_designsystem_themetest_themetest_animator_duration_scale_of_zero_is_reduced_motion",
-      "app_src_test_kotlin_dev_androidpods_core_designsystem_themetest_themetest_normal_animator_duration_scale_is_not_reduced_motion",
-      "dev"
-    ],
-    "6": [
       "app_src_androidtest_kotlin_dev_androidpods_core_bluetooth_l2captierbprobetest",
       "app_src_androidtest_kotlin_dev_androidpods_core_bluetooth_l2captierbprobetest_l2captierbprobetest",
       "app_src_androidtest_kotlin_dev_androidpods_core_bluetooth_l2captierbprobetest_l2captierbprobetest_attempt",
@@ -287,7 +264,6 @@
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_aaptransport_aaptransport_send",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_aaptransport_aaptransport_startreadloop",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_aaptransport_kt_airpodstransport",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_aaptransport_kt_bytearray",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_aaptransport_kt_coroutinescope",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_aaptransport_kt_flow",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodspresence",
@@ -302,11 +278,12 @@
       "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepositoryprovider_kt_stateflow",
       "bluetoothdevice",
       "bluetoothsocket",
+      "bytearray",
       "companiondeviceservice",
       "devicepresenceevent",
       "sharedflow"
     ],
-    "7": [
+    "6": [
       "app_src_main_kotlin_dev_androidpods_core_audio_chimeplayer",
       "app_src_main_kotlin_dev_androidpods_core_audio_chimeplayer_chimeplayer",
       "app_src_main_kotlin_dev_androidpods_core_audio_chimeplayer_chimeplayer_cleanupaudiotrack",
@@ -324,6 +301,7 @@
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_protocollogging_protocollogging_rawpacket",
       "app_src_main_kotlin_dev_androidpods_feature_findmy_findmycard",
       "app_src_main_kotlin_dev_androidpods_feature_findmy_findmycard_findmycard",
+      "app_src_main_kotlin_dev_androidpods_feature_findmy_findmycard_kt_airpodsstate",
       "app_src_main_kotlin_dev_androidpods_feature_findmy_findmycard_kt_modifier",
       "app_src_main_kotlin_dev_androidpods_feature_findmy_findmycard_pulsingsonaricon",
       "app_src_test_kotlin_dev_androidpods_core_audio_chimeplayertest",
@@ -337,7 +315,7 @@
       "job",
       "shortarray"
     ],
-    "8": [
+    "7": [
       "app_src_main_kotlin_dev_androidpods_app_androidpodsapp",
       "app_src_main_kotlin_dev_androidpods_app_androidpodsapp_androidpodsapp",
       "app_src_main_kotlin_dev_androidpods_app_androidpodsapp_androidpodsapp_oncreate",
@@ -366,36 +344,7 @@
       "app_src_main_kotlin_dev_androidpods_feature_notifications_notificationupdates_refreshbatterynotification",
       "application"
     ],
-    "9": [
-      "app_src_main_kotlin_dev_androidpods_app_mainactivity",
-      "app_src_main_kotlin_dev_androidpods_app_mainactivity_mainactivity",
-      "app_src_main_kotlin_dev_androidpods_app_mainactivity_mainactivity_oncreate",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate_object_companiondevicemanager_l64",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate_object_companiondevicemanager_l64_onassociationcreated",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate_object_companiondevicemanager_l64_onassociationpending",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_airpodsassociationmanager_associate_object_companiondevicemanager_l64_onfailure",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_hascompanionassociation",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_kt_context",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_kt_coroutinescope",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_observepresencequietly",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_resumeobservingassociateddevices",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions_hasbluetoothpermissions",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions_hascallpermissions",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions_hasnotificationpermission",
-      "app_src_main_kotlin_dev_androidpods_core_bluetooth_requiredpermissions_kt_context",
-      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen",
-      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen_kt_modifier",
-      "app_src_main_kotlin_dev_androidpods_feature_onboarding_onboardingscreen_onboardingscreen",
-      "associationinfo",
-      "bundle",
-      "componentactivity",
-      "intentsender"
-    ],
-    "10": [
+    "8": [
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_aapevent",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_aappacketdecoder",
@@ -419,7 +368,7 @@
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_stemconfig",
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_unrecognized"
     ],
-    "11": [
+    "9": [
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_bluetoothavailability",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_bluetoothavailability_bluetoothavailability",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_bluetoothavailability_bluetoothavailability_object_broadcastreceiver_l40",
@@ -429,42 +378,84 @@
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_bluetoothavailability_kt_context",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_bluetoothavailability_kt_flow",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_bluetoothavailability_unsupported",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_onclick",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_onstartlistening",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_onstoplistening",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_requestupdate",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_updatetilestate",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_kt_context",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_kt_coroutinescope",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_kt_stateflow",
-      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_observetileupdates",
-      "intent",
-      "tileservice"
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_controlsscreen",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_controlsscreencontent",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_controlsscreenpreview",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_inforow",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_kt_airpodsstate",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_kt_holdduration",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_kt_pressspeed",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_noisemodechip",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_segmentoption",
+      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_sensorstatuspill",
+      "intent"
+    ],
+    "10": [
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createheadgesturespacket",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createholddurationpacket",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createmotionstreampacket",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createpressspeedpacket",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setheadgesturesenabled",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setholdduration",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setpressspeed",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_start",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_startmotionstream",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_stopmotionstream",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_kt_bytearray",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_inbound_transport_packets_are_decoded_into_aap_events",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setassistanttriggerenabled_dispatches_configuration_for_both_earbuds",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setheadgesturesenabled_sends_config_0x3e_packet",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setholdduration_sends_config_0x26_packet",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setpressspeed_sends_config_0x25_packet",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_setstemaction_sends_correctly_formatted_configuration_packet",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_start_sends_handshake_then_feature_flags_then_notification_request_in_order",
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest_aapsessiontest_startmotionstream_and_stopmotionstream_send_opcode_0x17_packets"
+    ],
+    "11": [
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_a_single_failed_probe_does_not_yet_skip_the_next_connect_attempt",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_a_successful_probe_resets_a_prior_single_failure",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_battery_event_updates_battery_state",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_connect_drives_the_transport_and_starts_the_aap_handshake",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_connect_leaves_state_failed_instead_of_throwing_when_the_transport_fails_to_connect",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_connect_records_a_successful_probe_in_the_cache_when_none_exists_yet",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_connect_skips_the_transport_when_the_tier_probe_cache_already_confirms_unsupported",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_device_info_event_resolves_capabilities_from_the_model_number",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_ear_detection_event_updates_ear_detection_state",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_initial_state_is_disconnected_with_unknown_capabilities",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_airpodsrepositorytest_only_a_second_consecutive_failed_probe_confirms_unsupported_and_starts_skipping",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_kt_bytearray",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_loadfixturepacket",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest_loadfixturepacket_object_object_l21_l21",
+      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache",
+      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache",
+      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache_clear",
+      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache_recordproberesult",
+      "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache_tierbsupported"
     ],
     "12": [
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterycard",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterycontent",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterywidget",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterywidget_provideglance",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterywidgetcontent",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_kt_context",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_nodatacontent",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetreceiver",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetreceiver_batterywidgetreceiver",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetreceiver_kt_glanceappwidget",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates_kt_context",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates_kt_coroutinescope",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates_kt_flow",
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetupdates_observewidgetupdates",
-      "batterywidgetuistate",
-      "glanceappwidget",
-      "glanceappwidgetreceiver",
-      "glanceid",
-      "glancemodifier"
+      "aapevent",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_connect",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_disconnect",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_reduce",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_setassistanttriggerenabled",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_setheadgesturesenabled",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_setholdduration",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_setpressspeed",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_startmotionstream",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository_stopmotionstream",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_kt_airpodsstate",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_kt_flow",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_kt_holdduration",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_kt_pressspeed",
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsstate_headorientation",
+      "stateflow"
     ],
     "13": [
       "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_eardetectionstate",
@@ -487,6 +478,63 @@
       "app_src_test_kotlin_dev_androidpods_core_media_autopausedecidertest_autopausedecidertest_resumes_when_right_airpod_is_inserted_back_into_ear"
     ],
     "14": [
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_airpodsgeneration",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_airpodsgeneration_gen_1_2",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_airpodsgeneration_gen_3",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_airpodsgeneration_gen_4",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_airpodsgeneration_max",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_airpodsgeneration_next",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_airpodsgeneration_pro",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_airpodsgenerationmorphbadge",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_drawairpodsgen1silhouette",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_drawairpodsgen3silhouette",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_drawairpodsgen4silhouette",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_drawairpodsmaxsilhouette",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_drawairpodsprosilhouette",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_kt_color",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_kt_dp",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_airpodsgenerationbadge_kt_modifier"
+    ],
+    "15": [
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_morphingshape",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_morphingshape_calculateboundsrect",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_morphingshape_drawmorphshape",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_morphingshape_kt_color",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_morphingshape_kt_dp",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_morphingshape_kt_modifier",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_morphingshape_morphingshapehero",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_morphingshape_tocomposepath",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_morphingshapetest",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_morphingshapetest_morphingshapetest",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_morphingshapetest_morphingshapetest_morph_bounds_calculate_non_zero_dimensions",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_morphingshapetest_morphingshapetest_morph_converts_to_valid_cubics_at_various_progress_points",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_morphingshapetest_morphingshapetest_onboarding_morph_polygon_list_contains_multiple_shapes",
+      "apphaptics",
+      "morph",
+      "rect",
+      "roundedpolygon"
+    ],
+    "16": [
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterycard",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterycontent",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterywidget",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterywidget_provideglance",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_batterywidgetcontent",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_kt_batterycomponentstate",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_kt_context",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_nodatacontent",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetreceiver",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetreceiver_batterywidgetreceiver",
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidgetreceiver_kt_glanceappwidget",
+      "batterywidgetuistate",
+      "glanceappwidget",
+      "glanceappwidgetreceiver",
+      "glanceid",
+      "glancemodifier"
+    ],
+    "17": [
       "app_src_test_kotlin_dev_androidpods_core_airpods_aappacketdecodertest",
       "app_src_test_kotlin_dev_androidpods_core_airpods_aappacketdecodertest_aappacketdecodertest",
       "app_src_test_kotlin_dev_androidpods_core_airpods_aappacketdecodertest_aappacketdecodertest_battery_packet_with_wrong_length_decodes_to_unrecognized",
@@ -504,24 +552,7 @@
       "app_src_test_kotlin_dev_androidpods_core_airpods_aappacketdecodertest_loadfixturepacket",
       "app_src_test_kotlin_dev_androidpods_core_airpods_aappacketdecodertest_loadfixturepacket_object_object_l9_l9"
     ],
-    "15": [
-      "app_src_androidtest_kotlin_dev_androidpods_core_data_forcetierbunsupportedtest",
-      "app_src_androidtest_kotlin_dev_androidpods_core_data_forcetierbunsupportedtest_forcetierbunsupportedtest",
-      "app_src_androidtest_kotlin_dev_androidpods_core_data_forcetierbunsupportedtest_forcetierbunsupportedtest_forceconfirmedunsupported",
-      "app_src_androidtest_kotlin_dev_androidpods_core_data_forcetierbunsupportedtest_forcetierbunsupportedtest_resettosupported",
-      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache",
-      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache",
-      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache_clear",
-      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache_keyfor",
-      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache_recordproberesult",
-      "app_src_main_kotlin_dev_androidpods_core_data_datastoretierprobecache_datastoretierprobecache_tierbsupported",
-      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache",
-      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache_tierprobecache",
-      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache_tierprobecache_clear",
-      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache_tierprobecache_recordproberesult",
-      "app_src_main_kotlin_dev_androidpods_core_data_tierprobecache_tierprobecache_tierbsupported"
-    ],
-    "16": [
+    "18": [
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodstransport",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodstransport_airpodstransport",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodstransport_airpodstransport_connect",
@@ -536,7 +567,54 @@
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodstransport_kt_flow",
       "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodstransport_kt_stateflow"
     ],
-    "17": [
+    "19": [
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_onclick",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_onstartlistening",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_onstoplistening",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_requestupdate",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_airpodstileservice_updatetilestate",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_kt_context",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_kt_coroutinescope",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_kt_stateflow",
+      "app_src_main_kotlin_dev_androidpods_feature_tiles_airpodstileservice_observetileupdates",
+      "tileservice"
+    ],
+    "20": [
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_createstemconfigpacket",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setassistanttriggerenabled",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession_setstemaction",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction_disabled",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction_fromraw",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction_noise_control",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapstemaction_stempressandholdaction_voice_assistant"
+    ],
+    "21": [
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_airpodscapabilities",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_capabilityresolver",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_capabilityresolver_resolve",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode_adaptive",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode_noise_cancellation",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode_off",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_capabilityresolver_noisecontrolmode_transparency"
+    ],
+    "22": [
+      "app_src_test_kotlin_dev_androidpods_core_airpods_aapsessiontest",
+      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport",
+      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport",
+      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport_connect",
+      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport_disconnect",
+      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport_emit",
+      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_fakeairpodstransport_send",
+      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_kt_bytearray",
+      "app_src_test_kotlin_dev_androidpods_core_bluetooth_fakeairpodstransport_kt_flow"
+    ],
+    "23": [
       "app_src_test_kotlin_dev_androidpods_core_airpods_capabilityresolvertest",
       "app_src_test_kotlin_dev_androidpods_core_airpods_capabilityresolvertest_capabilityresolvertest",
       "app_src_test_kotlin_dev_androidpods_core_airpods_capabilityresolvertest_capabilityresolvertest_a3050_this_project_s_own_airpods_4_has_no_noise_control_and_no_stem_configuration",
@@ -544,109 +622,126 @@
       "app_src_test_kotlin_dev_androidpods_core_airpods_capabilityresolvertest_capabilityresolvertest_anc_airpods_4_model_number_supports_all_noise_control_modes_and_stem_configuration",
       "app_src_test_kotlin_dev_androidpods_core_airpods_capabilityresolvertest_capabilityresolvertest_unknown_model_number_resolves_to_no_supported_capabilities"
     ],
-    "18": [
+    "24": [
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration_airpodsillustration",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration_drawairpod",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration_kt_color",
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_deviceillustration_kt_modifier"
+    ],
+    "25": [
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_isreducedmotion",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_themetest",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_themetest_themetest",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_themetest_themetest_animator_duration_scale_of_zero_is_reduced_motion",
+      "app_src_test_kotlin_dev_androidpods_core_designsystem_themetest_themetest_normal_animator_duration_scale_is_not_reduced_motion"
+    ],
+    "26": [
+      "airpodstransport",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession",
+      "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_kt_flow",
+      "app_src_test_kotlin_dev_androidpods_core_data_airpodsrepositorytest"
+    ],
+    "27": [
       "gradlew",
       "gradlew__entry",
       "gradlew_die",
       "gradlew_warn"
     ],
-    "19": [
+    "28": [
       "app_src_test_kotlin_dev_androidpods_smoketest",
       "app_src_test_kotlin_dev_androidpods_smoketest_smoketest",
       "app_src_test_kotlin_dev_androidpods_smoketest_smoketest_test_source_set_is_wired"
     ],
-    "20": [
+    "29": [
       "app_build_gradle"
     ],
-    "21": [
-      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepositoryprovider_kt_bluetoothdevice"
-    ],
-    "22": [
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_color"
-    ],
-    "23": [
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_shape"
-    ],
-    "24": [
-      "app_src_main_kotlin_dev_androidpods_core_designsystem_typography"
-    ],
-    "25": [
-      "app_src_main_kotlin_dev_androidpods_core_media_autopause_kt_airpodsstate"
-    ],
-    "26": [
-      "app_src_main_kotlin_dev_androidpods_feature_controls_controlsscreen_kt_airpodsstate"
-    ],
-    "27": [
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_airpodsstate"
-    ],
-    "28": [
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_batterycomponentstate"
-    ],
-    "29": [
-      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_color"
-    ],
     "30": [
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_kt_glanceappwidget"
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_aaptransport_kt_bytearray"
     ],
     "31": [
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_kt_airpodsstate"
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_kt_context"
     ],
     "32": [
-      "app_src_main_kotlin_dev_androidpods_feature_widgets_widgetsscreen_kt_batterycomponentstate"
+      "app_src_main_kotlin_dev_androidpods_core_bluetooth_airpodsassociationmanager_kt_coroutinescope"
     ],
     "33": [
-      "build_gradle"
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_kt_stateflow"
     ],
     "34": [
-      "settings_gradle"
+      "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepositoryprovider_kt_bluetoothdevice"
     ],
     "35": [
-      "stateflow"
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_shape"
+    ],
+    "36": [
+      "app_src_main_kotlin_dev_androidpods_core_designsystem_typography"
+    ],
+    "37": [
+      "app_src_main_kotlin_dev_androidpods_core_media_autopause_kt_airpodsstate"
+    ],
+    "38": [
+      "app_src_main_kotlin_dev_androidpods_feature_home_homescreen_kt_color"
+    ],
+    "39": [
+      "app_src_main_kotlin_dev_androidpods_feature_widgets_batterywidget_kt_glanceappwidget"
+    ],
+    "40": [
+      "build_gradle"
+    ],
+    "41": [
+      "settings_gradle"
     ]
   },
   "cohesion": {
-    "0": 0.06013986013986014,
-    "1": 0.06382978723404255,
-    "2": 0.09986504723346828,
-    "3": 0.112375533428165,
+    "0": 0.06651017214397496,
+    "1": 0.06623376623376623,
+    "2": 0.06882591093117409,
+    "3": 0.09309309309309309,
     "4": 0.10158730158730159,
-    "5": 0.08739495798319327,
-    "6": 0.10752688172043011,
-    "7": 0.10837438423645321,
-    "8": 0.1452991452991453,
-    "9": 0.14245014245014245,
-    "10": 0.21645021645021645,
-    "11": 0.15584415584415584,
-    "12": 0.1619047619047619,
+    "5": 0.10752688172043011,
+    "6": 0.10344827586206896,
+    "7": 0.1452991452991453,
+    "8": 0.21645021645021645,
+    "9": 0.1774891774891775,
+    "10": 0.17142857142857143,
+    "11": 0.1736842105263158,
+    "12": 0.1568627450980392,
     "13": 0.19607843137254902,
-    "14": 0.2,
-    "15": 0.1619047619047619,
-    "16": 0.19230769230769232,
-    "17": 0.3333333333333333,
-    "18": 0.8333333333333334,
-    "19": 0.6666666666666666,
-    "20": 1.0,
-    "21": 1.0,
-    "22": 1.0,
-    "23": 1.0,
-    "24": 1.0,
-    "25": 1.0,
-    "26": 1.0,
-    "27": 1.0,
-    "28": 1.0,
+    "14": 0.21323529411764705,
+    "15": 0.20588235294117646,
+    "16": 0.20588235294117646,
+    "17": 0.2,
+    "18": 0.19230769230769232,
+    "19": 0.30303030303030304,
+    "20": 0.25,
+    "21": 0.25,
+    "22": 0.3055555555555556,
+    "23": 0.3333333333333333,
+    "24": 0.8,
+    "25": 0.5,
+    "26": 0.5,
+    "27": 0.8333333333333334,
+    "28": 0.6666666666666666,
     "29": 1.0,
     "30": 1.0,
     "31": 1.0,
     "32": 1.0,
     "33": 1.0,
     "34": 1.0,
-    "35": 1.0
+    "35": 1.0,
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0
   },
   "gods": [
     {
-      "id": "app_src_main_kotlin_dev_androidpods_core_data_airpodsstate_airpodsstate",
-      "label": "AirPodsState",
-      "degree": 29
+      "id": "app_src_main_kotlin_dev_androidpods_core_designsystem_theme_androidpodsspatialspec",
+      "label": "androidpodsSpatialSpec()",
+      "degree": 28
     },
     {
       "id": "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepository_airpodsrepository",
@@ -656,11 +751,6 @@
     {
       "id": "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_eardetectionstate",
       "label": "EarDetectionState",
-      "degree": 27
-    },
-    {
-      "id": "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession",
-      "label": "AapSession",
       "degree": 26
     },
     {
@@ -669,19 +759,19 @@
       "degree": 26
     },
     {
+      "id": "app_src_main_kotlin_dev_androidpods_core_airpods_aapsession_aapsession",
+      "label": "AapSession",
+      "degree": 25
+    },
+    {
       "id": "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_aapevent",
       "label": "AapEvent",
-      "degree": 23
+      "degree": 20
     },
     {
-      "id": "app_src_main_kotlin_dev_androidpods_core_airpods_aappacketdecoder_batterycomponentstate",
-      "label": "BatteryComponentState",
-      "degree": 22
-    },
-    {
-      "id": "app_src_main_kotlin_dev_androidpods_core_data_airpodsrepositoryprovider_airpodsrepositoryprovider",
-      "label": "AirPodsRepositoryProvider",
-      "degree": 18
+      "id": "app_src_main_kotlin_dev_androidpods_core_designsystem_haptics_rememberapphaptics",
+      "label": "rememberAppHaptics()",
+      "degree": 19
     },
     {
       "id": "app_src_test_kotlin_dev_androidpods_core_data_faketierprobecache_faketierprobecache",
@@ -689,23 +779,17 @@
       "degree": 16
     },
     {
-      "id": "app_src_main_kotlin_dev_androidpods_core_airpods_aapinteractionsettings_holdduration",
-      "label": "HoldDuration",
+      "id": "app_src_main_kotlin_dev_androidpods_core_data_airpodsstate_airpodsstate",
+      "label": "AirPodsState",
+      "degree": 16
+    },
+    {
+      "id": "app_src_main_kotlin_dev_androidpods_core_data_appsettingsrepository_appsettingsrepository",
+      "label": "AppSettingsRepository",
       "degree": 15
     }
   ],
   "surprises": [
-    {
-      "source": "resumeObservingAssociatedDevices()",
-      "target": "DataStoreTierProbeCache",
-      "source_files": [
-        "app/src/main/kotlin/dev/androidpods/core/bluetooth/AirPodsAssociationManager.kt",
-        "app/src/main/kotlin/dev/androidpods/core/data/DataStoreTierProbeCache.kt"
-      ],
-      "confidence": "INFERRED",
-      "relation": "calls",
-      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
-    },
     {
       "source": "HomeScreen()",
       "target": "DataStoreTierProbeCache",
@@ -718,33 +802,44 @@
       "why": "inferred connection - not explicitly stated in source; bridges separate communities"
     },
     {
-      "source": "ControlsScreenPreview()",
-      "target": "AndroidpodsTheme()",
+      "source": "AirPodsRepository",
+      "target": "AapSession",
       "source_files": [
-        "app/src/main/kotlin/dev/androidpods/feature/controls/ControlsScreen.kt",
-        "app/src/main/kotlin/dev/androidpods/core/designsystem/Theme.kt"
+        "app/src/main/kotlin/dev/androidpods/core/data/AirPodsRepository.kt",
+        "app/src/main/kotlin/dev/androidpods/core/airpods/AapSession.kt"
       ],
       "confidence": "INFERRED",
       "relation": "calls",
       "why": "inferred connection - not explicitly stated in source; bridges separate communities"
     },
     {
-      "source": "SegmentOption()",
-      "target": "androidpodsSpatialSpec()",
+      "source": "HomeScreenConnectedDarkPreview()",
+      "target": "EarDetectionState",
       "source_files": [
-        "app/src/main/kotlin/dev/androidpods/feature/controls/ControlsScreen.kt",
-        "app/src/main/kotlin/dev/androidpods/core/designsystem/Theme.kt"
+        "app/src/main/kotlin/dev/androidpods/feature/home/HomeScreen.kt",
+        "app/src/main/kotlin/dev/androidpods/core/airpods/AapPacketDecoder.kt"
       ],
       "confidence": "INFERRED",
       "relation": "calls",
       "why": "inferred connection - not explicitly stated in source; bridges separate communities"
     },
     {
-      "source": "SensorStatusPill()",
-      "target": "androidpodsSpatialSpec()",
+      "source": "observeWidgetUpdates()",
+      "target": "BatteryWidget",
       "source_files": [
-        "app/src/main/kotlin/dev/androidpods/feature/controls/ControlsScreen.kt",
-        "app/src/main/kotlin/dev/androidpods/core/designsystem/Theme.kt"
+        "app/src/main/kotlin/dev/androidpods/feature/widgets/WidgetUpdates.kt",
+        "app/src/main/kotlin/dev/androidpods/feature/widgets/BatteryWidget.kt"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
+    },
+    {
+      "source": "HomeScreenConnectedDarkPreview()",
+      "target": "BatteryState",
+      "source_files": [
+        "app/src/main/kotlin/dev/androidpods/feature/home/HomeScreen.kt",
+        "app/src/main/kotlin/dev/androidpods/core/airpods/AapPacketDecoder.kt"
       ],
       "confidence": "INFERRED",
       "relation": "calls",
@@ -754,33 +849,33 @@
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `AirPodsState` connect `Device Pairing & Association` to `AAP Session & Repository Core`, `ROADMAP: Hardware Pass Findings`, `AirPodsTransport Interface`, `Tier B L2CAP Transport Impl`, `App Startup & Battery Notification Wiring`, `Battery Home-Screen Widget`, `Auto-Pause & AirPodsState`, `AapPacketDecoder Tests`, `Bluetooth Availability Monitoring`?",
-      "why": "High betweenness centrality (0.195) - this node is a cross-community bridge."
+      "question": "Why does `EarDetectionState` connect `EarDetectionState` to `HomeScreen.kt`, `AppSettingsRepository`, `AirPodsState`, `AutoPause.kt`, `AapEvent`, `AapSession`, `FakeTierProbeCache`, `AapPacketDecoderTest`, `AirPodsTransport`?",
+      "why": "High betweenness centrality (0.116) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `AirPodsRepositoryProvider` connect `App Startup & Battery Notification Wiring` to `AAP Session & Repository Core`, `ROADMAP: Hardware Pass Findings`, `Device Pairing & Association`, `AirPodsTransport Interface`, `Tier B L2CAP Transport Impl`, `Auto-Pause & AirPodsState`, `Home Screen Compose UI`, `Docs, ADRs & Design Skill References`, `AapPacketDecoder Tests`, `Bluetooth Availability Monitoring`?",
-      "why": "High betweenness centrality (0.159) - this node is a cross-community bridge."
+      "question": "Why does `AirPodsRepositoryProvider` connect `AirPodsRepositoryProvider.kt` to `AirPodsState`, `CallGestureManager.kt`, `AutoPause.kt`, `AapEvent`, `AirPodsRepository`, `AirPodsTileService.kt`?",
+      "why": "High betweenness centrality (0.102) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `AirPodsRepository` connect `AAP Session & Repository Core` to `ROADMAP: Hardware Pass Findings`, `Docs, ADRs & Design Skill References`, `Device Pairing & Association`, `App Startup & Battery Notification Wiring`?",
-      "why": "High betweenness centrality (0.110) - this node is a cross-community bridge."
+      "question": "Why does `AapEvent` connect `AapEvent` to `AapSession`, `CallGestureManager.kt`, `AirPodsRepositoryProvider.kt`?",
+      "why": "High betweenness centrality (0.096) - this node is a cross-community bridge."
     },
     {
       "type": "verify_inferred",
-      "question": "Are the 10 inferred relationships involving `AirPodsRepository` (e.g. with `.`a single failed probe does not yet skip the next connect attempt`()` and `.`battery event updates battery state`()`) actually correct?",
-      "why": "`AirPodsRepository` has 10 INFERRED edges - model-reasoned connections that need verification."
+      "question": "Are the 3 inferred relationships involving `androidpodsSpatialSpec()` (e.g. with `AirPodsGenerationMorphBadge()` and `AirPodsIllustration()`) actually correct?",
+      "why": "`androidpodsSpatialSpec()` has 3 INFERRED edges - model-reasoned connections that need verification."
     },
     {
       "type": "verify_inferred",
-      "question": "Are the 2 inferred relationships involving `EarDetectionState` (e.g. with `.`decodes ear detection packet from real capture`()` and `.`inbound transport packets are decoded into AAP events`()`) actually correct?",
-      "why": "`EarDetectionState` has 2 INFERRED edges - model-reasoned connections that need verification."
+      "question": "Are the 11 inferred relationships involving `AirPodsRepository` (e.g. with `AapSession` and `.`a single failed probe does not yet skip the next connect attempt`()`) actually correct?",
+      "why": "`AirPodsRepository` has 11 INFERRED edges - model-reasoned connections that need verification."
     },
     {
       "type": "verify_inferred",
-      "question": "Are the 8 inferred relationships involving `AapSession` (e.g. with `.`inbound transport packets are decoded into AAP events`()` and `.`setAssistantTriggerEnabled dispatches configuration for both earbuds`()`) actually correct?",
-      "why": "`AapSession` has 8 INFERRED edges - model-reasoned connections that need verification."
+      "question": "Are the 3 inferred relationships involving `EarDetectionState` (e.g. with `HomeScreenConnectedDarkPreview()` and `.`decodes ear detection packet from real capture`()`) actually correct?",
+      "why": "`EarDetectionState` has 3 INFERRED edges - model-reasoned connections that need verification."
     },
     {
       "type": "verify_inferred",

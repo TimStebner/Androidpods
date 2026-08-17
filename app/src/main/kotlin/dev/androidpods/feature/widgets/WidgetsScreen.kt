@@ -4,6 +4,11 @@ package dev.androidpods.feature.widgets
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +28,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,11 +40,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,18 +57,21 @@ import dev.androidpods.core.airpods.BatteryState
 import dev.androidpods.core.data.AirPodsRepositoryProvider
 import dev.androidpods.core.data.AirPodsState
 import dev.androidpods.core.designsystem.AndroidpodsTheme
+import dev.androidpods.core.designsystem.ExpressiveScreenHeader
+import dev.androidpods.core.designsystem.androidpodsSpatialSpec
+import dev.androidpods.core.designsystem.rememberAppHaptics
 
 @Composable
 fun WidgetsScreen(modifier: Modifier = Modifier) {
     val state by AirPodsRepositoryProvider.state.collectAsState()
     val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
+    val haptics = rememberAppHaptics()
     val unsupportedMessage = stringResource(R.string.widgets_pin_unsupported)
 
     WidgetsScreenContent(
         state = state,
         onPinWidget = {
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            haptics.confirm()
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val receiver = ComponentName(context, BatteryWidgetReceiver::class.java)
             if (appWidgetManager.isRequestPinAppWidgetSupported) {
@@ -81,36 +91,57 @@ internal fun WidgetsScreenContent(
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
+    val haptics = rememberAppHaptics()
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val previewPressScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = androidpodsSpatialSpec(),
+        label = "widget-preview-scale",
+    )
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
             .padding(bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = stringResource(R.string.widgets_title),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 4.dp),
+        ExpressiveScreenHeader(
+            title = stringResource(R.string.widgets_title),
+            subtitle = "Home Screen Battery Glance",
+            icon = Icons.Default.Widgets,
+            iconBadgeColor = MaterialTheme.colorScheme.primaryContainer,
+            iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         )
 
         // Section 1: Live Interactive Widget Preview (Material 3 Expressive Pill)
         Text(
             text = stringResource(R.string.widgets_preview_header),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
             color = MaterialTheme.colorScheme.primary,
         )
 
-        // Pill Widget Preview Mockup matching reference image
+        // Pill Widget Preview with spring physics interaction
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(144.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer,
+                .height(152.dp)
+                .graphicsLayer {
+                    scaleX = previewPressScale
+                    scaleY = previewPressScale
+                }
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                ) {
+                    haptics.tick()
+                },
+            shape = RoundedCornerShape(36.dp),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             tonalElevation = 4.dp,
             shadowElevation = 8.dp,
         ) {
@@ -119,11 +150,12 @@ internal fun WidgetsScreenContent(
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .padding(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     WidgetBatteryCard(
+                        label = stringResource(R.string.home_battery_left),
                         iconRes = R.drawable.ic_airpod_left,
                         battery = battery.left,
                         isCase = false,
@@ -132,17 +164,19 @@ internal fun WidgetsScreenContent(
                             .fillMaxHeight(),
                     )
                     WidgetBatteryCard(
-                        iconRes = R.drawable.ic_airpod_right,
-                        battery = battery.right,
-                        isCase = false,
+                        label = stringResource(R.string.home_battery_case),
+                        iconRes = R.drawable.ic_airpods_case,
+                        battery = battery.case,
+                        isCase = true,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
                     )
                     WidgetBatteryCard(
-                        iconRes = R.drawable.ic_airpods_case,
-                        battery = battery.case,
-                        isCase = true,
+                        label = stringResource(R.string.home_battery_right),
+                        iconRes = R.drawable.ic_airpod_right,
+                        battery = battery.right,
+                        isCase = false,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
@@ -157,14 +191,20 @@ internal fun WidgetsScreenContent(
                     Icon(
                         painter = painterResource(R.drawable.ic_notification),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(34.dp),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.widget_battery_no_data),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Connect AirPods to preview battery levels",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -174,11 +214,17 @@ internal fun WidgetsScreenContent(
         Button(
             onClick = onPinWidget,
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
+            shape = CircleShape,
         ) {
+            Icon(
+                imageVector = Icons.Outlined.TouchApp,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.widgets_pin_button),
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(vertical = 4.dp),
             )
         }
@@ -186,7 +232,7 @@ internal fun WidgetsScreenContent(
         // Section 2: Step-by-step Guide
         Text(
             text = stringResource(R.string.widgets_guide_header),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(top = 8.dp),
         )
@@ -194,24 +240,15 @@ internal fun WidgetsScreenContent(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                Text(
-                    text = stringResource(R.string.widgets_guide_step_1),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Text(
-                    text = stringResource(R.string.widgets_guide_step_2),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Text(
-                    text = stringResource(R.string.widgets_guide_step_3),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                GuideStepRow(step = 1, text = stringResource(R.string.widgets_guide_step_1))
+                GuideStepRow(step = 2, text = stringResource(R.string.widgets_guide_step_2))
+                GuideStepRow(step = 3, text = stringResource(R.string.widgets_guide_step_3))
             }
         }
 
@@ -220,29 +257,83 @@ internal fun WidgetsScreenContent(
 }
 
 @Composable
+private fun GuideStepRow(
+    step: Int,
+    text: String,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(28.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = "$step",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}
+
+@Composable
 private fun WidgetBatteryCard(
+    label: String,
     iconRes: Int,
     battery: BatteryComponentState,
     isCase: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val haptics = rememberAppHaptics()
     val isCharging = battery.status == BatteryChargeStatus.CHARGING || battery.status == BatteryChargeStatus.OPTIMIZED_CHARGING
     val isDisconnected = battery.status == BatteryChargeStatus.DISCONNECTED
 
+    val cardInteractionSource = remember { MutableInteractionSource() }
+    val isCardPressed by cardInteractionSource.collectIsPressedAsState()
+    val cardPressScale by animateFloatAsState(
+        targetValue = if (isCardPressed) 0.93f else 1f,
+        animationSpec = androidpodsSpatialSpec(),
+        label = "card-press-$label",
+    )
+
+    val animatedLevel by animateIntAsState(
+        targetValue = battery.level,
+        animationSpec = androidpodsSpatialSpec(),
+        label = "widget-level-$label",
+    )
+
     val containerColor = if (isCase) {
-        MaterialTheme.colorScheme.secondaryContainer
+        MaterialTheme.colorScheme.tertiaryContainer
+    } else {
+        MaterialTheme.colorScheme.primaryContainer
+    }
+
+    val contentColor = if (isCase) {
+        MaterialTheme.colorScheme.onTertiaryContainer
     } else {
         MaterialTheme.colorScheme.onPrimaryContainer
     }
 
-    val contentColor = if (isCase) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
-
     Surface(
-        modifier = modifier,
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = cardPressScale
+                scaleY = cardPressScale
+            }
+            .clickable(
+                interactionSource = cardInteractionSource,
+                indication = null,
+            ) { haptics.tick() },
         shape = RoundedCornerShape(26.dp),
         color = containerColor,
         contentColor = contentColor,
@@ -258,14 +349,19 @@ private fun WidgetBatteryCard(
                 painter = painterResource(iconRes),
                 contentDescription = null,
                 tint = contentColor,
-                modifier = Modifier.size(38.dp),
+                modifier = Modifier.size(34.dp),
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = contentColor.copy(alpha = 0.85f),
+            )
+            Spacer(modifier = Modifier.height(2.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = if (isDisconnected) "--" else "${battery.level}%",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    text = if (isDisconnected) "--" else "$animatedLevel%",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                     color = contentColor,
                 )
                 if (isCharging) {

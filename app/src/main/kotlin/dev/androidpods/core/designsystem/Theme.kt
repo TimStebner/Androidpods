@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 // This file is the isolation boundary for experimental Material 3 Expressive APIs
@@ -36,9 +37,38 @@ fun AndroidpodsTheme(
     // on a device that can run Androidpods at all -- no version gate needed.
     val context = LocalContext.current
     val colorScheme = when {
-        dynamicColor -> if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        darkTheme -> AndroidpodsFallbackDarkColorScheme
-        else -> AndroidpodsFallbackLightColorScheme
+        dynamicColor -> {
+            val base = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) {
+                base.copy(
+                    background = Color(0xFF0A0D14),
+                    surface = Color(0xFF0A0D14),
+                    onBackground = Color(0xFFF8FAFC),
+                    onSurface = Color(0xFFF8FAFC),
+                    surfaceContainerLowest = Color(0xFF06080D),
+                    surfaceContainerLow = Color(0xFF10141F),
+                    surfaceContainer = Color(0xFF161B28),
+                    surfaceContainerHigh = Color(0xFF1E2536),
+                    surfaceContainerHighest = Color(0xFF283247),
+                    onSurfaceVariant = Color(0xFF94A3B8),
+                )
+            } else {
+                base.copy(
+                    background = Color(0xFFF1F5F9),
+                    surface = Color(0xFFF1F5F9),
+                    onBackground = Color(0xFF0F172A),
+                    onSurface = Color(0xFF0F172A),
+                    surfaceContainerLowest = Color(0xFFFFFFFF),
+                    surfaceContainerLow = Color(0xFFFFFFFF),
+                    surfaceContainer = Color(0xFFFFFFFF),
+                    surfaceContainerHigh = Color(0xFFE2E8F0),
+                    surfaceContainerHighest = Color(0xFFCBD5E1),
+                    onSurfaceVariant = Color(0xFF475569),
+                )
+            }
+        }
+        darkTheme -> AndroidpodsDarkColorScheme
+        else -> AndroidpodsLightColorScheme
     }
     val reduceMotion = remember {
         isReducedMotion(

@@ -23,12 +23,24 @@
     <string name="notification_battery_title">AirPods connected</string>
     <string name="notification_battery_text">Left %1$d%% · Right %2$d%% · Case %3$d%%</string>
     <string name="onboarding_title">Connect your AirPods</string>
+    <string name="onboarding_headline">AirPods, meet Android.</string>
+    <string name="onboarding_tagline">Native Companion Device pairing, live battery stats, 50Hz Spatial IMU, and gesture controls.</string>
     <string name="onboarding_rationale">Androidpods needs Bluetooth access to find and stay connected to your AirPods, and to read their battery and status.</string>
     <string name="onboarding_grant_permissions">Grant Bluetooth access</string>
     <string name="onboarding_pair_airpods">Pair AirPods</string>
     <string name="onboarding_pairing_cancelled">Pairing was cancelled.</string>
     <string name="onboarding_bluetooth_disabled">Turn on Bluetooth to connect your AirPods.</string>
     <string name="onboarding_bluetooth_unsupported">This device has no Bluetooth radio, so Androidpods cannot connect to AirPods.</string>
+    <string name="onboarding_enable_bluetooth">Enable Bluetooth</string>
+    <string name="onboarding_feature_spatial">Spatial Audio &amp; IMU</string>
+    <string name="onboarding_feature_spatial_desc">50Hz 6-axis head tracking &amp; gestures</string>
+    <string name="onboarding_feature_battery">Live Battery</string>
+    <string name="onboarding_feature_battery_desc">Buds &amp; case status via AAP protocol</string>
+    <string name="onboarding_feature_gestures">Head Gestures</string>
+    <string name="onboarding_feature_gestures_desc">Nod to accept, shake to decline calls</string>
+    <string name="onboarding_feature_findmy">Find My Locator</string>
+    <string name="onboarding_feature_findmy_desc">Acoustic chimes for lost earbuds</string>
+    <string name="onboarding_tap_morph_hint">✨ Tap the shapes to morph</string>
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_controls">Controls</string>
@@ -41,6 +53,15 @@
     <string name="home_quick_auto_pause_active">Active when removed</string>
     <string name="home_quick_auto_pause_inactive">Disabled</string>
     <string name="home_reconnect_button">Reconnect</string>
+    <string name="home_status_in_ear">In Ear</string>
+    <string name="home_status_out_of_ear">Out of Ear</string>
+    <string name="home_status_charging">Charging</string>
+    <string name="home_status_closed">Closed</string>
+    <string name="home_status_open">Open</string>
+    <string name="home_action_press_stem">Press Stem</string>
+    <string name="home_action_open_lid">Open Lid</string>
+    <string name="home_action_case_speaker">Case Speaker</string>
+    <string name="home_noise_control_header">Noise Control</string>
 
     <!-- Controls -->
     <string name="controls_title">Device Controls</string>
@@ -129,7 +150,10 @@
     <string name="settings_theme_system">System default</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
-    <string name="settings_notifications_header">Notifications</string>
+    <string name="settings_notifications_header">Notifications &amp; Experience</string>
+    <string name="settings_notif_popup_title">Battery Pop-up on Connect</string>
+    <string name="settings_notif_popup_desc">Show an expressive animated battery card when AirPods connect.</string>
+    <string name="settings_notif_popup_preview">Preview Pop-up</string>
     <string name="settings_notif_banner_title">Connection Banner</string>
     <string name="settings_notif_banner_desc">Show a heads-up notification when AirPods connect.</string>
     <string name="settings_notif_battery_title">Battery Status</string>

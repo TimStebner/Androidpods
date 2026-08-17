@@ -41,6 +41,12 @@ import dev.androidpods.core.airpods.BatteryChargeStatus
 import dev.androidpods.core.airpods.BatteryComponentState
 import dev.androidpods.core.data.AirPodsRepositoryProvider
 
+/**
+ * Material 3 Expressive Battery Glance Widget (PROJECT.md §6, §11, §30).
+ *
+ * Displays three distinct tonal status cards for Left, Right, and Case with
+ * bold typography, battery levels, and charging indicators.
+ */
 class BatteryWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -61,10 +67,10 @@ private fun BatteryWidgetContent(state: BatteryWidgetUiState) {
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .cornerRadius(44.dp)
-            .background(GlanceTheme.colors.primaryContainer)
+            .cornerRadius(32.dp)
+            .background(GlanceTheme.colors.surface)
             .clickable(actionStartActivity(intent))
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .padding(8.dp),
         contentAlignment = Alignment.Center,
     ) {
         when (state) {
@@ -84,15 +90,24 @@ private fun NoDataContent() {
         Image(
             provider = ImageProvider(R.drawable.ic_notification),
             contentDescription = null,
-            modifier = GlanceModifier.size(26.dp),
-            colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimaryContainer),
+            modifier = GlanceModifier.size(28.dp),
+            colorFilter = ColorFilter.tint(GlanceTheme.colors.primary),
         )
-        Spacer(modifier = GlanceModifier.height(4.dp))
+        Spacer(modifier = GlanceModifier.height(6.dp))
         Text(
             text = LocalContext.current.getString(R.string.widget_battery_no_data),
             style = TextStyle(
-                color = GlanceTheme.colors.onPrimaryContainer,
-                fontSize = 12.sp,
+                color = GlanceTheme.colors.onSurface,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+        Spacer(modifier = GlanceModifier.height(2.dp))
+        Text(
+            text = "Tap to open Androidpods",
+            style = TextStyle(
+                color = GlanceTheme.colors.onSurfaceVariant,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
             ),
         )
@@ -106,27 +121,30 @@ private fun BatteryContent(state: BatteryWidgetUiState.Battery) {
         verticalAlignment = Alignment.Vertical.CenterVertically,
         horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
     ) {
-        // Left AirPod - Dark Squircle Card
+        // Left AirPod Card
         BatteryCard(
+            label = "Left",
             iconRes = R.drawable.ic_airpod_left,
             battery = state.left,
             isCase = false,
             modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
         )
-        Spacer(modifier = GlanceModifier.width(8.dp))
-        // Right AirPod - Dark Squircle Card
+        Spacer(modifier = GlanceModifier.width(6.dp))
+        // Case Card (Center)
         BatteryCard(
-            iconRes = R.drawable.ic_airpod_right,
-            battery = state.right,
-            isCase = false,
-            modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
-        )
-        Spacer(modifier = GlanceModifier.width(8.dp))
-        // Case - Tinted Pastel Card
-        BatteryCard(
+            label = "Case",
             iconRes = R.drawable.ic_airpods_case,
             battery = state.case,
             isCase = true,
+            modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
+        )
+        Spacer(modifier = GlanceModifier.width(6.dp))
+        // Right AirPod Card
+        BatteryCard(
+            label = "Right",
+            iconRes = R.drawable.ic_airpod_right,
+            battery = state.right,
+            isCase = false,
             modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
         )
     }
@@ -134,6 +152,7 @@ private fun BatteryContent(state: BatteryWidgetUiState.Battery) {
 
 @Composable
 private fun BatteryCard(
+    label: String,
     iconRes: Int,
     battery: BatteryComponentState,
     isCase: Boolean,
@@ -142,24 +161,21 @@ private fun BatteryCard(
     val isCharging = battery.status == BatteryChargeStatus.CHARGING || battery.status == BatteryChargeStatus.OPTIMIZED_CHARGING
     val isDisconnected = battery.status == BatteryChargeStatus.DISCONNECTED
 
-    // In the visual template:
-    // Pods: Deep dark container with crisp white foreground
-    // Case: Tinted secondary container with tinted/white foreground
     val cardBackground = if (isCase) {
-        GlanceTheme.colors.secondaryContainer
+        GlanceTheme.colors.tertiaryContainer
+    } else {
+        GlanceTheme.colors.primaryContainer
+    }
+
+    val contentColor = if (isCase) {
+        GlanceTheme.colors.onTertiaryContainer
     } else {
         GlanceTheme.colors.onPrimaryContainer
     }
 
-    val contentColor = if (isCase) {
-        GlanceTheme.colors.onSecondaryContainer
-    } else {
-        GlanceTheme.colors.surface
-    }
-
     Column(
         modifier = modifier
-            .cornerRadius(26.dp)
+            .cornerRadius(24.dp)
             .background(cardBackground)
             .padding(horizontal = 4.dp, vertical = 8.dp),
         verticalAlignment = Alignment.Vertical.CenterVertically,
@@ -168,10 +184,20 @@ private fun BatteryCard(
         Image(
             provider = ImageProvider(iconRes),
             contentDescription = null,
-            modifier = GlanceModifier.size(32.dp),
+            modifier = GlanceModifier.size(30.dp),
             colorFilter = ColorFilter.tint(contentColor),
         )
         Spacer(modifier = GlanceModifier.height(4.dp))
+        Text(
+            text = label,
+            style = TextStyle(
+                color = contentColor,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+            ),
+            maxLines = 1,
+        )
+        Spacer(modifier = GlanceModifier.height(2.dp))
         val text = when {
             isDisconnected -> "--"
             isCharging -> "${battery.level}% ⚡"

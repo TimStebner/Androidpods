@@ -41,6 +41,15 @@
             </intent-filter>
         </activity>
 
+        <!-- Material 3 Expressive Battery Pop-up translucent dialog activity -->
+        <activity
+            android:name="dev.androidpods.feature.popup.BatteryPopupActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.Androidpods.Popup" />
+
         <service
             android:name="dev.androidpods.core.bluetooth.AirPodsPresenceService"
             android:exported="true"

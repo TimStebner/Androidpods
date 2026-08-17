@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,19 +30,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import dev.androidpods.app.R
 import dev.androidpods.core.data.AppSettings
 import dev.androidpods.core.data.AppSettingsRepositoryProvider
 import dev.androidpods.core.data.DataStoreTierProbeCache
 import dev.androidpods.core.data.ThemeMode
 import dev.androidpods.core.designsystem.AndroidpodsTheme
+import dev.androidpods.core.designsystem.ExpressiveScreenHeader
 import kotlinx.coroutines.launch
 
 @Composable
@@ -69,6 +73,14 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
             scope.launch { settingsRepo.setBatteryNotification(enabled) }
         },
+        onBatteryPopupChanged = { enabled ->
+            haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+            scope.launch { settingsRepo.setBatteryPopupEnabled(enabled) }
+        },
+        onPreviewPopup = {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            dev.androidpods.feature.popup.BatteryPopupActivity.start(context)
+        },
         onProtocolLoggingChanged = { enabled ->
             haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
             scope.launch { settingsRepo.setProtocolLogging(enabled) }
@@ -89,6 +101,8 @@ internal fun SettingsScreenContent(
     settings: AppSettings,
     onThemeModeSelected: (ThemeMode) -> Unit,
     onDynamicColorChanged: (Boolean) -> Unit,
+    onBatteryPopupChanged: (Boolean) -> Unit,
+    onPreviewPopup: () -> Unit,
     onConnectionBannerChanged: (Boolean) -> Unit,
     onBatteryNotificationChanged: (Boolean) -> Unit,
     onProtocolLoggingChanged: (Boolean) -> Unit,
@@ -106,23 +120,25 @@ internal fun SettingsScreenContent(
             .padding(bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = stringResource(R.string.settings_title),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 4.dp),
+        ExpressiveScreenHeader(
+            title = stringResource(R.string.settings_title),
+            subtitle = "Preferences & Diagnostics",
+            icon = Icons.Default.Settings,
+            iconBadgeColor = MaterialTheme.colorScheme.primaryContainer,
+            iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         )
 
         // Section 1: Appearance
         Text(
             text = stringResource(R.string.settings_appearance_header),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
             color = MaterialTheme.colorScheme.primary,
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Dynamic Color
@@ -179,16 +195,32 @@ internal fun SettingsScreenContent(
         // Section 2: Notifications
         Text(
             text = stringResource(R.string.settings_notifications_header),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary,
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                SettingSwitchRow(
+                    title = stringResource(R.string.settings_notif_popup_title),
+                    subtitle = stringResource(R.string.settings_notif_popup_desc),
+                    checked = settings.batteryPopupEnabled,
+                    onCheckedChange = onBatteryPopupChanged,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    OutlinedButton(
+                        onClick = onPreviewPopup,
+                    ) {
+                        Text(text = stringResource(R.string.settings_notif_popup_preview))
+                    }
+                }
                 SettingSwitchRow(
                     title = stringResource(R.string.settings_notif_banner_title),
                     subtitle = stringResource(R.string.settings_notif_banner_desc),
@@ -207,14 +239,14 @@ internal fun SettingsScreenContent(
         // Section 3: Diagnostics
         Text(
             text = stringResource(R.string.settings_diagnostics_header),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary,
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(
@@ -225,7 +257,7 @@ internal fun SettingsScreenContent(
                     Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
                         Text(
                             text = stringResource(R.string.settings_probe_cache_title),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         )
                         Text(
                             text = "Cached results for classic L2CAP PSM 0x1001.",
@@ -251,14 +283,14 @@ internal fun SettingsScreenContent(
         // Section 4: About & Legal
         Text(
             text = stringResource(R.string.settings_about_header),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary,
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
@@ -266,14 +298,14 @@ internal fun SettingsScreenContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(text = stringResource(R.string.settings_version_title), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = stringResource(R.string.settings_version_value), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = stringResource(R.string.settings_version_value), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(text = stringResource(R.string.settings_license_title), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "GPL-3.0", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = "GPL-3.0", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }
@@ -346,6 +378,8 @@ private fun SettingsScreenPreview() {
             settings = AppSettings(),
             onThemeModeSelected = {},
             onDynamicColorChanged = {},
+            onBatteryPopupChanged = {},
+            onPreviewPopup = {},
             onConnectionBannerChanged = {},
             onBatteryNotificationChanged = {},
             onProtocolLoggingChanged = {},

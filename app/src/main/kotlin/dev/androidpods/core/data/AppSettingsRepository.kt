@@ -34,6 +34,7 @@ class AppSettingsRepository(private val context: Context) {
             headGesturesEnabled = prefs[KEY_HEAD_GESTURES] ?: true,
             connectionBannerEnabled = prefs[KEY_CONNECTION_BANNER] ?: true,
             batteryNotificationEnabled = prefs[KEY_BATTERY_NOTIFICATION] ?: true,
+            batteryPopupEnabled = prefs[KEY_BATTERY_POPUP] ?: true,
             protocolLoggingEnabled = prefs[KEY_PROTOCOL_LOGGING] ?: false,
         )
     }
@@ -78,6 +79,10 @@ class AppSettingsRepository(private val context: Context) {
         dataStore.edit { it[KEY_BATTERY_NOTIFICATION] = enabled }
     }
 
+    suspend fun setBatteryPopupEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_BATTERY_POPUP] = enabled }
+    }
+
     suspend fun setProtocolLogging(enabled: Boolean) {
         dataStore.edit { it[KEY_PROTOCOL_LOGGING] = enabled }
     }
@@ -93,6 +98,7 @@ class AppSettingsRepository(private val context: Context) {
         private val KEY_HEAD_GESTURES = booleanPreferencesKey("head_gestures")
         private val KEY_CONNECTION_BANNER = booleanPreferencesKey("connection_banner")
         private val KEY_BATTERY_NOTIFICATION = booleanPreferencesKey("battery_notification")
+        private val KEY_BATTERY_POPUP = booleanPreferencesKey("battery_popup")
         private val KEY_PROTOCOL_LOGGING = booleanPreferencesKey("protocol_logging")
     }
 }
