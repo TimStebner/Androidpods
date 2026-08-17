@@ -21,4 +21,8 @@ class FakeTierProbeCache : TierProbeCache {
             if (states[deviceAddress] == -1) -2 else -1
         }
     }
+
+    override suspend fun clear() {
+        states.clear()
+    }
 }

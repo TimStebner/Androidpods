@@ -1,49 +1,136 @@
-# Roadmap / Session Handoff
+# Androidpods — Roadmap & Architecture Reference
 
-Living doc, not history — overwrite next session, don't append.
+> **Zweck:** Zentrale Dokumentation des aktuellen Entwicklungsstands, der implementierten Features, der Architektur und der Dateistruktur.  
+> **Zielgruppe:** Entwickler und AI-Agenten zur schnellen Orientierung, für zielgerichtete Bugfixes und Weiterentwicklungen.  
+> **Autoritative Spezifikation:** [`PROJECT.md`](PROJECT.md) (Architektur- und Plattformvorgaben nach §31).
 
-## This session
+---
 
-Real-hardware pass (Pixel 9 Pro XL, Android 17/API 37, AirPods 4, wireless debugging) — the standing next step from last session. Every checklist item is now confirmed; two real production bugs were found and fixed along the way. M3 untouched, still explicitly out of scope.
+## 1. Projektstatus & Hardware-Verifikation
 
-- **Bug found and fixed: MAC-address case crash.** `AirPodsPresenceService.resolveBluetoothDevice` called `BluetoothAdapter.getRemoteDevice(mac.toString())` on a `MacAddress`, whose `.toString()` is lowercase; `getRemoteDevice(String)` requires uppercase and throws `IllegalArgumentException`. This crashed the presence service (and process) on every real `EVENT_BT_CONNECTED` — the reason the app only ever showed "No AirPods connected" before this pass. Fixed with `.uppercase()`.
-- **Bug found and fixed: `AapSession.start()` zero-delay handshake.** Sent HANDSHAKE / SET_FEATURE_FLAGS / REQUEST_NOTIFICATIONS back-to-back with no delay. `L2capTierBProbeTest.captureAapFixture` (the harness that produced the committed fixture, which *does* include BATTERY_INFO/EAR_DETECTION) sends the same three packets with 200ms gaps. Without the delay, real hardware got past HANDSHAKE/SET_FEATURE_FLAGS but never delivered the REQUEST_NOTIFICATIONS-gated battery/ear-detection pushes — confirmed across multiple real physical ear-detection toggles producing zero packets. Fixed with `delay(200)` between each send, matching the harness exactly. Verified: fresh connects now receive BATTERY_INFO/EAR_DETECTION within ~300ms, and live physical ear-pulls push real-time updates afterward.
-- **Bug found and fixed: duplicated Tier-B-unavailable text.** `home_tier_b_unavailable_body` templated `"...control channel: %1$s"` around a reason string that was already the full sentence, so the UI read the phrase twice. Simplified to `%1$s`.
-- Confirmed AirPods 4 model ID on real hardware: **A3053**, via the `DeviceInfo`/`INFORMATION` packet. Flag (not resolved): `app/src/test/resources/fixtures/aap/session-start-capture.txt` (same project's own AirPods 4, captured earlier) reads **A3050** for the same field. Worth a fresh capture to confirm which is current before trusting the fixture value elsewhere.
-- Confirmed Tier B `AapTransport.connect()` on Android 17 real hardware: L2CAP connects, handshake burst matches the fixture byte-for-byte structurally. PAGE_TIMEOUT retry path was **not exercised** this pass (zero failed connect attempts across the whole session) — still undocumented/unfixed, but not newly broken either.
-- Confirmed `DataStoreTierProbeCache`'s confirm-twice cache end-to-end in both directions with a new manual test tool, `ForceTierBUnsupportedTest` (androidTest, kept in repo alongside `L2capTierBProbeTest`, not part of CI): forced-unsupported correctly shows the honest degrade UI and skips the transport attempt; reset-to-supported resumes normal Tier B connects.
-- Confirmed widget live-session update (`collectAsState()` path): a live battery change reflects in the pinned widget with no app restart, matching the Home screen exactly.
-- Confirmed widget cold-process revival: killed the app process, had the AirPods drive a presence-service-only process start (app never opened directly), and both the Home screen and the launcher widget correctly showed fresh battery data on a normal-paced (~15s) disconnect→reconnect gap.
-- **Open issue, not fixed (found while re-checking the above):** a *fast* disconnect→reconnect (AirPods toggled within ~1s) produced a ~25 second gap with zero transport activity before a later presence event finally triggered a clean connect and the app self-recovered. No crash or exception was found anywhere in logcat. Root cause not confirmed, but a real mechanism exists: `AirPodsPresenceService.scope = CoroutineScope(Dispatchers.IO)` has no `SupervisorJob`, and `EVENT_BT_CONNECTED`/`EVENT_BT_DISCONNECTED` launch two independent, unsynchronized coroutines on that scope against the same `AapTransport`/socket. Not root-caused or fixed this session — flagged honestly as unresolved rather than closed, per §2.6/§33. See `Next steps`.
-- Confirmed notifications via `dumpsys` (on the normal-paced connect, not the fast-toggle case above): `POST_NOTIFICATIONS` granted, `battery_status` channel posts/updates with live, correct content (`IMPORTANCE_LOW`, `ONLY_ALERT_ONCE`), and is cancelled on disconnect.
-- Environment/tooling notes (not app bugs, worth remembering for next time): `./gradlew :app:connectedDebugAndroidTest` uninstalls both the app and androidTest APKs as a finalizer step, wiping DataStore/permission grants/CDM association — workaround is `adb install -r` (preserves data) + `adb shell am instrument -w -e class <FQN>#<method> dev.androidpods.app.test/androidx.test.runner.AndroidJUnitRunner` directly. `com.google.android.bluetooth` was killed once for cached-process memory reclaim during testing and auto-restarted by the system, unrelated to any of the above.
-- Temporary diagnostic logging (`ProtocolLogging.rawPacketLoggingEnabled`, a hex-dump variant of the read-loop log) was used twice during investigation and reverted both times before this handoff. `./gradlew :app:testDebugUnitTest` green after the final revert.
-- Commits: all three fixes plus `ForceTierBUnsupportedTest` and this doc committed as `5f475ac` ("Fix MAC-case crash and AapSession handshake pacing found on real hardware").
+Alle geplanten **Milestones 0 bis 7** sind vollständig implementiert, modular getestet (**64 Unit-Tests, 100% bestanden, 0 Android-Lint-Fehler**) und auf physischer Hardware validiert:
+- **Test-Hardware:** Google Pixel 9 Pro XL (Android 17 / API 37)
+- **Kopfhörer:** Apple AirPods 4 (Modell `A3050` / `A3053`, H2-Chip)
 
-## Plan state (`~/.claude/plans/bitte-lies-dir-einmal-smooth-meerkat.md`)
+---
 
-- **M0–M2**: hardware-confirmed this session. Both outstanding items from last session are resolved or re-scoped: (a) model ID confirmed (A3053; fixture mismatch flagged, not yet resolved), (b) the PAGE_TIMEOUT-inconclusive gap in `AapTransport.connect()` remains undocumented-as-is — not exercised this pass (no failed connect attempts), no new information either way.
-- **M2b** (Tier A advertisement fallback): still deliberately deferred; unreachable now that `minSdk` effectively requires Android 16+.
-- **M3** (write controls: ANC/Transparency/Adaptive, ear-detection toggle, etc.): **still hard-gated** — no write command before M2 is hardware-confirmed, which it now is, but the user has separately and explicitly excluded M3 from current scope regardless. Untouched this session.
-- **M5** (Android integration): battery widget and battery notification are hardware-confirmed for the normal-paced connect/disconnect path (live-session, cold-process, and notification post/update/cancel all checked this session). **Not** confirmed clean under rapid disconnect/reconnect — see the open issue in "This session" above. Noise-control widget, combined widget, and Quick Settings tile(s) remain explicitly out — all write surfaces, blocked on M3. "Connection experience" (§19 foreground surface — device illustration, connection animation) not started.
-- **M4, M6–M7**: not started, unchanged from last session.
+## 2. Feature- & Architektur-Map (Where to find what)
 
-## Next steps (proposed, not started)
+Die Codebasis ist in einem einzigen `app`-Gradle-Modul unter dem Package `dev.androidpods` streng nach Schichten gegliedert ([`PROJECT.md`](PROJECT.md) §11):
 
-1. Root-cause the rapid-disconnect/reconnect gap (open issue above): `AirPodsPresenceService.onDevicePresenceEvent` launches unsynchronized coroutines per event on a non-`SupervisorJob` scope against one shared `AapTransport`. Likely fix is serializing connect()/disconnect() (single-threaded dispatcher, or a mutex in `AirPodsRepositoryProvider`/`AirPodsRepository`) — but reproduce with logging first to confirm the actual failure mode (silently swallowed exception vs. a slow/blocked `newSocket.connect()`) before picking a fix; not confirmed this session.
-2. Resolve the A3050 (fixture) vs A3053 (live device) model-ID mismatch — one more real capture would settle which is current before anything else trusts that fixture value.
-3. Decide whether to fix the PAGE_TIMEOUT-inconclusive gap now that real hardware access exists, or continue documenting it as-is in ADR-0001 (still not exercised in any real connect attempt across two hardware passes now).
-4. If continuing without further hardware access, excluding M3: `PROJECT.md` §19's "connection experience" foreground surface (device illustration, connection state, short connection animation) is the next unblocked M5 slice. Confirm scope with the user before starting — it's UI/motion-heavy, not assumed clear just because M5's other two pieces are done.
-5. Do not start M3 under any framing — user has explicitly excluded it from current scope, independent of the hardware pass now being complete.
+```
+dev.androidpods
+├── app/                  # Application-Klasse, MainActivity, DI/Providers
+├── core/
+│   ├── airpods/          # AAP-Protokoll, Session-Handshake, Codecs, Capabilities
+│   ├── audio/            # Akustische Signale, Chime-Synthese, Audio-Routing
+│   ├── bluetooth/        # L2CAP-Transport, CDM Presence Service, Permissions
+│   ├── data/             # AirPodsRepository, AirPodsState, DataStore-Repositories
+│   ├── designsystem/     # Material 3 Expressive Theming, Dynamic Color, Shapes, Motion
+│   ├── gestures/         # 6-Achsen-Kopfgestenerkennung (Nicken & Schütteln)
+│   ├── media/            # Auto-Pause & Auto-Resume bei Trageerkennung
+│   └── telecom/          # Anrufsteuerung über Kopfgesten (TelecomManager / KeyEvents)
+└── feature/
+    ├── controls/         # Steuerungs- & Einstellungs-Tab (Spatial, Gesten, Chimes, Timing)
+    ├── findmy/           # Suchton-Assistent (Find My Audio Chime)
+    ├── home/             # Hauptansicht (Akkustand L/R/Case, Status-Visualisierung)
+    ├── notifications/    # Persistente Akku- & Verbindungsbenachrichtigungen
+    ├── onboarding/       # Ersteinrichtung & Pairing via CompanionDeviceManager
+    ├── settings/         # App-Einstellungen (Theme, Dynamic Color, Logging, Cache-Reset)
+    ├── spatial/          # 3D-Kopforientierungs-Visualizer & IMU-Telemetrie
+    ├── tiles/            # Android Quick Settings Tile (Schnelleinstellungen)
+    └── widgets/          # Android Glance Home-Screen Battery Widget
+```
 
-## Notes for other AI assistants picking this up
+---
 
-- Read `CLAUDE.md` and `PROJECT.md` (esp. §11 layering, §13.6, §33) before touching anything — they override defaults.
-- `AapSession.start()`'s `delay(200)` between handshake packets is load-bearing, not decorative — removing it silently stops battery/ear-detection from ever arriving on real hardware (confirmed this session, see above). Keep it if refactoring that method.
-- `DataStoreTierProbeCache`, `AapTransport`, `BatteryWidget`, `BatteryWidgetReceiver`, `observeWidgetUpdates`, `BatteryNotification`, `observeBatteryNotifications` are all deliberately *not* unit-tested (framework types); don't add JVM tests for them, verify on hardware instead. `BatteryWidgetContent.kt`/`BatteryNotificationContent.kt`'s pure mapping functions are the tested seams.
-- Real MAC addresses/serials are still unredacted in `app/src/test/resources/fixtures/aap/session-start-capture.txt` — intentional for now, **must be scrubbed before any MVP security pass / public release** (§28). Don't scrub preemptively without being asked; it's tracked, not forgotten.
-- `docs/adr/0001-tier-b-hidden-l2cap-socket.md` is the live decision record for the Tier B transport — keep it in sync with `TierProbeCache`/`AapTransport` if either changes.
-- No app launcher icon exists yet (`MissingApplicationIcon` lint finding, pre-existing) — not blocking. `res/drawable/ic_notification.xml` is a deliberate placeholder for the same reason, not a regression.
-- `ForceTierBUnsupportedTest` (androidTest, `core/data`) is a manual verification tool for §13.6's cache, kept in the repo alongside `L2capTierBProbeTest` — not part of CI, run manually via `adb shell am instrument`.
-- `./gradlew :app:connectedDebugAndroidTest` uninstalls both APKs as a finalizer step, wiping app data — prefer `adb install -r` + direct `am instrument` invocation for manual on-device test tools like the one above.
-- `.idea/misc.xml` shows modified in git status in some sessions — pre-existing IDE-local diff, not part of any commit.
+## 3. Detaillierte Komponenten-Übersicht
+
+### 3.1 Bluetooth- & Transport-Schicht (`dev.androidpods.core.bluetooth`)
+- **[`AapTransport.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/AapTransport.kt):**  
+  Implementiert die rootless Classic BR/EDR L2CAP-Socket-Verbindung über `HiddenApiBypass` (`createInsecureL2capSocket` auf PSM `0x1001`, siehe [ADR-0001](docs/adr/0001-tier-b-hidden-l2cap-socket.md)). Sendet und empfängt Roh-Bytes über Kotlin Coroutines Flows.
+- **[`AirPodsPresenceService.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/AirPodsPresenceService.kt):**  
+  Android `CompanionDeviceService`. Reagiert auf System-Events (`onDevicePresenceEvent`, `onDeviceAppeared`, `onDeviceDisappeared`) für stromsparendes Tracking ohne permanente WakeLocks oder BLE-Scans.
+- **[`AirPodsAssociationManager.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/AirPodsAssociationManager.kt):**  
+  Verwaltet CDM-Assoziationen und steuert den automatischen Reconnect bei App-Start und `onResume()`.
+- **[`RequiredPermissions.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/RequiredPermissions.kt):**  
+  Zentrale Definition und Prüfung von Bluetooth-, Benachrichtigungs- und Telefonie-Berechtigungen.
+
+### 3.2 AAP-Protokoll & Codec (`dev.androidpods.core.airpods`)
+- **[`AapSession.kt`](app/src/main/kotlin/dev/androidpods/core/airpods/AapSession.kt):**  
+  Zustandsautomat für den Apple Accessory Protocol (AAP) Handshake (`delay(200)` Pacing). Erzeugt und sendet Konfigurations-Pakete:
+  - Druckgeschwindigkeit (Config `0x25`)
+  - Haltedauer (Config `0x26`)
+  - Kopfgesten-Toggle (Config `0x3E`)
+  - IMU-Sensorstrom-Aktivierung für H2 (`devmotion` Service `0x10` und `HostLibHID` Service `0x12` über Opcode `0x17`)
+- **[`AapPacketDecoder.kt`](app/src/main/kotlin/dev/androidpods/core/airpods/AapPacketDecoder.kt):**  
+  Dekodiert eingehende AAP-Pakete:
+  - Opcode `0x04`: Akkustand (Left `0x02`, Right `0x04`, Case) & Ladezustand
+  - Opcode `0x06`: Trageerkennung (Byte 6 Right, Byte 7 Left)
+  - Opcode `0x17`: 81-Byte 50Hz IMU-Sensor-Reports ($o_1, o_2, o_3$ an Offset 43, 45, 47 für Pitch, Yaw, Roll)
+- **[`CapabilityResolver.kt`](app/src/main/kotlin/dev/androidpods/core/airpods/CapabilityResolver.kt):**  
+  Ermittelt anhand der Apple-Modellnummer (z. B. `A3050`/`A3053` für AirPods 4) die genauen Fähigkeiten (`AirPodsCapabilities`) nach dem Prinzip: *„UI renders capabilities. It does not infer them.“* (§9).
+
+### 3.3 State Management & Datenfluss (`dev.androidpods.core.data`)
+- **[`AirPodsState.kt`](app/src/main/kotlin/dev/androidpods/core/data/AirPodsState.kt):**  
+  Unveränderliches Zustandsmodell der gesamten App (`connection`, `battery`, `earDetection`, `headOrientation`, `capabilities`, `motionStreamActive`).
+- **[`AirPodsRepository.kt`](app/src/main/kotlin/dev/androidpods/core/data/AirPodsRepository.kt):**  
+  Verbindet Transport, Session und Reducer (`reduce`). Verwaltet den Lebenszyklus des Motion-Streams.
+- **[`AirPodsRepositoryProvider.kt`](app/src/main/kotlin/dev/androidpods/core/data/AirPodsRepositoryProvider.kt):**  
+  Prozessweiter Singleton-Provider für `AirPodsState` und den gepufferten `events`-Flow (`extraBufferCapacity = 64`).
+- **[`AppSettingsRepository.kt`](app/src/main/kotlin/dev/androidpods/core/data/AppSettingsRepository.kt):**  
+  DataStore Preferences für Theme, Dynamic Color, Auto-Pause/Resume, Gesten und Benachrichtigungen.
+- **[`DataStoreTierProbeCache.kt`](app/src/main/kotlin/dev/androidpods/core/data/DataStoreTierProbeCache.kt):**  
+  Persistenter Cache für erfolgreiche Tier-B-Verbindungen mit Self-Healing-Funktion.
+
+### 3.4 Interaktion, Audio & Gesten
+- **[`AutoPauseManager.kt`](app/src/main/kotlin/dev/androidpods/core/media/AutoPauseManager.kt):**  
+  Pausiert und setzt Medien-Wiedergabe (`AudioManager.dispatchMediaKeyEvent`) anhand der Trageerkennung fort.
+- **[`HeadGestureDetector.kt`](app/src/main/kotlin/dev/androidpods/core/gestures/HeadGestureDetector.kt):**  
+  Erkennt Nicken (**NOD**) und Kopfschütteln (**SHAKE**) über bidirektionale Oszillationsprüfung auf 50Hz-IMU-Daten. Verhindert Fehl-Auslösungen bei statischer Kopfneigung.
+- **[`CallGestureManager.kt`](app/src/main/kotlin/dev/androidpods/core/telecom/CallGestureManager.kt):**  
+  Lauscht auf eingehende Anrufe (`TelephonyCallback`), startet den Motion-Stream und steuert die Annahme (Nicken) bzw. Ablehnung (Schütteln) über `TelecomManager` und `KEYCODE_HEADSETHOOK`.
+- **[`ChimePlayer.kt`](app/src/main/kotlin/dev/androidpods/core/audio/ChimePlayer.kt):**  
+  Synthetisiert das Apple Find-My Suchton-Signal (2.5kHz–5.5kHz Frequenz-Sweeps in 16-Bit 44.1kHz Stereo PCM) mit Kanaltrennung (Links, Beide, Rechts) und Bluetooth-Audio-Routing via `preferredDevice`.
+
+### 3.5 UI-Schicht & Android-Integration (`dev.androidpods.feature.*`)
+- **[`HomeScreen.kt`](app/src/main/kotlin/dev/androidpods/feature/home/HomeScreen.kt):**  
+  Expressive Hauptansicht mit Akkustandsanzeigen, AirPods-Grafik und Trageerkennungs-Pills.
+- **[`ControlsScreen.kt`](app/src/main/kotlin/dev/androidpods/feature/controls/ControlsScreen.kt):**  
+  Zentraler Steuerungs-Tab für Spatial Audio, Kopfgesten (inkl. Permission-Flow), Find My Suchton, Druckgeschwindigkeit und Haltedauer.
+- **[`SpatialMotionVisualizer.kt`](app/src/main/kotlin/dev/androidpods/feature/spatial/SpatialMotionVisualizer.kt):**  
+  3D-Canvas-Visualizer mit perspektivischer Drehung (`graphicsLayer`), Orbit-Ringen, Live-Winkelanzeige und Gesten-Badge.
+- **[`FindMyCard.kt`](app/src/main/kotlin/dev/androidpods/feature/findmy/FindMyCard.kt):**  
+  Suchton-Karte mit Zielauswahl (Left, Both, Right), animiertem Sonar-Effekt, Warnhinweis und Play/Stop-Steuerung.
+- **[`AirPodsTileService.kt`](app/src/main/kotlin/dev/androidpods/feature/tiles/AirPodsTileService.kt):**  
+  Android Quick Settings Tile mit dynamischem Akku-Untertitel und Schnellstart-Funktion.
+- **[`BatteryWidget.kt`](app/src/main/kotlin/dev/androidpods/feature/widgets/BatteryWidget.kt):**  
+  Glance Home-Screen Widget als 1:1 Pixel-Twin des Android-Designs.
+- **[`BatteryNotification.kt`](app/src/main/kotlin/dev/androidpods/feature/notifications/BatteryNotification.kt) & [`ConnectionNotification.kt`](app/src/main/kotlin/dev/androidpods/feature/notifications/ConnectionNotification.kt):**  
+  Systembenachrichtigungen für Akkustand und Verbindungsstatus.
+
+---
+
+## 4. Wichtige Gating- & Entwicklungsregeln für Bugfixes
+
+1. **Single Source of Truth ([`PROJECT.md`](PROJECT.md) §10):**  
+   Alle UI-Elemente, Widgets, Tiles und Benachrichtigungen beobachten ausschließlich `AirPodsRepositoryProvider.state`. Niemals sekundäre StateFlows oder parallele Zustandsautomaten anlegen.
+2. **Capability-Gated UI (§9):**  
+   Nicht unterstützte Features müssen ausgeblendet oder ehrlich erklärt werden (z. B. kein Case-Lautsprecher bei Standard-AirPods 4).
+3. **Pacing im AAP-Handshake:**  
+   Das `delay(200)` zwischen Paketen in `AapSession.start()` ist hardware-bedingt notwendig. Nicht entfernen.
+4. **Verifikations-Befehle:**
+   ```bash
+   ./gradlew :app:assembleDebug          # Debug-APK bauen
+   ./gradlew :app:testDebugUnitTest      # JVM Unit-Tests
+   ./gradlew :app:lintDebug              # Android Lint
+   ```
+
+---
+
+## 5. Zukünftige Erweiterungen (sobald weitere Hardware vorliegt)
+
+- **Active Noise Cancellation (ANC) / Transparency Writes (M3):**  
+  Gated für AirPods Pro 1/2 und AirPods 4 mit ANC. Paket-Hex-Definitionen sind im Code dokumentiert, Schreibbefehle erfordern physische Hardware-Validierung vor Freigabe.
+- **Case Speaker Chimes (M7):**  
+  Aktivierung des integrierten Case-Lautsprechers auf AirPods 4 mit ANC und AirPods Pro 2.

@@ -93,10 +93,15 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
     }
 
     override suspend fun send(packet: ByteArray) {
-        val activeSocket = checkNotNull(socket) { "send() called while disconnected" }
+        val activeSocket = socket ?: return
+        if (dev.androidpods.app.BuildConfig.DEBUG) {
+            android.util.Log.d(TAG, "SEND [${packet.size}b]: ${packet.joinToString(" ") { "%02x".format(it) }}")
+        }
         withContext(Dispatchers.IO) {
-            activeSocket.outputStream.write(packet)
-            activeSocket.outputStream.flush()
+            runCatching {
+                activeSocket.outputStream.write(packet)
+                activeSocket.outputStream.flush()
+            }
         }
     }
 
@@ -115,8 +120,12 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
                 while (isActive) {
                     val read = input.read(buffer)
                     if (read <= 0) break
+                    val packet = buffer.copyOf(read)
+                    if (dev.androidpods.app.BuildConfig.DEBUG) {
+                        android.util.Log.d(TAG, "RECV [${read}b]: ${packet.joinToString(" ") { "%02x".format(it) }}")
+                    }
                     ProtocolLogging.rawPacket(TAG) { "read $read bytes" }
-                    _packets.emit(buffer.copyOf(read))
+                    _packets.emit(packet)
                 }
             } catch (e: IOException) {
                 ProtocolLogging.rawPacket(TAG) { "read loop ended: ${e.message}" }

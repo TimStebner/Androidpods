@@ -4,22 +4,27 @@ package dev.androidpods.core.data
 import dev.androidpods.core.airpods.AapEvent
 import dev.androidpods.core.airpods.AapSession
 import dev.androidpods.core.airpods.CapabilityResolver
+import dev.androidpods.core.airpods.HeadGesturesState
+import dev.androidpods.core.airpods.HoldDuration
+import dev.androidpods.core.airpods.PressSpeed
+import dev.androidpods.core.airpods.StemPressAndHoldAction
 import dev.androidpods.core.bluetooth.AirPodsTransport
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// The only layer allowed to expose AirPods write operations (PROJECT.md §11). M2 is read-only --
-// connect() only establishes the session, no configuration command exists yet (§2.6/§33).
+// The only layer allowed to expose AirPods write operations (PROJECT.md §11, §33).
 class AirPodsRepository(
     private val transport: AirPodsTransport,
     scope: CoroutineScope,
     private val tierProbeCache: TierProbeCache,
 ) {
     private val session = AapSession(transport)
+    val events: Flow<AapEvent> = session.events
     private val _state = MutableStateFlow(AirPodsState.INITIAL)
     val state: StateFlow<AirPodsState> = _state.asStateFlow()
 
@@ -58,10 +63,62 @@ class AirPodsRepository(
 
     suspend fun disconnect() = transport.disconnect()
 
+    suspend fun setAssistantTriggerEnabled(enabled: Boolean) {
+        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
+            session.setAssistantTriggerEnabled(enabled)
+        }
+    }
+
+    suspend fun setPressSpeed(speed: PressSpeed) {
+        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
+            session.setPressSpeed(speed)
+        }
+    }
+
+    suspend fun setHoldDuration(duration: HoldDuration) {
+        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
+            session.setHoldDuration(duration)
+        }
+    }
+
+    suspend fun setHeadGesturesEnabled(enabled: Boolean) {
+        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
+            session.setHeadGesturesEnabled(enabled)
+        }
+    }
+
+    private var motionStreamRequested: Boolean = false
+
+    suspend fun startMotionStream() {
+        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
+            motionStreamRequested = true
+            session.startMotionStream()
+            _state.update { it.copy(motionStreamActive = true) }
+        }
+    }
+
+    suspend fun stopMotionStream() {
+        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
+            motionStreamRequested = false
+            session.stopMotionStream()
+            _state.update { it.copy(motionStreamActive = false, headOrientation = null) }
+        }
+    }
+
     private fun AirPodsState.reduce(event: AapEvent): AirPodsState = when (event) {
         is AapEvent.Battery -> copy(battery = event.state)
         is AapEvent.EarDetection -> copy(earDetection = event.state)
         is AapEvent.DeviceInfo -> copy(capabilities = CapabilityResolver.resolve(event.info.modelNumber))
+        is AapEvent.StemConfig -> if (event.isLeft) copy(stemLeftAction = event.action) else copy(stemRightAction = event.action)
+        is AapEvent.PressSpeedConfig -> copy(pressSpeed = event.speed)
+        is AapEvent.HoldDurationConfig -> copy(holdDuration = event.duration)
+        is AapEvent.HeadGesturesConfig -> copy(headGesturesState = event.state)
+        is AapEvent.HeadMotion -> if (motionStreamRequested) {
+            copy(
+                headOrientation = HeadOrientation(pitch = event.pitch, yaw = event.yaw, roll = event.roll),
+                motionStreamActive = true,
+            )
+        } else this
         AapEvent.Unrecognized -> this
     }
 

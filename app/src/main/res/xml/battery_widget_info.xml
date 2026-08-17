@@ -3,9 +3,9 @@
 <!-- updatePeriodMillis="0": the widget is push-updated from AirPodsRepositoryProvider.state
      (PROJECT.md §13.4/§14: event-driven, not host-timer polling). -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="110dp"
-    android:minHeight="40dp"
-    android:targetCellWidth="2"
+    android:minWidth="180dp"
+    android:minHeight="60dp"
+    android:targetCellWidth="3"
     android:targetCellHeight="1"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/glance_default_loading_layout"

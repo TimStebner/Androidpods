@@ -15,11 +15,9 @@ class AapSession(private val transport: AirPodsTransport) {
     val events: Flow<AapEvent> = transport.packets.map(AapPacketDecoder::decode)
 
     suspend fun start() {
-        // The 200ms gaps replicate captureAapFixture's harness exactly (real hardware capture
-        // that reached BATTERY_INFO/EAR_DETECTION) -- back-to-back sends with no delay were
-        // observed on hardware to get the AirPods past HANDSHAKE/SET_FEATURE_FLAGS but never
-        // deliver the REQUEST_NOTIFICATIONS-gated battery/ear-detection pushes, even across
-        // repeated real physical ear-detection changes (hardware pass, 2026-08-13).
+        // Reset any lingering motion stream from previous session before initial handshake
+        runCatching { stopMotionStream() }
+        delay(50)
         transport.send(HANDSHAKE_PACKET)
         delay(200)
         transport.send(SET_FEATURE_FLAGS_PACKET)
@@ -27,7 +25,53 @@ class AapSession(private val transport: AirPodsTransport) {
         transport.send(REQUEST_NOTIFICATIONS_PACKET)
     }
 
+    suspend fun setStemAction(isLeft: Boolean, action: StemPressAndHoldAction) {
+        transport.send(createStemConfigPacket(isLeft, action))
+    }
+
+    suspend fun setAssistantTriggerEnabled(enabled: Boolean) {
+        val action = if (enabled) StemPressAndHoldAction.VOICE_ASSISTANT else StemPressAndHoldAction.DISABLED
+        setStemAction(isLeft = true, action = action)
+        delay(50)
+        setStemAction(isLeft = false, action = action)
+    }
+
+    suspend fun setPressSpeed(speed: PressSpeed) {
+        transport.send(createPressSpeedPacket(speed))
+    }
+
+    suspend fun setHoldDuration(duration: HoldDuration) {
+        transport.send(createHoldDurationPacket(duration))
+    }
+
+    suspend fun setHeadGesturesEnabled(enabled: Boolean) {
+        transport.send(createHeadGesturesPacket(enabled))
+    }
+
+    suspend fun startMotionStream() {
+        transport.send(createMotionStreamPacket(serviceId = 0x10.toByte(), enabled = true))
+        delay(50)
+        transport.send(createMotionStreamPacket(serviceId = 0x12.toByte(), enabled = true))
+    }
+
+    suspend fun stopMotionStream() {
+        transport.send(createMotionStreamPacket(serviceId = 0x10.toByte(), enabled = false))
+        delay(50)
+        transport.send(createMotionStreamPacket(serviceId = 0x12.toByte(), enabled = false))
+    }
+
     companion object {
+        fun createMotionStreamPacket(serviceId: Byte, enabled: Boolean): ByteArray {
+            val rateByte = if (enabled) 0x40.toByte() else 0x00.toByte()
+            val rateByte2 = if (enabled) 0x9C.toByte() else 0x00.toByte()
+            return byteArrayOf(
+                0x04, 0x00, 0x04, 0x00, 0x17, 0x00, 0x00, 0x00,
+                0x10, 0x00, 0x10, 0x00, 0x08, 0xA1.toByte(), 0x02, 0x42,
+                0x0B, 0x08, serviceId, 0x10, 0x02, 0x1A, 0x05, 0x01,
+                rateByte, rateByte2, 0x00, 0x00,
+            )
+        }
+
         // Own 4-byte pseudo-header (00 00 04 00), unlike the two packets below.
         val HANDSHAKE_PACKET = byteArrayOf(
             0x00, 0x00, 0x04, 0x00, 0x01, 0x00, 0x02, 0x00,
@@ -40,6 +84,37 @@ class AapSession(private val transport: AirPodsTransport) {
         val REQUEST_NOTIFICATIONS_PACKET = byteArrayOf(
             0x04, 0x00, 0x04, 0x00, 0x0F, 0x00,
             0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(),
+        )
+
+        fun createStemConfigPacket(isLeft: Boolean, action: StemPressAndHoldAction): ByteArray {
+            val configId = if (isLeft) 0x18.toByte() else 0x17.toByte()
+            return byteArrayOf(
+                0x04, 0x00, 0x04, 0x00, // Header
+                0x09, 0x00,             // Opcode 0x09 (Config Write)
+                configId, 0x00,         // Config ID (0x18 Left, 0x17 Right)
+                action.rawValue, 0x00, 0x00, // Value payload
+            )
+        }
+
+        fun createPressSpeedPacket(speed: PressSpeed): ByteArray = byteArrayOf(
+            0x04, 0x00, 0x04, 0x00, // Header
+            0x09, 0x00,             // Opcode 0x09
+            0x25, speed.rawValue,   // Config 0x25
+            0x00, 0x00, 0x00,
+        )
+
+        fun createHoldDurationPacket(duration: HoldDuration): ByteArray = byteArrayOf(
+            0x04, 0x00, 0x04, 0x00, // Header
+            0x09, 0x00,             // Opcode 0x09
+            0x26, duration.rawValue,// Config 0x26
+            0x00, 0x00, 0x00,
+        )
+
+        fun createHeadGesturesPacket(enabled: Boolean): ByteArray = byteArrayOf(
+            0x04, 0x00, 0x04, 0x00, // Header
+            0x09, 0x00,             // Opcode 0x09
+            0x3E.toByte(), if (enabled) HeadGesturesState.ENABLED.rawValue else HeadGesturesState.DISABLED.rawValue,
+            0x00, 0x00, 0x00,
         )
     }
 }

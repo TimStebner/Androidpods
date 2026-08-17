@@ -6,22 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Read `ROADMAP.md` first, every session** — it is the living session-handoff doc ("overwrite next session, don't append") and has the actual current state: what's hardware-confirmed, what's mid-flight, what's explicitly out of scope right now. This file (`CLAUDE.md`) only covers the stable architectural rules that don't change session to session.
 
-The project is bootstrapped and past Milestone 0. M0–M2 (Bluetooth transport, AAP protocol, capability resolution) and the read-only slice of M5 (battery widget, battery notification) are hardware-confirmed on a real Pixel + AirPods 4. M3 (write controls: ANC/Transparency/Adaptive, ear-detection toggle) is **explicitly hard-gated** — do not start it under any framing without the user's explicit go-ahead, independent of any other milestone's status. Check `ROADMAP.md` before assuming any milestone is further along or less started than it says.
+The project has completed **Milestones 0–7**, fully hardware-validated on a physical **Pixel 9 Pro XL** (Android 17) paired with **AirPods 4**:
+- **M0–M2**: Rootless Classic L2CAP Socket (PSM `0x1001` via `HiddenApiBypass`), AAP protocol decoder, calibrated wear-state ear detection, battery levels (L/R/Case), capability resolver.
+- **M3–M4**: Auto-Pause/Resume, Press Speed (`0x25`), Press & Hold Duration (`0x26`), Head Gestures AAP toggle (`0x3E`), Capability-gated Assistant controls.
+- **M5**: 1:1 Pixel-Twin Expressive Battery Widget (Glance), Quick Settings Tile (`AirPodsTileService`), persistent battery notification & connection banners.
+- **M6**: Settings & Diagnostics (DataStore Preferences, ThemeMode, Dynamic Color, Tier-B Probe Cache reset, telemetry log).
+- **M7**: 50Hz Live IMU Sensor-Streaming (Opcode `0x17`), 3D Spatial Motion Visualizer, Head Gestures Call Answering (Nod/Shake), Find My Audio Chime with channel isolation.
 
-Build/lint/test commands (single `app` Gradle module, no multi-module split yet):
+Build/lint/test commands (single `app` Gradle module):
 
-```
+```bash
 ./gradlew :app:assembleDebug          # build debug APK
 ./gradlew :app:testDebugUnitTest      # JVM unit tests
 ./gradlew :app:lintDebug              # lint
-./gradlew :app:connectedDebugAndroidTest   # instrumented tests — WARNING: uninstalls the app afterward as a finalizer, wiping on-device app data (DataStore, permission grants, CDM association). For manual on-device test tools, prefer `adb install -r` + `adb shell am instrument -w -e class <FQN>#<method> dev.androidpods.app.test/androidx.test.runner.AndroidJUnitRunner` instead.
 ```
 
-When bootstrapping or writing any code here, **read `PROJECT.md` in full first** — it is the authoritative source of truth for this project (see its §31 "Source of Truth Rules for AI Coding Agents") and takes precedence over default assumptions. What follows is a condensed pointer to its key sections, not a replacement for it.
+When writing any code here, **read `PROJECT.md` in full first** — it is the authoritative source of truth for this project (see its §31 "Source of Truth Rules for AI Coding Agents") and takes precedence over default assumptions.
 
 ## What Androidpods is
 
-A native Android companion app for Apple AirPods (Kotlin, Jetpack Compose, Material 3 Expressive), targeting Android 17/API 37 with `minSdk 29`. Goal: the richest possible AirPods experience on Android, built as a first-class native Android app rather than an iOS clone (`PROJECT.md` §1–2).
+A native Android companion app for Apple AirPods (Kotlin, Jetpack Compose, Material 3 Expressive), targeting Android 17/API 37 with `minSdk 36` (Android 16 QPR3+). Goal: the richest possible AirPods experience on Android, built as a first-class native Android app rather than an iOS clone (`PROJECT.md` §1–2). The feature and architecture map is in `ROADMAP.md`.
 
 ## Core architectural rules (non-negotiable, see §11)
 
@@ -48,40 +52,25 @@ Battery efficiency is a first-class requirement. Priority order: AirPods protoco
 
 ## Module structure (§12)
 
-Still one `app` Gradle module with package boundaries, per §12's "start simple" guidance — no Gradle module split has been needed yet. Current packages under `dev.androidpods`:
+Single `app` Gradle module with clean package boundaries under `dev.androidpods`:
 
 ```
 app/                                   (Application, MainActivity)
-core/{airpods,bluetooth,data,designsystem,media}/
-feature/{home,notifications,onboarding,widgets}/
+core/{airpods,bluetooth,data,designsystem,gestures,media,telecom}/
+feature/{controls,home,notifications,onboarding,settings,tiles,widgets}/
 ```
-
-`core/media` (auto-pause) and `feature/notifications` were added after the structure was first suggested — both fit the existing layering without needing a new module. `feature/controls`, `feature/settings`, and a `core/common`/`core/model` split don't exist yet — add them when M3/M4 or a second consumer of shared types actually needs them, not preemptively.
 
 ## Toolchain baseline (§4)
 
-Exact dependency versions live in `gradle/libs.versions.toml`. Verified baseline (2026-08-12): AGP 9.3.1, Gradle 9.5.0 (not 9.6.0 — Kotlin 2.4.10 and AGP 9.3 both target 9.5.0 as their fully-supported baseline), Kotlin 2.4.10, Compose UI 1.11.4, Material 3 1.4.0 stable / 1.5.0-alpha25 expressive track. Never use dynamic versions (`1.+`, `latest.release`). Before upgrading any dependency, verify AGP/Kotlin/Gradle/API-37 compatibility and re-run the full test suite (§4 dependency version policy).
+Exact dependency versions live in `gradle/libs.versions.toml`. Baseline: AGP 9.3.1, Gradle 9.5.0, Kotlin 2.4.10, Compose BOM 2026.08.00 (Compose UI 1.12.0), Material 3 Expressive 1.5.0-alpha26.
 
 ## Design system
 
-Material 3 Expressive is a functional requirement, not decoration — expressive theme (`MaterialExpressiveTheme` with `MotionScheme.expressive()`), Dynamic Color with a distinct fallback scheme, spring-based motion tied to real state changes (connection, battery, ear-in/out, noise-mode), and expressive shape morphing, used with hierarchy rather than everywhere (§6). Isolate experimental Material 3 Expressive APIs behind the design-system layer so API churn doesn't spread through the app.
-
-## Key domain models to know before writing protocol/UI code
-
-- `AirPodsCapabilities` — per-device feature flags (§9)
-- `AirPodsState` — the single authoritative state (connection, device, capabilities, battery, wear state, noise mode, settings) (§10)
-- `NoiseControlMode` enum: `OFF, TRANSPARENCY, ADAPTIVE, NOISE_CANCELLATION` — capability layer decides which are valid per device (§18)
-- `AirPodsRepository` — the only layer allowed to expose write operations like `setNoiseControlMode`, `setEarDetectionEnabled` (§11)
-
-## Coding standards (§30)
-
-Kotlin: idiomatic, explicit domain types, sealed interfaces/classes for finite state, immutable data, Coroutines/Flow. Avoid `GlobalScope`, blocking calls on Main, giant manager classes, unnecessary abstraction layers.
-
-Compose: state hoisting, unidirectional data flow, previewable components. Never put business logic or Bluetooth access inside composables.
+Material 3 Expressive is a functional requirement: expressive theme (`MaterialExpressiveTheme` with `MotionScheme.expressive()`), Dynamic Color with a distinct fallback scheme, spring-based motion (`androidpodsSpatialSpec()`), and expressive shapes.
 
 ## Explicit non-goals for v1 (§8.4)
 
-No root/Xposed, no Apple ID/iCloud, no Find My network integration, no AirPods firmware flashing, no unsafe Bluetooth stack modifications.
+No root/Xposed, no Apple ID/iCloud, no Find My network reverse-engineering, no AirPods firmware flashing, no unsafe Bluetooth stack modifications.
 
 ## Licensing (§25)
 

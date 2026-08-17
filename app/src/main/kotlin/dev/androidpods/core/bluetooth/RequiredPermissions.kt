@@ -27,3 +27,14 @@ fun hasNotificationPermission(context: Context): Boolean =
         context,
         Manifest.permission.POST_NOTIFICATIONS,
     ) == PackageManager.PERMISSION_GRANTED
+
+val CALL_PERMISSIONS = arrayOf(
+    Manifest.permission.READ_PHONE_STATE,
+    Manifest.permission.ANSWER_PHONE_CALLS,
+)
+
+fun hasCallPermissions(context: Context): Boolean =
+    CALL_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+    }
+

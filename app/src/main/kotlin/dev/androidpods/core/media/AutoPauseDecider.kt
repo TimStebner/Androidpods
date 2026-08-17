@@ -3,13 +3,19 @@ package dev.androidpods.core.media
 
 import dev.androidpods.core.airpods.EarDetectionState
 
-// PROJECT.md §16: pause only on the transition into "both AirPods out of ear" -- taking one bud
-// out while the other stays in must not pause (matches Apple's own behavior, and avoids pausing
-// playback for someone who just readjusts one earbud).
+// Auto-Pause & Auto-Resume decider: triggers pause on removal, resume on re-insertion.
 object AutoPauseDecider {
     fun shouldPause(previous: EarDetectionState?, current: EarDetectionState): Boolean {
-        val wasInEar = previous != null && (previous.leftInEar || previous.rightInEar)
-        val isNowOutOfEar = !current.leftInEar && !current.rightInEar
-        return wasInEar && isNowOutOfEar
+        if (previous == null) return false
+        val leftRemoved = previous.leftInEar && !current.leftInEar
+        val rightRemoved = previous.rightInEar && !current.rightInEar
+        return leftRemoved || rightRemoved
+    }
+
+    fun shouldResume(previous: EarDetectionState?, current: EarDetectionState): Boolean {
+        if (previous == null) return false
+        val leftInserted = !previous.leftInEar && current.leftInEar
+        val rightInserted = !previous.rightInEar && current.rightInEar
+        return leftInserted || rightInserted
     }
 }

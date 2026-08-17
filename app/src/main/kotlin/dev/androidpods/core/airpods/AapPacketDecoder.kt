@@ -36,6 +36,11 @@ sealed interface AapEvent {
     data class Battery(val state: BatteryState) : AapEvent
     data class EarDetection(val state: EarDetectionState) : AapEvent
     data class DeviceInfo(val info: AirPodsInformation) : AapEvent
+    data class StemConfig(val isLeft: Boolean, val action: StemPressAndHoldAction) : AapEvent
+    data class PressSpeedConfig(val speed: PressSpeed) : AapEvent
+    data class HoldDurationConfig(val duration: HoldDuration) : AapEvent
+    data class HeadGesturesConfig(val state: HeadGesturesState) : AapEvent
+    data class HeadMotion(val pitch: Float, val yaw: Float, val roll: Float) : AapEvent
     data object Unrecognized : AapEvent
 }
 
@@ -44,8 +49,10 @@ object AapPacketDecoder {
     private val HEADER = byteArrayOf(0x04, 0x00, 0x04, 0x00)
     private const val OPCODE_BATTERY_INFO = 0x04
     private const val OPCODE_EAR_DETECTION = 0x06
+    private const val OPCODE_CONTROL = 0x09
+    private const val OPCODE_HEADTRACKING = 0x17
     private const val OPCODE_INFORMATION = 0x1D
-    private const val COMPONENT_LEFT = 4 // BatteryComponent.LEFT -- bitmask-style, not sequential
+    private const val COMPONENT_LEFT = 2 // In AAP: 0x02 = Left, 0x04 = Right, 0x08 = Case
 
     fun decode(packet: ByteArray): AapEvent {
         if (packet.size < 6 || !packet.copyOfRange(0, 4).contentEquals(HEADER)) {
@@ -55,6 +62,46 @@ object AapPacketDecoder {
             OPCODE_BATTERY_INFO -> decodeBattery(packet)
             OPCODE_EAR_DETECTION -> decodeEarDetection(packet)
             OPCODE_INFORMATION -> decodeInformation(packet)
+            OPCODE_CONTROL -> decodeControl(packet)
+            OPCODE_HEADTRACKING -> decodeHeadTracking(packet)
+            else -> AapEvent.Unrecognized
+        }
+    }
+
+    private fun decodeHeadTracking(packet: ByteArray): AapEvent {
+        // Only decode actual IMU spatial sensor reports (at least 50 bytes)
+        if (packet.size < 50) return AapEvent.Unrecognized
+
+        // Standard AAP spatial sensor packet with 16-bit orientation coordinates at offsets 43, 45, 47
+        val o1Raw = (packet[43].toInt() and 0xFF) or (packet[44].toInt() shl 8)
+        val o2Raw = (packet[45].toInt() and 0xFF) or (packet[46].toInt() shl 8)
+        val o3Raw = (packet[47].toInt() and 0xFF) or (packet[48].toInt() shl 8)
+
+        val o1 = o1Raw.toShort().toFloat()
+        val o2 = o2Raw.toShort().toFloat()
+        val o3 = o3Raw.toShort().toFloat()
+
+        val pitch = (((o2 + o3) / 2f) / 32000f * 180f).coerceIn(-90f, 90f)
+        val yaw = (((o2 - o3) / 2f) / 32000f * 180f).coerceIn(-70f, 70f)
+        val roll = (o1 / 32000f * 180f).coerceIn(-180f, 180f)
+        dev.androidpods.core.bluetooth.ProtocolLogging.rawPacket("AapPacketDecoder") {
+            "HeadMotion: pitch=%.1f, yaw=%.1f, roll=%.1f (raw: %04x, %04x, %04x)".format(pitch, yaw, roll, o1Raw, o2Raw, o3Raw)
+        }
+        return AapEvent.HeadMotion(pitch = pitch, yaw = yaw, roll = roll)
+    }
+
+    private fun decodeControl(packet: ByteArray): AapEvent {
+        if (packet.size < 8) return AapEvent.Unrecognized
+        val configId = packet[6].toInt() and 0xFF
+        val byte7 = packet[7]
+        val byte8 = if (packet.size > 8) packet[8] else 0.toByte()
+        val value = if (byte7 != 0.toByte()) byte7 else byte8
+        return when (configId) {
+            0x18 -> AapEvent.StemConfig(isLeft = true, action = StemPressAndHoldAction.fromRaw(value))
+            0x17 -> AapEvent.StemConfig(isLeft = false, action = StemPressAndHoldAction.fromRaw(value))
+            0x25 -> AapEvent.PressSpeedConfig(speed = PressSpeed.fromRaw(value))
+            0x26 -> AapEvent.HoldDurationConfig(duration = HoldDuration.fromRaw(value))
+            0x3E -> AapEvent.HeadGesturesConfig(state = HeadGesturesState.fromRaw(value))
             else -> AapEvent.Unrecognized
         }
     }
@@ -88,28 +135,30 @@ object AapPacketDecoder {
 
     private fun decodeEarDetection(packet: ByteArray): AapEvent {
         if (packet.size != 8) return AapEvent.Unrecognized
-        return AapEvent.EarDetection(
-            EarDetectionState(leftInEar = packet[6] == 0x01.toByte(), rightInEar = packet[7] == 0x01.toByte()),
-        )
+        // Calibration pass confirmed against physical hardware (2026-08-17):
+        // Byte 6 = Right Earbud (0x00 In-Ear, 0x01 Out-of-Ear)
+        // Byte 7 = Left Earbud  (0x00 In-Ear, 0x01 Out-of-Ear)
+        val rightIn = packet[6].toInt() and 0xFF == 0
+        val leftIn = packet[7].toInt() and 0xFF == 0
+        return AapEvent.EarDetection(EarDetectionState(leftInEar = leftIn, rightInEar = rightIn))
     }
 
     private fun decodeInformation(packet: ByteArray): AapEvent {
-        // First entry is a leading non-string token before the field list proper -- dropped, same
-        // as upstream's "too lazy to adjust, just removing the first empty string".
         val fields = splitNulDelimited(packet.copyOfRange(6, packet.size)).drop(1)
+        if (fields.size < 11) return AapEvent.Unrecognized
         return AapEvent.DeviceInfo(
             AirPodsInformation(
-                name = fields.getOrElse(0) { "" },
-                modelNumber = fields.getOrElse(1) { "" },
-                manufacturer = fields.getOrElse(2) { "" },
-                serialNumber = fields.getOrElse(3) { "" },
-                version1 = fields.getOrElse(4) { "" },
-                version2 = fields.getOrElse(5) { "" },
-                hardwareRevision = fields.getOrElse(6) { "" },
-                updaterIdentifier = fields.getOrElse(7) { "" },
-                leftSerialNumber = fields.getOrElse(8) { "" },
-                rightSerialNumber = fields.getOrElse(9) { "" },
-                version3 = fields.getOrElse(10) { "" },
+                name = fields[0],
+                modelNumber = fields[1],
+                manufacturer = fields[2],
+                serialNumber = fields[3],
+                version1 = fields[4],
+                version2 = fields[5],
+                hardwareRevision = fields[6],
+                updaterIdentifier = fields[7],
+                leftSerialNumber = fields[8],
+                rightSerialNumber = fields[9],
+                version3 = fields[10],
             ),
         )
     }

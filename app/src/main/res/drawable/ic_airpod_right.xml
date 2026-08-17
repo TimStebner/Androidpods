@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Right AirPod Outer Contour -->
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 25,8 C 19,8 15,12 16,17.5 C 16.8,22 20.5,24.5 22.5,25 L 20,37.5 C 19.7,39 20.8,40.5 22.5,40.5 C 24.2,40.5 25.5,39 25.8,37.5 L 28.2,25 C 30,24.2 32,22 32,17.5 C 32,12 29,8 25,8 Z" />
+    <!-- Speaker vent inner contour (oval) -->
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M 26.5,13.5 C 23,11.5 19.5,13.5 19.5,17 C 19.5,19.5 22,20.5 26,19" />
+    <!-- Outer acoustic port dot/slot -->
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M 18.5,14 C 17.5,15.5 17.5,17 18.5,18" />
+</vector>

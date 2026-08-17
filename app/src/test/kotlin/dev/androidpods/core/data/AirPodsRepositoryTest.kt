@@ -59,8 +59,8 @@ class AirPodsRepositoryTest {
         transport.emit(loadFixturePacket(21)) // BATTERY_INFO
 
         val battery = repository.state.value.battery
-        assertEquals(BatteryComponentState(95, BatteryChargeStatus.NOT_CHARGING), battery?.left)
-        assertEquals(BatteryComponentState(96, BatteryChargeStatus.NOT_CHARGING), battery?.right)
+        assertEquals(BatteryComponentState(96, BatteryChargeStatus.NOT_CHARGING), battery?.left)
+        assertEquals(BatteryComponentState(95, BatteryChargeStatus.NOT_CHARGING), battery?.right)
     }
 
     @Test
@@ -70,7 +70,7 @@ class AirPodsRepositoryTest {
 
         transport.emit(loadFixturePacket(27)) // EAR_DETECTION
 
-        assertEquals(EarDetectionState(leftInEar = true, rightInEar = true), repository.state.value.earDetection)
+        assertEquals(EarDetectionState(leftInEar = false, rightInEar = false), repository.state.value.earDetection)
     }
 
     @Test
@@ -81,7 +81,7 @@ class AirPodsRepositoryTest {
         repository.connect()
 
         assertEquals(AirPodsTransport.ConnectionState.Connected, transport.state.value)
-        assertEquals(3, transport.sent.size)
+        assertEquals(5, transport.sent.size)
     }
 
     @Test

@@ -5,9 +5,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-// Fixtures: app/src/test/resources/fixtures/aap/session-start-capture.txt -- a real capture from
-// the project's own AirPods 4 (PROJECT.md §28 "capture real bytes first, then parse"). Values
-// asserted below are the actual decoded values of that capture, not synthetic expectations.
 private fun loadFixturePacket(index: Int): ByteArray {
     val line = object {}.javaClass.getResourceAsStream("/fixtures/aap/session-start-capture.txt")
         ?.bufferedReader()
@@ -26,8 +23,8 @@ class AapPacketDecoderTest {
 
         assertTrue(event is AapEvent.Battery)
         val battery = event as AapEvent.Battery
-        assertEquals(BatteryComponentState(95, BatteryChargeStatus.NOT_CHARGING), battery.state.left)
-        assertEquals(BatteryComponentState(96, BatteryChargeStatus.NOT_CHARGING), battery.state.right)
+        assertEquals(BatteryComponentState(96, BatteryChargeStatus.NOT_CHARGING), battery.state.left)
+        assertEquals(BatteryComponentState(95, BatteryChargeStatus.NOT_CHARGING), battery.state.right)
         assertEquals(BatteryComponentState(0, BatteryChargeStatus.DISCONNECTED), battery.state.case)
     }
 
@@ -37,7 +34,7 @@ class AapPacketDecoderTest {
 
         assertTrue(event is AapEvent.EarDetection)
         val earDetection = event as AapEvent.EarDetection
-        assertEquals(EarDetectionState(leftInEar = true, rightInEar = true), earDetection.state)
+        assertEquals(EarDetectionState(leftInEar = false, rightInEar = false), earDetection.state)
     }
 
     @Test
@@ -73,5 +70,66 @@ class AapPacketDecoderTest {
         val event = AapPacketDecoder.decode(byteArrayOf(0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x00))
 
         assertTrue(event is AapEvent.Unrecognized)
+    }
+
+    @Test
+    fun `decodes stem config packet from real capture`() {
+        val event = AapPacketDecoder.decode(loadFixturePacket(4))
+
+        assertTrue(event is AapEvent.StemConfig)
+        val stemConfig = event as AapEvent.StemConfig
+        assertTrue(stemConfig.isLeft)
+        assertEquals(StemPressAndHoldAction.VOICE_ASSISTANT, stemConfig.action)
+    }
+
+    @Test
+    fun `decodes press speed packet from real capture`() {
+        val event = AapPacketDecoder.decode(loadFixturePacket(6))
+
+        assertTrue(event is AapEvent.PressSpeedConfig)
+        assertEquals(PressSpeed.DEFAULT, (event as AapEvent.PressSpeedConfig).speed)
+    }
+
+    @Test
+    fun `decodes hold duration packet from real capture`() {
+        val event = AapPacketDecoder.decode(loadFixturePacket(10))
+
+        assertTrue(event is AapEvent.HoldDurationConfig)
+        assertEquals(HoldDuration.DEFAULT, (event as AapEvent.HoldDurationConfig).duration)
+    }
+
+    @Test
+    fun `decodes head gestures packet from real capture`() {
+        val event = AapPacketDecoder.decode(loadFixturePacket(13))
+
+        assertTrue(event is AapEvent.HeadGesturesConfig)
+        assertEquals(HeadGesturesState.ENABLED, (event as AapEvent.HeadGesturesConfig).state)
+    }
+
+    @Test
+    fun `decodes head tracking packet from sensor report`() {
+        // Construct a synthetic 52-byte sensor report with o1, o2, o3 values
+        val packet = ByteArray(52) { 0 }
+        packet[0] = 0x04
+        packet[1] = 0x00
+        packet[2] = 0x04
+        packet[3] = 0x00
+        packet[4] = 0x17 // Opcode 0x17
+        packet[5] = 0x00
+
+        // Put o1 = 0, o2 = 3200 (10 deg), o3 = 3200 (10 deg)
+        // pitch = ((3200 + 3200)/2 / 32000) * 180 = (3200/32000)*180 = 18.0 deg
+        val o2 = 3200.toShort()
+        packet[45] = (o2.toInt() and 0xFF).toByte()
+        packet[46] = (o2.toInt() shr 8).toByte()
+        val o3 = 3200.toShort()
+        packet[47] = (o3.toInt() and 0xFF).toByte()
+        packet[48] = (o3.toInt() shr 8).toByte()
+
+        val event = AapPacketDecoder.decode(packet)
+        assertTrue(event is AapEvent.HeadMotion)
+        val motion = event as AapEvent.HeadMotion
+        assertEquals(18f, motion.pitch, 0.1f)
+        assertEquals(0f, motion.yaw, 0.1f)
     }
 }

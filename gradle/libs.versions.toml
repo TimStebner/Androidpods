@@ -23,6 +23,8 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
+androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 # Overrides the BOM-selected material3 version: MaterialExpressiveTheme and
 # MotionScheme.expressive() are still `internal` in the 1.4.0 stable artifact (verified by
 # compiler error, not just a decompiled signature check) and only public from 1.5.0-alpha.

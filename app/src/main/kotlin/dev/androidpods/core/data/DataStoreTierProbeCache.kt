@@ -40,6 +40,12 @@ class DataStoreTierProbeCache(private val context: Context) : TierProbeCache {
         }
     }
 
+    override suspend fun clear() {
+        context.tierProbeDataStore.edit { prefs ->
+            prefs.clear()
+        }
+    }
+
     // Bundling the build fingerprint into the key (rather than a separate stored fingerprint
     // plus manual invalidation) makes a build upgrade a cache miss for free.
     private fun keyFor(deviceAddress: String) = intPreferencesKey("$deviceAddress@${Build.FINGERPRINT}")

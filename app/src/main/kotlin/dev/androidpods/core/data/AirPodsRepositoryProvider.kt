@@ -3,12 +3,16 @@ package dev.androidpods.core.data
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import dev.androidpods.core.airpods.AapEvent
 import dev.androidpods.core.bluetooth.AapTransport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -24,6 +28,9 @@ object AirPodsRepositoryProvider {
     private val _state = MutableStateFlow(AirPodsState.INITIAL)
     val state: StateFlow<AirPodsState> = _state.asStateFlow()
 
+    private val _events = MutableSharedFlow<AapEvent>(extraBufferCapacity = 64)
+    val events: SharedFlow<AapEvent> = _events.asSharedFlow()
+
     val current: AirPodsRepository? get() = repository
 
     fun repositoryFor(device: BluetoothDevice, context: Context): AirPodsRepository {
@@ -35,6 +42,7 @@ object AirPodsRepositoryProvider {
         )
         repository = created
         scope.launch { created.state.collect { _state.value = it } }
+        scope.launch { created.events.collect { _events.emit(it) } }
         return created
     }
 }

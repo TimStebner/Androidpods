@@ -14,4 +14,5 @@ package dev.androidpods.core.data
 interface TierProbeCache {
     suspend fun tierBSupported(deviceAddress: String): Boolean?
     suspend fun recordProbeResult(deviceAddress: String, supported: Boolean)
+    suspend fun clear()
 }

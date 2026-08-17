@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Same teal as AndroidpodsFallbackLightColorScheme.primary (Color.kt), so the launcher icon
+     keeps the app's identity even without dynamic color. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FF2F6B5E"
+        android:pathData="M0,0 h108 v108 h-108 Z" />
+</vector>

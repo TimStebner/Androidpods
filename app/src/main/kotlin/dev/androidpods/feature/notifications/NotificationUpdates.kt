@@ -2,10 +2,12 @@
 package dev.androidpods.feature.notifications
 
 import android.content.Context
+import dev.androidpods.core.bluetooth.AirPodsTransport
 import dev.androidpods.core.data.AirPodsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -22,7 +24,14 @@ fun observeBatteryNotifications(context: Context, states: Flow<AirPodsState>, sc
     states
         .map { it.toBatteryNotificationUiState() }
         .distinctUntilChanged()
-        .onEach { updateBatteryNotification(context, it) }
+        .onEach { uiState ->
+            val isEnabled = dev.androidpods.core.data.AppSettingsRepositoryProvider.settings.value.batteryNotificationEnabled
+            if (isEnabled) {
+                updateBatteryNotification(context, uiState)
+            } else {
+                updateBatteryNotification(context, null)
+            }
+        }
         .launchIn(scope)
 }
 
@@ -33,5 +42,26 @@ fun observeBatteryNotifications(context: Context, states: Flow<AirPodsState>, sc
 // the state HomeScreen already has from its own collectAsState() -- keeps this file free of a
 // direct AirPodsRepositoryProvider read, matching observeBatteryNotifications' own shape.
 fun refreshBatteryNotification(context: Context, state: AirPodsState) {
-    updateBatteryNotification(context, state.toBatteryNotificationUiState())
+    val isEnabled = dev.androidpods.core.data.AppSettingsRepositoryProvider.settings.value.batteryNotificationEnabled
+    if (isEnabled) {
+        updateBatteryNotification(context, state.toBatteryNotificationUiState())
+    }
+}
+
+// PROJECT.md §19 "pop-up": distinctUntilChanged on just the connection field (not the whole
+// AirPodsState) so this fires once per transition into Connected, not on every battery/ear-
+// detection update while already connected.
+fun observeConnectionNotifications(context: Context, states: Flow<AirPodsState>, scope: CoroutineScope) {
+    ensureConnectionNotificationChannel(context)
+    states
+        .map { it.connection }
+        .distinctUntilChanged()
+        .filter { it == AirPodsTransport.ConnectionState.Connected }
+        .onEach {
+            val isEnabled = dev.androidpods.core.data.AppSettingsRepositoryProvider.settings.value.connectionBannerEnabled
+            if (isEnabled) {
+                postConnectionNotification(context)
+            }
+        }
+        .launchIn(scope)
 }
