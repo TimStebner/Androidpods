@@ -8,7 +8,7 @@
 
 ## 1. Projektstatus & Hardware-Verifikation
 
-Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die **Performance- & Batterielaufzeit-Optimierung** sind implementiert. Die Release-Härtung ergänzt minifizierte Builds, Privacy-/Backup-Regeln, synthetische Test-Fixtures, ehrliches Capability-Gating, Macrobenchmarks und Baseline Profiles. Das endgültige Deployment-Go bleibt bis zu den im Release-Review dokumentierten Hardware-, Signatur- und Play-Policy-Gates offen.
+Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die **Performance- & Batterielaufzeit-Optimierung** sind implementiert. Die Release-Härtung ergänzt minifizierte Builds, Privacy-/Backup-Regeln, synthetische Test-Fixtures, ehrliches Capability-Gating, Macrobenchmarks und Baseline Profiles. Das endgültige Deployment-Urteil ist wegen der im [`SECURITY_PERFORMANCE_REVIEW.md`](SECURITY_PERFORMANCE_REVIEW.md) dokumentierten Frame-, PSS-, Signatur- und Play-Policy-Blocker derzeit **No-Go**.
 - **Test-Hardware:** Google Pixel 9 Pro XL (Android 17 / API 37)
 - **Kopfhörer:** Apple AirPods 4 (Modell `A3050` / `A3053`, H2-Chip)
 
@@ -152,8 +152,10 @@ dev.androidpods
 5. **Verifikations-Befehle:**
    ```bash
    ./gradlew :app:assembleDebug          # Debug-APK bauen
-   ./gradlew :app:testDebugUnitTest      # JVM Unit-Tests (67 Tests)
+   ./gradlew :app:testDebugUnitTest      # JVM Unit-Tests (84 Tests)
    ./gradlew :app:lintDebug              # Android Lint (0 Fehler)
+   ./gradlew :app:bundleRelease          # Optimiertes, noch unsigniertes Release-AAB
+   ./gradlew :benchmark:connectedBenchmarkAndroidTest
    ```
 
 ---

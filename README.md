@@ -71,8 +71,8 @@ All while remaining a normal, **rootless Android application**.
 | Find My-style earbud chime | ✅ |
 | Dynamic Color | ✅ |
 | Light / dark themes | ✅ |
-| Noise Control read/write controls | 🔒 Hardware validation required |
-| Case-speaker chimes | 🚧 Planned / experimental |
+| Noise Control read/write controls | ❌ Not implemented |
+| Case-speaker chimes | ❌ Not implemented |
 | Apple Find My network | ❌ Not supported |
 | iCloud / Apple ID integration | ❌ Not required |
 
@@ -264,6 +264,8 @@ Additional optimizations include:
 Androidpods is designed to work locally.
 
 See the full [Privacy Policy](PRIVACY.md).
+
+The current release assessment is documented in the [Security, Performance and Deployment Review](SECURITY_PERFORMANCE_REVIEW.md). Its verdict remains **No-Go** until every listed hardware, signing and Play-policy gate passes.
 
 It does **not** require:
 
