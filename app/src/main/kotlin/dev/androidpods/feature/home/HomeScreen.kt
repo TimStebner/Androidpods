@@ -36,8 +36,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.Headphones
@@ -48,6 +51,7 @@ import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.SpatialAudio
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -103,7 +107,9 @@ import dev.androidpods.core.designsystem.ExpressiveScreenHeader
 import dev.androidpods.core.designsystem.MorphingBadge
 import dev.androidpods.core.designsystem.androidpodsReduceMotion
 import dev.androidpods.core.designsystem.androidpodsSpatialSpec
+import dev.androidpods.core.designsystem.generation
 import dev.androidpods.core.designsystem.rememberAppHaptics
+import dev.androidpods.feature.controls.ControlsSection
 import dev.androidpods.feature.notifications.refreshBatteryNotification
 import kotlinx.coroutines.launch
 
@@ -114,7 +120,10 @@ import kotlinx.coroutines.launch
  * for Left/Case/Right, capability-filtered controls, and a prominent disconnected state.
  */
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    onNavigateToControls: (ControlsSection) -> Unit = {},
+) {
     val state by AirPodsRepositoryProvider.state.collectAsState()
     val settings by AppSettingsRepositoryProvider.settings.collectAsState()
     val context = LocalContext.current
@@ -141,6 +150,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 resumeObservingAssociatedDevices(context)
             }
         },
+        onNavigateToControls = onNavigateToControls,
         modifier = modifier,
     )
 }
@@ -151,6 +161,7 @@ internal fun HomeScreenContent(
     autoPauseActive: Boolean = true,
     onToggleAutoPause: (Boolean) -> Unit = {},
     onRetry: () -> Unit = {},
+    onNavigateToControls: (ControlsSection) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -238,11 +249,16 @@ internal fun HomeScreenContent(
             Spacer(modifier = Modifier.height(12.dp))
 
             if (state.capabilities.supportsHeadGestures) {
-                HeadGesturesQuickCard()
+                HeadGesturesQuickCard(
+                    onClick = { onNavigateToControls(ControlsSection.HEAD_GESTURES) },
+                )
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            SpatialAudioQuickCard(state = state)
+            SpatialAudioQuickCard(
+                state = state,
+                onClick = { onNavigateToControls(ControlsSection.SPATIAL_MOTION) },
+            )
         } else {
             // 5. Rich Disconnected / Failed State
             DisconnectedGuideCard(
@@ -341,7 +357,8 @@ private fun HeroDeviceCard(
                     AirPodsIllustration(
                         tint = MaterialTheme.colorScheme.primary,
                         pulsing = true,
-                        modifier = Modifier.size(100.dp),
+                        generation = state.capabilities.generation,
+                        modifier = Modifier.size(108.dp),
                     )
                 }
 
@@ -746,7 +763,9 @@ private fun AutoPauseCard(
  * Quick Action card displaying Head Gestures status with spring physics.
  */
 @Composable
-private fun HeadGesturesQuickCard() {
+private fun HeadGesturesQuickCard(
+    onClick: () -> Unit,
+) {
     val haptics = rememberAppHaptics()
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -766,7 +785,10 @@ private fun HeadGesturesQuickCard() {
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-            ) { haptics.tick() },
+            ) {
+                haptics.tick()
+                onClick()
+            },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -811,6 +833,21 @@ private fun HeadGesturesQuickCard() {
                     )
                 }
             }
+
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier.size(32.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                    contentDescription = "Open Setting",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(14.dp),
+                )
+            }
         }
     }
 }
@@ -821,6 +858,7 @@ private fun HeadGesturesQuickCard() {
 @Composable
 private fun SpatialAudioQuickCard(
     state: AirPodsState,
+    onClick: () -> Unit,
 ) {
     val haptics = rememberAppHaptics()
     val interactionSource = remember { MutableInteractionSource() }
@@ -841,7 +879,10 @@ private fun SpatialAudioQuickCard(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-            ) { haptics.tick() },
+            ) {
+                haptics.tick()
+                onClick()
+            },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -885,6 +926,21 @@ private fun SpatialAudioQuickCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
+
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier.size(32.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                    contentDescription = "Open Setting",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(14.dp),
+                )
             }
         }
     }

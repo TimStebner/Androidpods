@@ -53,11 +53,30 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
     private var readScope: CoroutineScope? = null
     private val connectMutex = Mutex()
 
+    private fun isDeviceAclConnected(): Boolean {
+        return runCatching {
+            HiddenApiBypass.addHiddenApiExemptions("Landroid/bluetooth/")
+            HiddenApiBypass.invoke(
+                BluetoothDevice::class.java,
+                device,
+                "isConnected",
+            ) as Boolean
+        }.getOrDefault(true)
+    }
+
     override suspend fun connect() {
         connectMutex.withLock {
             if (_state.value == AirPodsTransport.ConnectionState.Connected) {
                 return@withLock
             }
+
+            // If the device is not currently connected to Android Bluetooth (e.g. inside the charging case),
+            // remain cleanly Disconnected without failing as a platform Tier B rejection.
+            if (!isDeviceAclConnected()) {
+                _state.value = AirPodsTransport.ConnectionState.Disconnected
+                return@withLock
+            }
+
             _state.value = AirPodsTransport.ConnectionState.Connecting
 
             var lastFailure = "connect failed"
@@ -67,6 +86,11 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
                     readScope = null
                     runCatching { socket?.close() }
                     socket = null
+
+                    if (!isDeviceAclConnected()) {
+                        _state.value = AirPodsTransport.ConnectionState.Disconnected
+                        return@withLock
+                    }
 
                     val connected = withContext(Dispatchers.IO) {
                         HiddenApiBypass.addHiddenApiExemptions("Landroid/bluetooth/")
@@ -87,10 +111,18 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
                 } catch (e: IOException) {
                     lastFailure = e.message ?: lastFailure
                     ProtocolLogging.rawPacket(TAG) { "connect attempt ${attempt + 1}/$CONNECT_ATTEMPTS failed: $lastFailure" }
+                    if (!isDeviceAclConnected()) {
+                        _state.value = AirPodsTransport.ConnectionState.Disconnected
+                        return@withLock
+                    }
                     if (attempt < CONNECT_ATTEMPTS - 1) delay(CONNECT_RETRY_DELAY_MS)
                 }
             }
-            _state.value = AirPodsTransport.ConnectionState.Failed(lastFailure)
+            if (!isDeviceAclConnected()) {
+                _state.value = AirPodsTransport.ConnectionState.Disconnected
+            } else {
+                _state.value = AirPodsTransport.ConnectionState.Failed(lastFailure)
+            }
         }
     }
 

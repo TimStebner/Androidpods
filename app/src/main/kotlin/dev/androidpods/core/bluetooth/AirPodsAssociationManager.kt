@@ -2,6 +2,7 @@
 package dev.androidpods.core.bluetooth
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.companion.AssociationInfo
 import android.companion.AssociationRequest
@@ -18,6 +19,7 @@ import java.util.regex.Pattern
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 private const val TAG = "AirPodsAssociation"
 
@@ -115,6 +117,28 @@ class AirPodsAssociationManager(private val context: Context) {
 fun hasCompanionAssociation(context: Context): Boolean =
     context.getSystemService<CompanionDeviceManager>()?.myAssociations?.isNotEmpty() == true
 
+@SuppressLint("MissingPermission")
+fun isBluetoothDeviceConnected(device: BluetoothDevice, context: Context): Boolean {
+    val isConnected = runCatching {
+        HiddenApiBypass.addHiddenApiExemptions("Landroid/bluetooth/")
+        HiddenApiBypass.invoke(
+            BluetoothDevice::class.java,
+            device,
+            "isConnected",
+        ) as Boolean
+    }.getOrNull()
+    if (isConnected != null) return isConnected
+
+    val manager = context.getSystemService<BluetoothManager>() ?: return false
+    val a2dp = runCatching {
+        manager.getConnectionState(device, android.bluetooth.BluetoothProfile.A2DP) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
+    }.getOrDefault(false)
+    val headset = runCatching {
+        manager.getConnectionState(device, android.bluetooth.BluetoothProfile.HEADSET) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
+    }.getOrDefault(false)
+    return a2dp || headset
+}
+
 // Presence observation is registered once, right after association -- call this at process start
 // too so a registration that was somehow lost (OS data reset, association predating this code)
 // self-heals instead of silently leaving AirPodsPresenceService unbound forever.
@@ -135,9 +159,11 @@ fun resumeObservingAssociatedDevices(context: Context, scope: CoroutineScope = C
             adapter?.getRemoteDevice(mac.toString().uppercase())
         }.getOrNull() ?: return@forEach
 
-        scope.launch {
-            DataStoreTierProbeCache(context).clear()
-            AirPodsRepositoryProvider.repositoryFor(device, context).connect()
+        if (isBluetoothDeviceConnected(device, context)) {
+            scope.launch {
+                DataStoreTierProbeCache(context).clear()
+                AirPodsRepositoryProvider.repositoryFor(device, context).connect()
+            }
         }
     }
 }

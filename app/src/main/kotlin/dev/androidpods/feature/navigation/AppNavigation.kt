@@ -57,11 +57,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.androidpods.app.R
+import dev.androidpods.core.designsystem.StatusBarScrim
 import dev.androidpods.core.designsystem.androidpodsSpatialSpec
 import dev.androidpods.feature.controls.ControlsScreen
 import dev.androidpods.feature.home.HomeScreen
 import dev.androidpods.feature.settings.SettingsScreen
 import dev.androidpods.feature.widgets.WidgetsScreen
+
+import dev.androidpods.feature.controls.ControlsSection
 
 enum class AppDestination(
     val labelRes: Int,
@@ -76,6 +79,7 @@ enum class AppDestination(
 @Composable
 fun AppScaffold(modifier: Modifier = Modifier) {
     var currentDestination by remember { mutableStateOf(AppDestination.HOME) }
+    var controlsInitialSection by remember { mutableStateOf<ControlsSection?>(null) }
     val haptic = LocalHapticFeedback.current
     val slideSpec = androidpodsSpatialSpec<androidx.compose.ui.unit.IntOffset>()
     val fadeSpec = androidpodsSpatialSpec<Float>()
@@ -99,19 +103,36 @@ fun AppScaffold(modifier: Modifier = Modifier) {
                     .clipToBounds(),
             ) { destination ->
                 when (destination) {
-                    AppDestination.HOME -> HomeScreen(modifier = Modifier.fillMaxSize())
-                    AppDestination.CONTROLS -> ControlsScreen(modifier = Modifier.fillMaxSize())
+                    AppDestination.HOME -> HomeScreen(
+                        onNavigateToControls = { section ->
+                            controlsInitialSection = section
+                            currentDestination = AppDestination.CONTROLS
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    AppDestination.CONTROLS -> ControlsScreen(
+                        initialSection = controlsInitialSection,
+                        modifier = Modifier.fillMaxSize(),
+                    )
                     AppDestination.WIDGETS -> WidgetsScreen(modifier = Modifier.fillMaxSize())
                     AppDestination.SETTINGS -> SettingsScreen(modifier = Modifier.fillMaxSize())
                 }
             }
 
-            // 2. Floating Navigation Pill (Material 3 Expressive)
+            // 2. Material 3 Expressive Status Bar Scrim
+            StatusBarScrim(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+            )
+
+            // 3. Floating Navigation Pill (Material 3 Expressive)
             FloatingNavigationPill(
                 currentDestination = currentDestination,
                 onDestinationSelected = { dest ->
                     if (dest != currentDestination) {
                         haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        controlsInitialSection = null
                         currentDestination = dest
                     }
                 },

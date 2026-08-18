@@ -353,7 +353,7 @@ private fun DrawScope.drawAirPodsProSilhouette(primaryColor: Color, accentColor:
 /**
  * Silhouette for AirPods Max: Over-ear headphone ear-cup and headband canopy.
  */
-private fun DrawScope.drawAirPodsMaxSilhouette(primaryColor: Color, accentColor: Color) {
+internal fun DrawScope.drawAirPodsMaxSilhouette(primaryColor: Color, accentColor: Color) {
     val w = size.width
     val h = size.height
 

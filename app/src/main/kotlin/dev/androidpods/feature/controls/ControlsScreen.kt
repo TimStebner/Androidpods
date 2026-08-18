@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -31,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,10 +60,21 @@ import dev.androidpods.core.data.AirPodsState
 import dev.androidpods.core.data.AppSettingsRepositoryProvider
 import dev.androidpods.core.designsystem.AndroidpodsTheme
 import dev.androidpods.core.designsystem.androidpodsSpatialSpec
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+enum class ControlsSection {
+    EAR_DETECTION,
+    SPATIAL_MOTION,
+    FIND_MY,
+    HEAD_GESTURES,
+}
+
 @Composable
-fun ControlsScreen(modifier: Modifier = Modifier) {
+fun ControlsScreen(
+    modifier: Modifier = Modifier,
+    initialSection: ControlsSection? = null,
+) {
     val state by AirPodsRepositoryProvider.state.collectAsState()
     val settings by AppSettingsRepositoryProvider.settings.collectAsState()
     val context = LocalContext.current
@@ -112,6 +126,7 @@ fun ControlsScreen(modifier: Modifier = Modifier) {
                 AirPodsRepositoryProvider.current?.setHoldDuration(duration)
             }
         },
+        initialSection = initialSection,
         modifier = modifier,
     )
 }
@@ -131,9 +146,23 @@ internal fun ControlsScreenContent(
     onPressSpeedChanged: (PressSpeed) -> Unit = {},
     holdDuration: HoldDuration = HoldDuration.DEFAULT,
     onHoldDurationChanged: (HoldDuration) -> Unit = {},
+    initialSection: ControlsSection? = null,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
+    val headGesturesRequester = remember { BringIntoViewRequester() }
+    val spatialRequester = remember { BringIntoViewRequester() }
+
+    LaunchedEffect(initialSection) {
+        if (initialSection != null) {
+            delay(150)
+            when (initialSection) {
+                ControlsSection.HEAD_GESTURES -> headGesturesRequester.bringIntoView()
+                ControlsSection.SPATIAL_MOTION -> spatialRequester.bringIntoView()
+                else -> {}
+            }
+        }
+    }
     val context = LocalContext.current
     var hasCallPerms by remember { mutableStateOf(dev.androidpods.core.bluetooth.hasCallPermissions(context)) }
     val callPermLauncher = rememberLauncherForActivityResult(
@@ -244,13 +273,20 @@ internal fun ControlsScreenContent(
 
         // Section: Spatial Audio & Head Motion Tracking (Milestone 7)
         if (state.capabilities.supportsHeadGestures) {
-            Text(
-                text = stringResource(R.string.spatial_motion_header),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .bringIntoViewRequester(spatialRequester),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.spatial_motion_header),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
 
-            dev.androidpods.feature.spatial.SpatialMotionCard(state = state)
+                dev.androidpods.feature.spatial.SpatialMotionCard(state = state)
+            }
         }
 
         // Section: Find My & Audio Chime (Milestone 7)
@@ -266,17 +302,23 @@ internal fun ControlsScreenContent(
 
         // Section 2: Head Gestures (AirPods 4 & AirPods Pro 2)
         if (state.capabilities.supportsHeadGestures) {
-            Text(
-                text = stringResource(R.string.controls_head_gestures_header),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .bringIntoViewRequester(headGesturesRequester),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                Text(
+                    text = stringResource(R.string.controls_head_gestures_header),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                ) {
                 val supportsHeadGestures = state.capabilities.supportsHeadGestures
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(
@@ -339,6 +381,7 @@ internal fun ControlsScreenContent(
                 }
             }
         }
+    }
 
         // Section 3: Accessibility & Gesture Timing (Press Speed & Hold Duration)
         if (state.capabilities.supportsPressSpeed) {

@@ -3,6 +3,9 @@ package dev.androidpods.core.data
 
 import dev.androidpods.core.airpods.AapEvent
 import dev.androidpods.core.airpods.AapSession
+import dev.androidpods.core.airpods.BatteryChargeStatus
+import dev.androidpods.core.airpods.BatteryComponentState
+import dev.androidpods.core.airpods.BatteryState
 import dev.androidpods.core.airpods.CapabilityResolver
 import dev.androidpods.core.airpods.HeadGesturesState
 import dev.androidpods.core.airpods.HoldDuration
@@ -58,12 +61,11 @@ class AirPodsRepository(
 
         transport.connect()
         val supported = transport.state.value == AirPodsTransport.ConnectionState.Connected
-        tierProbeCache.recordProbeResult(transport.deviceAddress, supported)
-        // A failed transport.connect() already recorded itself as Failed (§2.6: honest failure,
-        // not a crash) -- starting the AAP session on top of a socket that doesn't exist would
-        // throw instead.
         if (supported) {
+            tierProbeCache.recordProbeResult(transport.deviceAddress, true)
             session.start()
+        } else if (transport.state.value is AirPodsTransport.ConnectionState.Failed) {
+            tierProbeCache.recordProbeResult(transport.deviceAddress, false)
         }
     }
 
@@ -111,8 +113,40 @@ class AirPodsRepository(
         }
     }
 
+    private var lastKnownLeft: BatteryComponentState? = null
+    private var lastKnownRight: BatteryComponentState? = null
+    private var lastKnownCase: BatteryComponentState? = null
+
+    private fun mergeBatteryEvent(event: AapEvent.Battery): BatteryState {
+        val rawLeft = event.state.left
+        val effectiveLeft = if (rawLeft.status != BatteryChargeStatus.DISCONNECTED && rawLeft.level > 0) {
+            lastKnownLeft = rawLeft
+            rawLeft
+        } else {
+            lastKnownLeft?.copy(status = BatteryChargeStatus.DISCONNECTED) ?: rawLeft
+        }
+
+        val rawRight = event.state.right
+        val effectiveRight = if (rawRight.status != BatteryChargeStatus.DISCONNECTED && rawRight.level > 0) {
+            lastKnownRight = rawRight
+            rawRight
+        } else {
+            lastKnownRight?.copy(status = BatteryChargeStatus.DISCONNECTED) ?: rawRight
+        }
+
+        val rawCase = event.state.case
+        val effectiveCase = if (rawCase.status != BatteryChargeStatus.DISCONNECTED && rawCase.level > 0) {
+            lastKnownCase = rawCase
+            rawCase
+        } else {
+            lastKnownCase?.copy(status = BatteryChargeStatus.DISCONNECTED) ?: rawCase
+        }
+
+        return BatteryState(left = effectiveLeft, right = effectiveRight, case = effectiveCase)
+    }
+
     private fun AirPodsState.reduce(event: AapEvent): AirPodsState = when (event) {
-        is AapEvent.Battery -> copy(battery = event.state)
+        is AapEvent.Battery -> copy(battery = mergeBatteryEvent(event))
         is AapEvent.EarDetection -> copy(earDetection = event.state)
         is AapEvent.DeviceInfo -> copy(capabilities = CapabilityResolver.resolve(event.info.modelNumber))
         is AapEvent.StemConfig -> if (event.isLeft) copy(stemLeftAction = event.action) else copy(stemRightAction = event.action)

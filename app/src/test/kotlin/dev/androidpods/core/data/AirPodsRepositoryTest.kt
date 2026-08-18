@@ -64,6 +64,38 @@ class AirPodsRepositoryTest {
     }
 
     @Test
+    fun `battery state preserves last known case level when case disconnects or closes`() = runTest(UnconfinedTestDispatcher()) {
+        val transport = FakeAirPodsTransport()
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
+
+        // 1. Battery packet with active case at 80%
+        val initialPacket = byteArrayOf(
+            0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x01,
+            0x02, 0x01, 95.toByte(), 0x02, 0x00,
+            0x04, 0x01, 95.toByte(), 0x02, 0x00,
+            0x08, 0x01, 80.toByte(), 0x02, 0x00,
+        )
+        transport.emit(initialPacket)
+        assertEquals(80, repository.state.value.battery?.case?.level)
+        assertEquals(BatteryChargeStatus.NOT_CHARGING, repository.state.value.battery?.case?.status)
+
+        // 2. Subsequent packet where case is closed/disconnected (level 0, status DISCONNECTED)
+        val closedCasePacket = byteArrayOf(
+            0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x01,
+            0x02, 0x01, 94.toByte(), 0x02, 0x00,
+            0x04, 0x01, 94.toByte(), 0x02, 0x00,
+            0x08, 0x01, 0.toByte(), 0x00, 0x00,
+        )
+        transport.emit(closedCasePacket)
+
+        val updatedBattery = repository.state.value.battery
+        assertEquals(94, updatedBattery?.left?.level)
+        assertEquals(94, updatedBattery?.right?.level)
+        assertEquals(80, updatedBattery?.case?.level)
+        assertEquals(BatteryChargeStatus.DISCONNECTED, updatedBattery?.case?.status)
+    }
+
+    @Test
     fun `ear detection event updates ear detection state`() = runTest(UnconfinedTestDispatcher()) {
         val transport = FakeAirPodsTransport()
         val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())

@@ -10,7 +10,7 @@ Guidance for AI coding assistants (Antigravity / Gemini, OpenAI Codex, Claude Co
 
 ## Current Project State
 
-- **Milestones 0–7**: Fully implemented and hardware-verified on physical **Pixel 9 Pro XL** with **AirPods 4** (MVP, Settings, 50Hz Spatial IMU stream, Head Gestures Call Controls, and Find My Audio Chime).
+- **Milestones 0–7 + Expressive UX & Pop-up**: Fully implemented and hardware-verified on physical **Pixel 9 Pro XL** with **AirPods 4** (MVP, Settings, 50Hz Spatial IMU stream, Head Gestures Call Controls, Find My Audio Chime, Battery Pop-up, Last-Known Case Battery Preservation, Dynamic Generation Icons, and Link-Aware Bluetooth Lifecycle).
 
 ## Core Rules
 
@@ -18,7 +18,7 @@ Guidance for AI coding assistants (Antigravity / Gemini, OpenAI Codex, Claude Co
    `Bluetooth/CDM APIs → Transport → Protocol/Codec → Capability Resolver → Repository → StateFlow (AirPodsState) → UI/Widgets/QuickSettings/Notifications`
 2. **Single State Source (§10)**: All UI surfaces (Compose, Glance widgets, Quick Settings, Notifications) observe `AirPodsRepository.state` (`AirPodsState`). Never create secondary state holders.
 3. **Capability-Driven UI (§9, §2.6)**: UI strictly renders capabilities. Unsupported features must be hidden or disabled with an honest explanation; never display fake or untested controls.
-4. **Event-Driven Lifecycle (§13.4, §14)**: Rely on `CompanionDeviceService` presence events and AAP packets. No continuous BLE scanning or permanent wake locks.
+4. **Event-Driven Lifecycle (§13.4, §14)**: Rely on `CompanionDeviceService` presence events and AAP packets. No continuous BLE scanning or permanent wake locks. Active ACL link checks (`isDeviceAclConnected`) prevent spurious socket timeouts when AirPods are closed in their case.
 5. **Gating Rules**:
    - **M3 (Write Controls / ANC / Transparency)** is strictly gated. Do not implement or send write commands without explicit user instruction and real hardware validation (§33).
    - **Tier B Transport**: Uses classic L2CAP socket reflection via `HiddenApiBypass` on PSM `0x1001` ([ADR-0001](docs/adr/0001-tier-b-hidden-l2cap-socket.md)).
@@ -29,6 +29,6 @@ Guidance for AI coding assistants (Antigravity / Gemini, OpenAI Codex, Claude Co
 
 ```bash
 ./gradlew :app:assembleDebug          # Build debug APK
-./gradlew :app:testDebugUnitTest      # JVM unit tests
-./gradlew :app:lintDebug              # Android Lint
+./gradlew :app:testDebugUnitTest      # JVM unit tests (66 tests)
+./gradlew :app:lintDebug              # Android Lint (0 errors)
 ```

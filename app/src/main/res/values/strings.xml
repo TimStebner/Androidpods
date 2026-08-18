@@ -40,7 +40,7 @@
     <string name="onboarding_feature_gestures_desc">Nod to accept, shake to decline calls</string>
     <string name="onboarding_feature_findmy">Find My Locator</string>
     <string name="onboarding_feature_findmy_desc">Acoustic chimes for lost earbuds</string>
-    <string name="onboarding_tap_morph_hint">✨ Tap the shapes to morph</string>
+    <string name="onboarding_tap_morph_hint">Tap the shapes to morph</string>
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_controls">Controls</string>
@@ -105,7 +105,7 @@
     <string name="controls_head_gestures_desc">Nod to accept incoming calls, shake to decline. Motion sensors activate automatically when your phone rings.</string>
     <string name="controls_head_gestures_unsupported">Head gestures are supported on AirPods 4 and AirPods Pro (2nd gen).</string>
     <string name="controls_head_gestures_grant_btn">Grant Call Control Permissions</string>
-    <string name="controls_head_gestures_ready">✨ Ready: Nod to answer, shake to decline incoming calls</string>
+    <string name="controls_head_gestures_ready">Ready: Nod to answer, shake to decline incoming calls</string>
     <string name="controls_timing_header">Accessibility &amp; Gesture Speed</string>
     <string name="controls_press_speed_title">Press Speed</string>
     <string name="controls_press_speed_desc">Adjust the speed required to press two or three times.</string>

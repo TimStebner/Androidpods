@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -73,6 +74,7 @@ import dev.androidpods.core.bluetooth.hasBluetoothPermissions
 import dev.androidpods.core.designsystem.AirPodsIllustration
 import dev.androidpods.core.designsystem.AndroidpodsTheme
 import dev.androidpods.core.designsystem.MorphingShapeHero
+import dev.androidpods.core.designsystem.StatusBarScrim
 import dev.androidpods.core.designsystem.androidpodsSpatialSpec
 import dev.androidpods.core.designsystem.rememberAppHaptics
 
@@ -130,37 +132,41 @@ fun OnboardingScreen(onAssociated: () -> Unit, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(scrollState)
-                .statusBarsPadding()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(padding),
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // 1. Centerpiece: Expressive Shape Morphing Hero with AirPods Illustration
-            MorphingShapeHero(
-                sizeDp = 220.dp,
-                haptics = haptics,
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .statusBarsPadding()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AirPodsIllustration(
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    pulsing = isPairing,
-                    modifier = Modifier.size(136.dp),
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // 1. Centerpiece: Expressive Shape Morphing Hero with AirPods Illustration
+                MorphingShapeHero(
+                    sizeDp = 220.dp,
+                    haptics = haptics,
+                ) {
+                    AirPodsIllustration(
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        pulsing = isPairing,
+                        modifier = Modifier.size(136.dp),
+                    )
+                }
+
+                Text(
+                    text = stringResource(R.string.onboarding_tap_morph_hint),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(top = 8.dp),
                 )
-            }
 
-            Text(
-                text = stringResource(R.string.onboarding_tap_morph_hint),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier.padding(top = 8.dp),
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
             // 2. Bold Headline & Subtitle
             Text(
@@ -420,7 +426,14 @@ fun OnboardingScreen(onAssociated: () -> Unit, modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+
+        StatusBarScrim(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+        )
     }
+}
 }
 
 /**
