@@ -13,17 +13,19 @@ import dev.androidpods.core.airpods.PressSpeed
 import dev.androidpods.core.bluetooth.AirPodsTransport
 import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // The only layer allowed to expose AirPods write operations (PROJECT.md §11, §33).
 class AirPodsRepository(
     private val transport: AirPodsTransport,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
     private val tierProbeCache: TierProbeCache,
 ) {
     private val session = AapSession(transport)
@@ -34,7 +36,18 @@ class AirPodsRepository(
     init {
         scope.launch {
             transport.state.collect { connection ->
-                _state.update { it.copy(connection = connection) }
+                _state.update {
+                    if (connection !is AirPodsTransport.ConnectionState.Connected) {
+                        motionStreamRequested = false
+                        it.copy(
+                            connection = connection,
+                            motionStreamActive = false,
+                            headOrientation = null,
+                        )
+                    } else {
+                        it.copy(connection = connection)
+                    }
+                }
             }
         }
         scope.launch {
@@ -95,12 +108,18 @@ class AirPodsRepository(
         _state.update { it.copy(motionStreamActive = true) }
     }
 
-    suspend fun stopMotionStream() {
+    suspend fun stopMotionStream() = withContext(NonCancellable) {
         motionStreamRequested = false
         if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
-            session.stopMotionStream()
+            runCatching { session.stopMotionStream() }
         }
         _state.update { it.copy(motionStreamActive = false, headOrientation = null) }
+    }
+
+    fun requestStopMotionStream() {
+        scope.launch {
+            stopMotionStream()
+        }
     }
 
     private fun requireConnected() {

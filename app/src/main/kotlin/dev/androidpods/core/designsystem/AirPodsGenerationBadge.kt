@@ -81,6 +81,9 @@ fun AirPodsGenerationMorphBadge(
         label = "airpods-badge-press-scale",
     )
 
+    val path1 = remember { Path() }
+    val path2 = remember { Path() }
+
     Surface(
         modifier = modifier
             .size(sizeDp)
@@ -124,11 +127,11 @@ fun AirPodsGenerationMorphBadge(
 
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     when (gen) {
-                        AirPodsGeneration.GEN_1_2 -> drawAirPodsGen1Silhouette(primaryColor, accentColor)
-                        AirPodsGeneration.GEN_3 -> drawAirPodsGen3Silhouette(primaryColor, accentColor)
-                        AirPodsGeneration.GEN_4 -> drawAirPodsGen4Silhouette(primaryColor, accentColor)
-                        AirPodsGeneration.PRO -> drawAirPodsProSilhouette(primaryColor, accentColor)
-                        AirPodsGeneration.MAX -> drawAirPodsMaxSilhouette(primaryColor, accentColor)
+                        AirPodsGeneration.GEN_1_2 -> drawAirPodsGen1Silhouette(primaryColor, accentColor, path1)
+                        AirPodsGeneration.GEN_3 -> drawAirPodsGen3Silhouette(primaryColor, accentColor, path1)
+                        AirPodsGeneration.GEN_4 -> drawAirPodsGen4Silhouette(primaryColor, accentColor, path1)
+                        AirPodsGeneration.PRO -> drawAirPodsProSilhouette(primaryColor, accentColor, path1, path2)
+                        AirPodsGeneration.MAX -> drawAirPodsMaxSilhouette(primaryColor, accentColor, path1)
                     }
                 }
             }
@@ -139,7 +142,11 @@ fun AirPodsGenerationMorphBadge(
 /**
  * Silhouette for AirPods 1 & 2: Classic long straight stem and rounded pod head.
  */
-private fun DrawScope.drawAirPodsGen1Silhouette(primaryColor: Color, accentColor: Color) {
+private fun DrawScope.drawAirPodsGen1Silhouette(
+    primaryColor: Color,
+    accentColor: Color,
+    headPath: Path,
+) {
     val w = size.width
     val h = size.height
 
@@ -156,20 +163,19 @@ private fun DrawScope.drawAirPodsGen1Silhouette(primaryColor: Color, accentColor
     )
 
     // Round open ear head
-    val headPath = Path().apply {
-        moveTo(stemLeft + stemWidth * 0.8f, stemTop + stemHeight * 0.2f)
-        cubicTo(
-            stemLeft + stemWidth * 0.8f, h * 0.08f,
-            w * 0.22f, h * 0.08f,
-            w * 0.22f, h * 0.28f,
-        )
-        cubicTo(
-            w * 0.22f, h * 0.44f,
-            stemLeft, stemTop + stemHeight * 0.3f,
-            stemLeft + stemWidth * 0.2f, stemTop + stemHeight * 0.2f,
-        )
-        close()
-    }
+    headPath.rewind()
+    headPath.moveTo(stemLeft + stemWidth * 0.8f, stemTop + stemHeight * 0.2f)
+    headPath.cubicTo(
+        stemLeft + stemWidth * 0.8f, h * 0.08f,
+        w * 0.22f, h * 0.08f,
+        w * 0.22f, h * 0.28f,
+    )
+    headPath.cubicTo(
+        w * 0.22f, h * 0.44f,
+        stemLeft, stemTop + stemHeight * 0.3f,
+        stemLeft + stemWidth * 0.2f, stemTop + stemHeight * 0.2f,
+    )
+    headPath.close()
     drawPath(headPath, color = primaryColor, style = Fill)
 
     // Chrome bottom ring
@@ -184,7 +190,11 @@ private fun DrawScope.drawAirPodsGen1Silhouette(primaryColor: Color, accentColor
 /**
  * Silhouette for AirPods 3: Shorter angled stem with larger acoustic body.
  */
-private fun DrawScope.drawAirPodsGen3Silhouette(primaryColor: Color, accentColor: Color) {
+private fun DrawScope.drawAirPodsGen3Silhouette(
+    primaryColor: Color,
+    accentColor: Color,
+    headPath: Path,
+) {
     val w = size.width
     val h = size.height
 
@@ -201,20 +211,19 @@ private fun DrawScope.drawAirPodsGen3Silhouette(primaryColor: Color, accentColor
     )
 
     // Ergonomic angled acoustic head
-    val headPath = Path().apply {
-        moveTo(stemLeft + stemWidth * 0.9f, stemTop + stemHeight * 0.15f)
-        cubicTo(
-            stemLeft + stemWidth * 0.9f, h * 0.12f,
-            w * 0.16f, h * 0.14f,
-            w * 0.16f, h * 0.36f,
-        )
-        cubicTo(
-            w * 0.16f, h * 0.54f,
-            stemLeft - w * 0.06f, stemTop + stemHeight * 0.3f,
-            stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.15f,
-        )
-        close()
-    }
+    headPath.rewind()
+    headPath.moveTo(stemLeft + stemWidth * 0.9f, stemTop + stemHeight * 0.15f)
+    headPath.cubicTo(
+        stemLeft + stemWidth * 0.9f, h * 0.12f,
+        w * 0.16f, h * 0.14f,
+        w * 0.16f, h * 0.36f,
+    )
+    headPath.cubicTo(
+        w * 0.16f, h * 0.54f,
+        stemLeft - w * 0.06f, stemTop + stemHeight * 0.3f,
+        stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.15f,
+    )
+    headPath.close()
     drawPath(headPath, color = primaryColor, style = Fill)
 
     // Top acoustic mesh vent
@@ -228,7 +237,11 @@ private fun DrawScope.drawAirPodsGen3Silhouette(primaryColor: Color, accentColor
 /**
  * Silhouette for AirPods 4: Modern refined ultra-compact stem with acoustic cavity.
  */
-private fun DrawScope.drawAirPodsGen4Silhouette(primaryColor: Color, accentColor: Color) {
+private fun DrawScope.drawAirPodsGen4Silhouette(
+    primaryColor: Color,
+    accentColor: Color,
+    headPath: Path,
+) {
     val w = size.width
     val h = size.height
 
@@ -245,20 +258,19 @@ private fun DrawScope.drawAirPodsGen4Silhouette(primaryColor: Color, accentColor
     )
 
     // Ultra-ergonomic pod head
-    val headPath = Path().apply {
-        moveTo(stemLeft + stemWidth * 0.95f, stemTop + stemHeight * 0.1f)
-        cubicTo(
-            stemLeft + stemWidth * 0.95f, h * 0.14f,
-            w * 0.18f, h * 0.16f,
-            w * 0.18f, h * 0.38f,
-        )
-        cubicTo(
-            w * 0.18f, h * 0.56f,
-            stemLeft, stemTop + stemHeight * 0.2f,
-            stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.1f,
-        )
-        close()
-    }
+    headPath.rewind()
+    headPath.moveTo(stemLeft + stemWidth * 0.95f, stemTop + stemHeight * 0.1f)
+    headPath.cubicTo(
+        stemLeft + stemWidth * 0.95f, h * 0.14f,
+        w * 0.18f, h * 0.16f,
+        w * 0.18f, h * 0.38f,
+    )
+    headPath.cubicTo(
+        w * 0.18f, h * 0.56f,
+        stemLeft, stemTop + stemHeight * 0.2f,
+        stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.1f,
+    )
+    headPath.close()
     drawPath(headPath, color = primaryColor, style = Fill)
 
     // Distinct side acoustic port notch
@@ -273,7 +285,12 @@ private fun DrawScope.drawAirPodsGen4Silhouette(primaryColor: Color, accentColor
 /**
  * Silhouette for AirPods Pro: Short stem + silicone in-ear ear tip and black mesh vents.
  */
-private fun DrawScope.drawAirPodsProSilhouette(primaryColor: Color, accentColor: Color) {
+private fun DrawScope.drawAirPodsProSilhouette(
+    primaryColor: Color,
+    accentColor: Color,
+    bodyPath: Path,
+    tipPath: Path,
+) {
     val w = size.width
     val h = size.height
 
@@ -290,32 +307,30 @@ private fun DrawScope.drawAirPodsProSilhouette(primaryColor: Color, accentColor:
     )
 
     // Pod body
-    val bodyPath = Path().apply {
-        moveTo(stemLeft + stemWidth, stemTop + stemHeight * 0.1f)
-        cubicTo(
-            stemLeft + stemWidth, h * 0.18f,
-            w * 0.28f, h * 0.18f,
-            w * 0.28f, h * 0.42f,
-        )
-        cubicTo(
-            w * 0.28f, h * 0.56f,
-            stemLeft, stemTop + stemHeight * 0.2f,
-            stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.1f,
-        )
-        close()
-    }
+    bodyPath.rewind()
+    bodyPath.moveTo(stemLeft + stemWidth, stemTop + stemHeight * 0.1f)
+    bodyPath.cubicTo(
+        stemLeft + stemWidth, h * 0.18f,
+        w * 0.28f, h * 0.18f,
+        w * 0.28f, h * 0.42f,
+    )
+    bodyPath.cubicTo(
+        w * 0.28f, h * 0.56f,
+        stemLeft, stemTop + stemHeight * 0.2f,
+        stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.1f,
+    )
+    bodyPath.close()
     drawPath(bodyPath, color = primaryColor, style = Fill)
 
     // Distinct Silicone Ear Tip (angled on the left)
-    val tipPath = Path().apply {
-        moveTo(w * 0.30f, h * 0.28f)
-        cubicTo(
-            w * 0.10f, h * 0.24f,
-            w * 0.10f, h * 0.46f,
-            w * 0.30f, h * 0.44f,
-        )
-        close()
-    }
+    tipPath.rewind()
+    tipPath.moveTo(w * 0.30f, h * 0.28f)
+    tipPath.cubicTo(
+        w * 0.10f, h * 0.24f,
+        w * 0.10f, h * 0.46f,
+        w * 0.30f, h * 0.44f,
+    )
+    tipPath.close()
     drawPath(tipPath, color = accentColor, style = Fill)
 
     // Black ANC mesh vent on back of pod head
@@ -329,19 +344,22 @@ private fun DrawScope.drawAirPodsProSilhouette(primaryColor: Color, accentColor:
 /**
  * Silhouette for AirPods Max: Over-ear headphone ear-cup and headband canopy.
  */
-internal fun DrawScope.drawAirPodsMaxSilhouette(primaryColor: Color, accentColor: Color) {
+internal fun DrawScope.drawAirPodsMaxSilhouette(
+    primaryColor: Color,
+    accentColor: Color,
+    headbandPath: Path = Path(),
+) {
     val w = size.width
     val h = size.height
 
     // Headband Mesh Canopy Arc
-    val headbandPath = Path().apply {
-        moveTo(w * 0.25f, h * 0.55f)
-        cubicTo(
-            w * 0.25f, h * 0.12f,
-            w * 0.75f, h * 0.12f,
-            w * 0.75f, h * 0.55f,
-        )
-    }
+    headbandPath.rewind()
+    headbandPath.moveTo(w * 0.25f, h * 0.55f)
+    headbandPath.cubicTo(
+        w * 0.25f, h * 0.12f,
+        w * 0.75f, h * 0.12f,
+        w * 0.75f, h * 0.55f,
+    )
     drawPath(
         path = headbandPath,
         color = primaryColor,

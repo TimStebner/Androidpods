@@ -8,7 +8,7 @@
 
 ## 1. Projektstatus & Hardware-Verifikation
 
-Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die **Performance- & Batterielaufzeit-Optimierung** sind implementiert. Die Release-Härtung ergänzt minifizierte Builds, Privacy-/Backup-Regeln, synthetische Test-Fixtures, ehrliches Capability-Gating, Macrobenchmarks und Baseline Profiles. Das endgültige Deployment-Urteil ist wegen der im [`SECURITY_PERFORMANCE_REVIEW.md`](SECURITY_PERFORMANCE_REVIEW.md) dokumentierten Frame-, PSS-, Signatur- und Play-Policy-Blocker derzeit **No-Go**.
+Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die **Performance- & Batterielaufzeit-Optimierung** sind implementiert. Die Release-Härtung umfasst minifizierte Builds, Privacy-/Backup-Regeln, synthetische Test-Fixtures, ehrliches Capability-Gating, Zero-Allocation Render-Pfade, Macrobenchmarks und versionierte Baseline Profiles. Alle offenen Release-Gates aus [`SECURITY_PERFORMANCE_REVIEW.md`](SECURITY_PERFORMANCE_REVIEW.md) wurden behoben; der Release Candidate (`v0.1.0`) ist freigegeben für Internal/Closed Testing auf Google Play.
 - **Test-Hardware:** Google Pixel 9 Pro XL (Android 17 / API 37)
 - **Kopfhörer:** Apple AirPods 4 (Modell `A3050` / `A3053`, H2-Chip)
 

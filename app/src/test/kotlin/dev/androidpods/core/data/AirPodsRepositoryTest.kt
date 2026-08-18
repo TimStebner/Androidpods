@@ -210,4 +210,47 @@ class AirPodsRepositoryTest {
 
         assertEquals(true, cache.tierBSupported("02:00:00:00:00:01"))
     }
+
+    @Test
+    fun `motion stream start updates state and stopMotionStream resets state`() = runTest(UnconfinedTestDispatcher()) {
+        val transport = FakeAirPodsTransport()
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
+        repository.connect()
+
+        repository.startMotionStream()
+        assertTrue(repository.state.value.motionStreamActive)
+
+        repository.stopMotionStream()
+        assertFalse(repository.state.value.motionStreamActive)
+        assertEquals(null, repository.state.value.headOrientation)
+    }
+
+    @Test
+    fun `disconnect automatically resets motionStreamActive and headOrientation`() = runTest(UnconfinedTestDispatcher()) {
+        val transport = FakeAirPodsTransport()
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
+        repository.connect()
+
+        repository.startMotionStream()
+        assertTrue(repository.state.value.motionStreamActive)
+
+        transport.disconnect()
+        assertFalse(repository.state.value.motionStreamActive)
+        assertEquals(null, repository.state.value.headOrientation)
+    }
+
+    @Test
+    fun `requestStopMotionStream stops stream via repository background scope`() = runTest(UnconfinedTestDispatcher()) {
+        val transport = FakeAirPodsTransport()
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
+        repository.connect()
+
+        repository.startMotionStream()
+        assertTrue(repository.state.value.motionStreamActive)
+
+        repository.requestStopMotionStream()
+        testScheduler.advanceTimeBy(200)
+        testScheduler.runCurrent()
+        assertFalse(repository.state.value.motionStreamActive)
+    }
 }

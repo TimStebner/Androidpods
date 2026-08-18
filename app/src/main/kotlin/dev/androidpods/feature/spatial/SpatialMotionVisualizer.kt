@@ -2,14 +2,11 @@
 package dev.androidpods.feature.spatial
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -49,59 +46,46 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.androidpods.app.R
 import dev.androidpods.core.bluetooth.AirPodsTransport
 import dev.androidpods.core.data.AirPodsRepositoryProvider
-import dev.androidpods.core.data.AirPodsState
-import dev.androidpods.core.designsystem.androidpodsSpatialSpec
+import dev.androidpods.core.data.HeadOrientation
 import dev.androidpods.core.gestures.HeadGesture
 import dev.androidpods.core.gestures.HeadGestureDetector
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @Composable
 fun SpatialMotionCard(
     modifier: Modifier = Modifier,
 ) {
-    val state by AirPodsRepositoryProvider.state.collectAsStateWithLifecycle()
+    val streamStateFlow = remember {
+        AirPodsRepositoryProvider.state
+            .map { (it.connection is AirPodsTransport.ConnectionState.Connected) to it.motionStreamActive }
+            .distinctUntilChanged()
+    }
+    val streamState by streamStateFlow.collectAsStateWithLifecycle(
+        initialValue = false to false,
+    )
+    val (isConnected, isStreaming) = streamState
+
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
-    val isConnected = state.connection is AirPodsTransport.ConnectionState.Connected
-    val isStreaming = state.motionStreamActive
-    val orientation = state.headOrientation
 
-    // Gesture detector instance for real-time visual feedback
-    val detector = remember { HeadGestureDetector(pitchNodThreshold = 15f, yawShakeThreshold = 20f) }
-    var detectedGesture by remember { mutableStateOf(HeadGesture.NONE) }
-
-    LaunchedEffect(orientation) {
-        if (orientation != null) {
-            val gesture = detector.onSample(orientation.pitch, orientation.yaw)
-            if (gesture != HeadGesture.NONE) {
-                detectedGesture = gesture
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            }
-        }
-    }
-
-    // Auto-stop stream when leaving this composable or when activity is stopped/backgrounded
+    // Auto-stop stream reliably on repository process-scope when leaving composable or backgrounding activity
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner, isStreaming) {
+    DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP && isStreaming) {
-                scope.launch {
-                    AirPodsRepositoryProvider.current?.stopMotionStream()
-                }
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP) {
+                AirPodsRepositoryProvider.current?.requestStopMotionStream()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            if (isStreaming) {
-                scope.launch {
-                    AirPodsRepositoryProvider.current?.stopMotionStream()
-                }
-            }
+            AirPodsRepositoryProvider.current?.requestStopMotionStream()
         }
     }
 
@@ -157,88 +141,7 @@ fun SpatialMotionCard(
             }
 
             if (isStreaming) {
-                val currentPitch = orientation?.pitch ?: 0f
-                val currentYaw = orientation?.yaw ?: 0f
-                val currentRoll = orientation?.roll ?: 0f
-
-                // 3D Head Visualizer Canvas
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    val animatedPitch = animateFloatAsState(
-                        targetValue = currentPitch,
-                        animationSpec = androidpodsSpatialSpec(),
-                        label = "pitch-anim",
-                    )
-                    val animatedYaw = animateFloatAsState(
-                        targetValue = currentYaw,
-                        animationSpec = androidpodsSpatialSpec(),
-                        label = "yaw-anim",
-                    )
-                    val animatedRoll = animateFloatAsState(
-                        targetValue = currentRoll,
-                        animationSpec = androidpodsSpatialSpec(),
-                        label = "roll-anim",
-                    )
-
-                    HeadOrientation3DView(
-                        pitch = animatedPitch,
-                        yaw = animatedYaw,
-                        roll = animatedRoll,
-                        modifier = Modifier.size(160.dp),
-                    )
-
-                    // Detected Gesture Badge
-                    androidx.compose.animation.AnimatedVisibility(
-                        visible = detectedGesture != HeadGesture.NONE,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = 12.dp),
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primary,
-                        ) {
-                            Text(
-                                text = when (detectedGesture) {
-                                    HeadGesture.NOD -> stringResource(R.string.spatial_nod_detected)
-                                    HeadGesture.SHAKE -> stringResource(R.string.spatial_shake_detected)
-                                    HeadGesture.NONE -> ""
-                                },
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            )
-                        }
-                    }
-                }
-
-                // Telemetry Readings (Pitch, Yaw, Roll)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OrientationPill(
-                        label = stringResource(R.string.spatial_pitch),
-                        value = if (orientation != null) "%.1f°".format(orientation.pitch) else "--",
-                        modifier = Modifier.weight(1f),
-                    )
-                    OrientationPill(
-                        label = stringResource(R.string.spatial_yaw),
-                        value = if (orientation != null) "%.1f°".format(orientation.yaw) else "--",
-                        modifier = Modifier.weight(1f),
-                    )
-                    OrientationPill(
-                        label = stringResource(R.string.spatial_roll),
-                        value = if (orientation != null) "%.1f°".format(orientation.roll) else "--",
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+                ActiveMotionVisualizer()
             } else {
                 Surface(
                     shape = MaterialTheme.shapes.medium,
@@ -263,10 +166,94 @@ fun SpatialMotionCard(
 }
 
 @Composable
+private fun ActiveMotionVisualizer() {
+    val orientationState = remember {
+        AirPodsRepositoryProvider.state.map { it.headOrientation }
+    }.collectAsStateWithLifecycle(initialValue = null)
+
+    val haptic = LocalHapticFeedback.current
+    val detector = remember { HeadGestureDetector(pitchNodThreshold = 15f, yawShakeThreshold = 20f) }
+    var detectedGesture by remember { mutableStateOf(HeadGesture.NONE) }
+
+    val currentOrientation = orientationState.value
+
+    LaunchedEffect(currentOrientation) {
+        if (currentOrientation != null) {
+            val gesture = detector.onSample(currentOrientation.pitch, currentOrientation.yaw)
+            if (gesture != HeadGesture.NONE) {
+                detectedGesture = gesture
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
+        }
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // 3D Head Visualizer Canvas (Zero Allocation & Deferred graphicsLayer State Reads)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            contentAlignment = Alignment.Center,
+        ) {
+            HeadOrientation3DView(
+                orientationState = orientationState,
+                modifier = Modifier.size(160.dp),
+            )
+
+            // Detected Gesture Badge
+            androidx.compose.animation.AnimatedVisibility(
+                visible = detectedGesture != HeadGesture.NONE,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 12.dp),
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary,
+                ) {
+                    Text(
+                        text = when (detectedGesture) {
+                            HeadGesture.NOD -> stringResource(R.string.spatial_nod_detected)
+                            HeadGesture.SHAKE -> stringResource(R.string.spatial_shake_detected)
+                            HeadGesture.NONE -> ""
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    )
+                }
+            }
+        }
+
+        // Telemetry Readings (Pitch, Yaw, Roll)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OrientationPill(
+                label = stringResource(R.string.spatial_pitch),
+                value = if (currentOrientation != null) "%.1f°".format(currentOrientation.pitch) else "--",
+                modifier = Modifier.weight(1f),
+            )
+            OrientationPill(
+                label = stringResource(R.string.spatial_yaw),
+                value = if (currentOrientation != null) "%.1f°".format(currentOrientation.yaw) else "--",
+                modifier = Modifier.weight(1f),
+            )
+            OrientationPill(
+                label = stringResource(R.string.spatial_roll),
+                value = if (currentOrientation != null) "%.1f°".format(currentOrientation.roll) else "--",
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
 private fun HeadOrientation3DView(
-    pitch: State<Float>,
-    yaw: State<Float>,
-    roll: State<Float>,
+    orientationState: State<HeadOrientation?>,
     modifier: Modifier = Modifier,
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -276,9 +263,10 @@ private fun HeadOrientation3DView(
     Box(
         modifier = modifier
             .graphicsLayer {
-                rotationX = -pitch.value
-                rotationY = yaw.value
-                rotationZ = -roll.value
+                val orientation = orientationState.value
+                rotationX = -(orientation?.pitch ?: 0f)
+                rotationY = (orientation?.yaw ?: 0f)
+                rotationZ = -(orientation?.roll ?: 0f)
                 cameraDistance = 12f * density
             },
         contentAlignment = Alignment.Center,

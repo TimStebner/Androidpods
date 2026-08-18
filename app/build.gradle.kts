@@ -18,6 +18,22 @@ android {
         versionName = "0.1.0"
     }
 
+    signingConfigs {
+        val keystorePath = System.getenv("KEYSTORE_PATH") ?: findProperty("ANDROIDPODS_KEYSTORE_PATH") as? String
+        val keystorePassword = System.getenv("KEYSTORE_PASSWORD") ?: findProperty("ANDROIDPODS_KEYSTORE_PASSWORD") as? String
+        val keyAlias = System.getenv("KEY_ALIAS") ?: findProperty("ANDROIDPODS_KEY_ALIAS") as? String
+        val keyPassword = System.getenv("KEY_PASSWORD") ?: findProperty("ANDROIDPODS_KEY_PASSWORD") as? String
+
+        if (keystorePath != null && file(keystorePath).exists()) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = keystorePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -26,6 +42,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            signingConfigs.findByName("release")?.let {
+                signingConfig = it
+            }
         }
         create("benchmark") {
             initWith(getByName("release"))

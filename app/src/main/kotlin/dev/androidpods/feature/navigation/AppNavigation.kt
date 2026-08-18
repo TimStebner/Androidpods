@@ -66,6 +66,9 @@ import dev.androidpods.feature.widgets.WidgetsScreen
 
 import dev.androidpods.feature.controls.ControlsSection
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+
 enum class AppDestination(
     val labelRes: Int,
     val icon: ImageVector,
@@ -81,21 +84,18 @@ fun AppScaffold(modifier: Modifier = Modifier) {
     var currentDestination by remember { mutableStateOf(AppDestination.HOME) }
     var controlsInitialSection by remember { mutableStateOf<ControlsSection?>(null) }
     val haptic = LocalHapticFeedback.current
-    val slideSpec = androidpodsSpatialSpec<androidx.compose.ui.unit.IntOffset>()
-    val fadeSpec = androidpodsSpatialSpec<Float>()
 
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surface,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 1. Edge-to-Edge Animated Screen Content
+            // 1. Edge-to-Edge Animated Screen Content with Zero Jank Transition
             AnimatedContent(
                 targetState = currentDestination,
                 transitionSpec = {
-                    val isForward = targetState.ordinal > initialState.ordinal
-                    (fadeIn(animationSpec = fadeSpec) + slideInHorizontally(animationSpec = slideSpec) { width -> if (isForward) width / 6 else -width / 6 })
-                        .togetherWith(fadeOut(animationSpec = fadeSpec) + slideOutHorizontally(animationSpec = slideSpec) { width -> if (isForward) -width / 6 else width / 6 })
+                    fadeIn(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing))
+                        .togetherWith(fadeOut(animationSpec = tween(durationMillis = 120, easing = FastOutSlowInEasing)))
                 },
                 label = "tab-screen-transition",
                 modifier = Modifier
@@ -159,7 +159,7 @@ private fun FloatingNavigationPill(
     ) {
         Row(
             modifier = Modifier
-                .animateContentSize(animationSpec = androidpodsSpatialSpec())
+                .animateContentSize(animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing))
                 .padding(horizontal = 6.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -186,18 +186,18 @@ private fun FloatingNavPillItem(
     val isPressed by interactionSource.collectIsPressedAsState()
     val itemScale by androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (isPressed) 0.92f else 1f,
-        animationSpec = androidpodsSpatialSpec(),
+        animationSpec = tween(durationMillis = 150, easing = FastOutSlowInEasing),
         label = "nav-item-press-scale",
     )
 
     val containerColor by animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        animationSpec = androidpodsSpatialSpec(),
+        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
         label = "pill-container-color",
     )
     val contentColor by animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = androidpodsSpatialSpec(),
+        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
         label = "pill-content-color",
     )
 
@@ -226,10 +226,10 @@ private fun FloatingNavPillItem(
             )
             AnimatedVisibility(
                 visible = selected,
-                enter = fadeIn(animationSpec = androidpodsSpatialSpec()) +
-                    expandHorizontally(animationSpec = androidpodsSpatialSpec(), expandFrom = Alignment.Start),
-                exit = fadeOut(animationSpec = androidpodsSpatialSpec()) +
-                    shrinkHorizontally(animationSpec = androidpodsSpatialSpec(), shrinkTowards = Alignment.Start),
+                enter = fadeIn(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing)) +
+                    expandHorizontally(animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing), expandFrom = Alignment.Start),
+                exit = fadeOut(animationSpec = tween(durationMillis = 120, easing = FastOutSlowInEasing)) +
+                    shrinkHorizontally(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing), shrinkTowards = Alignment.Start),
             ) {
                 Text(
                     text = stringResource(destination.labelRes),

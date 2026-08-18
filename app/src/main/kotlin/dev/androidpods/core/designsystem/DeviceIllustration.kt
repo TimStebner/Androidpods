@@ -93,7 +93,7 @@ fun AirPodsIllustration(
             AirPodsGeneration.PRO -> drawAirPodPairPro(tint, accentTint, leftPath, rightPath, tipLeftPath, tipRightPath)
             AirPodsGeneration.GEN_1_2 -> drawAirPodPairGen1(tint, accentTint, leftPath, rightPath)
             AirPodsGeneration.GEN_3 -> drawAirPodPairGen3(tint, accentTint, leftPath, rightPath)
-            AirPodsGeneration.MAX -> drawAirPodsMaxSilhouette(tint, accentTint)
+            AirPodsGeneration.MAX -> drawAirPodsMaxSilhouette(tint, accentTint, leftPath)
         }
     }
 }
