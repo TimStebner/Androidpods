@@ -18,7 +18,7 @@ private fun loadFixturePacket(index: Int): ByteArray {
 
 class AapPacketDecoderTest {
     @Test
-    fun `decodes battery packet from real capture`() {
+    fun `decodes battery packet from sanitized capture`() {
         val event = AapPacketDecoder.decode(loadFixturePacket(21))
 
         assertTrue(event is AapEvent.Battery)
@@ -29,7 +29,7 @@ class AapPacketDecoderTest {
     }
 
     @Test
-    fun `decodes ear detection packet from real capture`() {
+    fun `decodes ear detection packet from sanitized capture`() {
         val event = AapPacketDecoder.decode(loadFixturePacket(27))
 
         assertTrue(event is AapEvent.EarDetection)
@@ -38,7 +38,7 @@ class AapPacketDecoderTest {
     }
 
     @Test
-    fun `decodes information packet from real capture`() {
+    fun `decodes information packet from sanitized capture`() {
         val event = AapPacketDecoder.decode(loadFixturePacket(3))
 
         assertTrue(event is AapEvent.DeviceInfo)
@@ -46,9 +46,9 @@ class AapPacketDecoderTest {
         assertEquals("AirPods", deviceInfo.info.name)
         assertEquals("A3050", deviceInfo.info.modelNumber)
         assertEquals("Apple Inc.", deviceInfo.info.manufacturer)
-        assertEquals("LKGVHWX2P5", deviceInfo.info.serialNumber)
-        assertEquals("H1FHAN0C84W0000B30", deviceInfo.info.leftSerialNumber)
-        assertEquals("H2KHAN0D3FP0000B32", deviceInfo.info.rightSerialNumber)
+        assertEquals("TESTSER001", deviceInfo.info.serialNumber)
+        assertEquals("TESTLEFT0000000001", deviceInfo.info.leftSerialNumber)
+        assertEquals("TESTRIGHT000000001", deviceInfo.info.rightSerialNumber)
     }
 
     @Test
@@ -73,7 +73,7 @@ class AapPacketDecoderTest {
     }
 
     @Test
-    fun `decodes stem config packet from real capture`() {
+    fun `decodes stem config packet from sanitized capture`() {
         val event = AapPacketDecoder.decode(loadFixturePacket(4))
 
         assertTrue(event is AapEvent.StemConfig)
@@ -83,7 +83,7 @@ class AapPacketDecoderTest {
     }
 
     @Test
-    fun `decodes press speed packet from real capture`() {
+    fun `decodes press speed packet from sanitized capture`() {
         val event = AapPacketDecoder.decode(loadFixturePacket(6))
 
         assertTrue(event is AapEvent.PressSpeedConfig)
@@ -91,7 +91,7 @@ class AapPacketDecoderTest {
     }
 
     @Test
-    fun `decodes hold duration packet from real capture`() {
+    fun `decodes hold duration packet from sanitized capture`() {
         val event = AapPacketDecoder.decode(loadFixturePacket(10))
 
         assertTrue(event is AapEvent.HoldDurationConfig)
@@ -99,7 +99,7 @@ class AapPacketDecoderTest {
     }
 
     @Test
-    fun `decodes head gestures packet from real capture`() {
+    fun `decodes head gestures packet from sanitized capture`() {
         val event = AapPacketDecoder.decode(loadFixturePacket(13))
 
         assertTrue(event is AapEvent.HeadGesturesConfig)

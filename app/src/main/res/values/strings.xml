@@ -2,30 +2,20 @@
 <resources>
     <string name="app_name">Androidpods</string>
     <string name="home_disconnected_title">No AirPods connected</string>
-    <string name="home_disconnected_body">Connect your AirPods to see their status here.</string>
     <string name="home_connecting_title">Connecting…</string>
     <string name="home_connected_title">AirPods connected</string>
     <string name="home_tier_b_unavailable_title">Control channel unavailable</string>
-    <string name="home_tier_b_unavailable_body">%1$s</string>
     <string name="home_battery_left">Left</string>
     <string name="home_battery_right">Right</string>
     <string name="home_battery_case">Case</string>
-    <string name="home_battery_charging">Charging</string>
-    <string name="home_battery_not_charging">Not charging</string>
-    <string name="home_battery_optimized_charging">Optimized charging</string>
-    <string name="home_battery_unavailable">Unavailable</string>
-    <string name="home_ear_detection_in_ear">In ear</string>
-    <string name="home_ear_detection_out_of_ear">Out of ear</string>
     <string name="widget_battery_no_data">Open Androidpods to connect</string>
     <string name="widget_battery_description">AirPods battery</string>
     <string name="notification_channel_battery">AirPods battery</string>
     <string name="notification_channel_connection">AirPods connection</string>
     <string name="notification_battery_title">AirPods connected</string>
     <string name="notification_battery_text">Left %1$d%% · Right %2$d%% · Case %3$d%%</string>
-    <string name="onboarding_title">Connect your AirPods</string>
     <string name="onboarding_headline">AirPods, meet Android.</string>
     <string name="onboarding_tagline">Native Companion Device pairing, live battery stats, 50Hz Spatial IMU, and gesture controls.</string>
-    <string name="onboarding_rationale">Androidpods needs Bluetooth access to find and stay connected to your AirPods, and to read their battery and status.</string>
     <string name="onboarding_grant_permissions">Grant Bluetooth access</string>
     <string name="onboarding_pair_airpods">Pair AirPods</string>
     <string name="onboarding_pairing_cancelled">Pairing was cancelled.</string>
@@ -48,7 +38,6 @@
     <string name="nav_settings">Settings</string>
 
     <!-- Home -->
-    <string name="home_device_title">AirPods</string>
     <string name="home_quick_auto_pause_title">Auto-Pause</string>
     <string name="home_quick_auto_pause_active">Active when removed</string>
     <string name="home_quick_auto_pause_inactive">Disabled</string>
@@ -56,12 +45,27 @@
     <string name="home_status_in_ear">In Ear</string>
     <string name="home_status_out_of_ear">Out of Ear</string>
     <string name="home_status_charging">Charging</string>
-    <string name="home_status_closed">Closed</string>
-    <string name="home_status_open">Open</string>
     <string name="home_action_press_stem">Press Stem</string>
-    <string name="home_action_open_lid">Open Lid</string>
-    <string name="home_action_case_speaker">Case Speaker</string>
-    <string name="home_noise_control_header">Noise Control</string>
+    <string name="home_header_connected_subtitle">%1$s · Active</string>
+    <string name="home_header_disconnected_subtitle">Ready to Connect</string>
+    <string name="home_logo_description">Androidpods Logo</string>
+    <string name="home_device_fallback">AirPods</string>
+    <string name="home_connection_active">L2CAP Tier B Active · 50Hz IMU</string>
+    <string name="home_connection_connecting">Connecting L2CAP channel…</string>
+    <string name="home_connection_failed">Connection Failed</string>
+    <string name="home_connection_disconnected">Not Connected · Open Case</string>
+    <string name="home_refresh_connection_description">Refresh connection</string>
+    <string name="home_status_offline">Offline</string>
+    <string name="home_status_case_ready">Case Ready</string>
+    <string name="home_status_ready">Ready</string>
+    <string name="home_status_in_case">In Case</string>
+    <string name="home_head_gestures_summary">Nod to answer, shake to decline calls</string>
+    <string name="home_open_setting_description">Open Setting</string>
+    <string name="home_spatial_active">50Hz 6-Axis Stream Active</string>
+    <string name="home_spatial_ready">Ready · 50Hz Head Tracking</string>
+    <string name="home_connection_issue">Connection Issue</string>
+    <string name="home_airpods_disconnected">AirPods Disconnected</string>
+    <string name="home_disconnected_hint">Open your AirPods case or put them into your ears to automatically connect.</string>
 
     <!-- Controls -->
     <string name="controls_title">Device Controls</string>
@@ -70,13 +74,6 @@
     <string name="controls_auto_pause_desc">Automatically pause playback when either AirPod is removed from your ear.</string>
     <string name="controls_auto_resume_title">Automatic Media Resume</string>
     <string name="controls_auto_resume_desc">Automatically resume playback when the AirPod is placed back into your ear.</string>
-    <string name="controls_assistant_header">Digital Assistant</string>
-    <string name="controls_assistant_title">Press &amp; Hold for Assistant</string>
-    <string name="controls_assistant_desc_supported">Switch stem press-and-hold gesture between Digital Assistant (Gemini) and Noise Control.</string>
-    <string name="controls_assistant_desc_unsupported">Stem gesture customization requires AirPods Pro or AirPods 4 with ANC. On standard AirPods 4, press-and-hold is permanently assigned to Bluetooth voice recognition (AT+BVRA).</string>
-    <string name="controls_assistant_gesture_label">Gesture</string>
-    <string name="controls_assistant_gesture_value">Pinch &amp; hold stem</string>
-    <string name="controls_assistant_settings_button">System Assistant Settings</string>
     <!-- Quick Settings Tile (Milestone 5) -->
     <string name="tile_airpods_label">AirPods</string>
     <string name="tile_connected_no_battery">Connected</string>
@@ -94,8 +91,6 @@
     <string name="findmy_target_left">Left (L)</string>
     <string name="findmy_target_both">Both</string>
     <string name="findmy_target_right">Right (R)</string>
-    <string name="findmy_target_case">Case Speaker</string>
-    <string name="findmy_case_unsupported_hint">Case speaker requires AirPods 4 with ANC or AirPods Pro (2nd gen).</string>
     <string name="findmy_btn_play">Play Sound</string>
     <string name="findmy_btn_stop">Stop Sound</string>
     <string name="findmy_warning">⚠️ Remove AirPods from your ears before playing (sound is loud).</string>
@@ -117,29 +112,27 @@
     <string name="controls_hold_duration_default">Default</string>
     <string name="controls_hold_duration_short">Shorter</string>
     <string name="controls_hold_duration_long">Longer</string>
-    <string name="controls_noise_header">Noise Control</string>
-    <string name="controls_noise_off">Off</string>
-    <string name="controls_noise_transparency">Transparency</string>
-    <string name="controls_noise_adaptive">Adaptive</string>
-    <string name="controls_noise_anc">Noise Cancellation</string>
-    <string name="controls_noise_unsupported_hint">Noise control is only available on AirPods 4 with ANC and AirPods Pro models.</string>
-    <string name="controls_noise_gated_desc">Active Noise Cancellation, Transparency, and Adaptive Audio modes.</string>
     <string name="controls_info_header">Device Information</string>
     <string name="controls_model_label">Model</string>
-    <string name="controls_model_number_label">Model Number</string>
     <string name="controls_transport_label">Transport</string>
     <string name="controls_transport_tier_b">Tier B (Classic L2CAP PSM 0x1001)</string>
+    <string name="controls_write_failed">Could not update the AirPods setting. Reconnect and try again.</string>
+    <string name="controls_subtitle">Custom Gestures &amp; Audio Tuning</string>
+    <string name="controls_current_sensor_state">Current Sensor State</string>
 
     <!-- Widgets -->
     <string name="widgets_title">Widgets</string>
     <string name="widgets_preview_header">Battery Widget Preview</string>
     <string name="widgets_pin_button">Add to Home screen</string>
-    <string name="widgets_pin_success">Widget added to Home screen</string>
     <string name="widgets_pin_unsupported">Please add the widget manually via your launcher\'s widget menu.</string>
     <string name="widgets_guide_header">How to add manually</string>
     <string name="widgets_guide_step_1">1. Long-press an empty space on your Home screen.</string>
     <string name="widgets_guide_step_2">2. Tap Widgets and search for Androidpods.</string>
     <string name="widgets_guide_step_3">3. Drag the Battery Widget to your desired location.</string>
+    <string name="widgets_subtitle">Home Screen Battery Glance</string>
+    <string name="widgets_preview_hint">Connect AirPods to preview battery levels</string>
+    <string name="charging_description">Charging</string>
+    <string name="widget_tap_to_open">Tap to open Androidpods</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
@@ -160,7 +153,6 @@
     <string name="settings_notif_battery_desc">Show persistent low-priority battery notification while connected.</string>
     <string name="settings_diagnostics_header">Diagnostics</string>
     <string name="settings_probe_cache_title">Tier B Probe Cache</string>
-    <string name="settings_probe_cache_reset">Reset Probe Cache</string>
     <string name="settings_probe_cache_reset_done">Probe cache cleared. Will re-probe on next connect.</string>
     <string name="settings_logging_title">Protocol Debug Logging</string>
     <string name="settings_logging_desc">Log AAP packet events to Android logcat for troubleshooting.</string>
@@ -168,5 +160,27 @@
     <string name="settings_version_title">Version</string>
     <string name="settings_version_value">0.1.0-mvp</string>
     <string name="settings_license_title">License</string>
-    <string name="settings_license_desc">GNU General Public License v3.0 (GPL-3.0-or-later)</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_subtitle">Preferences &amp; Diagnostics</string>
+    <string name="settings_probe_cache_desc">Cached results for classic L2CAP PSM 0x1001.</string>
+    <string name="settings_probe_cache_reset">Reset</string>
+    <string name="settings_license_value">GPL-3.0</string>
+
+    <!-- Spatial motion -->
+    <string name="spatial_start_motion_stream">Start Motion Stream</string>
+    <string name="spatial_stop_motion_stream">Stop Motion Stream</string>
+    <string name="spatial_nod_detected">✨ Nod Detected (Yes)</string>
+    <string name="spatial_shake_detected">❌ Shake Detected (No)</string>
+    <string name="spatial_pitch">Pitch</string>
+    <string name="spatial_yaw">Yaw</string>
+    <string name="spatial_roll">Roll</string>
+
+    <!-- Battery pop-up -->
+    <string name="popup_connected">Connected · 50Hz Spatial Active</string>
+    <string name="popup_connecting">Connecting…</string>
+    <string name="popup_ready_to_connect">Ready to Connect</string>
+    <string name="popup_close_description">Close Pop-up</string>
+    <string name="popup_open_app">Open App</string>
+    <string name="popup_done">Done</string>
+    <string name="popup_out_of_ear">Out</string>
 </resources>

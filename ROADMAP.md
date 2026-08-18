@@ -8,7 +8,7 @@
 
 ## 1. Projektstatus & Hardware-Verifikation
 
-Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die umfassende **Performance- & Batterielaufzeit-Optimierung** sind vollständig implementiert, modular getestet (**67 JVM Unit-Tests, 100% bestanden, 0 Android-Lint-Fehler**) und auf physischer Hardware validiert:
+Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die **Performance- & Batterielaufzeit-Optimierung** sind implementiert. Die Release-Härtung ergänzt minifizierte Builds, Privacy-/Backup-Regeln, synthetische Test-Fixtures, ehrliches Capability-Gating, Macrobenchmarks und Baseline Profiles. Das endgültige Deployment-Go bleibt bis zu den im Release-Review dokumentierten Hardware-, Signatur- und Play-Policy-Gates offen.
 - **Test-Hardware:** Google Pixel 9 Pro XL (Android 17 / API 37)
 - **Kopfhörer:** Apple AirPods 4 (Modell `A3050` / `A3053`, H2-Chip)
 
@@ -16,7 +16,7 @@ Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesig
 
 ## 2. Feature- & Architektur-Map (Where to find what)
 
-Die Codebasis ist in einem einzigen `app`-Gradle-Modul unter dem Package `dev.androidpods` streng nach Schichten gegliedert ([`PROJECT.md`](PROJECT.md) §11):
+Der Produktionscode bleibt vollständig im einzelnen `app`-Gradle-Modul und ist unter dem Package `dev.androidpods` streng nach Schichten gegliedert ([`PROJECT.md`](PROJECT.md) §11). Das separate `benchmark`-Modul enthält ausschließlich Macrobenchmark-/Baseline-Profile-Instrumentierung:
 
 ```
 dev.androidpods

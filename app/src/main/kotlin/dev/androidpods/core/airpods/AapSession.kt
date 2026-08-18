@@ -25,17 +25,6 @@ class AapSession(private val transport: AirPodsTransport) {
         transport.send(REQUEST_NOTIFICATIONS_PACKET)
     }
 
-    suspend fun setStemAction(isLeft: Boolean, action: StemPressAndHoldAction) {
-        transport.send(createStemConfigPacket(isLeft, action))
-    }
-
-    suspend fun setAssistantTriggerEnabled(enabled: Boolean) {
-        val action = if (enabled) StemPressAndHoldAction.VOICE_ASSISTANT else StemPressAndHoldAction.DISABLED
-        setStemAction(isLeft = true, action = action)
-        delay(50)
-        setStemAction(isLeft = false, action = action)
-    }
-
     suspend fun setPressSpeed(speed: PressSpeed) {
         transport.send(createPressSpeedPacket(speed))
     }
@@ -85,16 +74,6 @@ class AapSession(private val transport: AirPodsTransport) {
             0x04, 0x00, 0x04, 0x00, 0x0F, 0x00,
             0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(),
         )
-
-        fun createStemConfigPacket(isLeft: Boolean, action: StemPressAndHoldAction): ByteArray {
-            val configId = if (isLeft) 0x18.toByte() else 0x17.toByte()
-            return byteArrayOf(
-                0x04, 0x00, 0x04, 0x00, // Header
-                0x09, 0x00,             // Opcode 0x09 (Config Write)
-                configId, 0x00,         // Config ID (0x18 Left, 0x17 Right)
-                action.rawValue, 0x00, 0x00, // Value payload
-            )
-        }
 
         fun createPressSpeedPacket(speed: PressSpeed): ByteArray = byteArrayOf(
             0x04, 0x00, 0x04, 0x00, // Header

@@ -90,8 +90,8 @@ import kotlin.math.roundToInt
 fun AirPodsBatteryPopupContent(
     state: AirPodsState,
     onDismiss: () -> Unit,
-    onOpenApp: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    onOpenApp: (() -> Unit)? = null,
     autoDismissSeconds: Int = 8,
 ) {
     val haptics = rememberAppHaptics()
@@ -121,7 +121,7 @@ fun AirPodsBatteryPopupContent(
     }
 
     val isConnected = state.connection == AirPodsTransport.ConnectionState.Connected
-    val modelName = if (isConnected) state.capabilities.modelName else "AirPods"
+    val modelName = if (isConnected) state.capabilities.modelName else stringResource(R.string.home_device_fallback)
 
     val dragSpec = androidpodsSpatialSpec<Float>()
     val animatedOffsetY by animateFloatAsState(
@@ -217,9 +217,9 @@ fun AirPodsBatteryPopupContent(
                             )
                             Text(
                                 text = when (state.connection) {
-                                    AirPodsTransport.ConnectionState.Connected -> "Connected · 50Hz Spatial Active"
-                                    AirPodsTransport.ConnectionState.Connecting -> "Connecting…"
-                                    else -> "Ready to Connect"
+                                    AirPodsTransport.ConnectionState.Connected -> stringResource(R.string.popup_connected)
+                                    AirPodsTransport.ConnectionState.Connecting -> stringResource(R.string.popup_connecting)
+                                    else -> stringResource(R.string.popup_ready_to_connect)
                                 },
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                                 color = if (isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -236,7 +236,7 @@ fun AirPodsBatteryPopupContent(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Close,
-                                contentDescription = "Close Pop-up",
+                                contentDescription = stringResource(R.string.popup_close_description),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp),
                             )
@@ -311,7 +311,7 @@ fun AirPodsBatteryPopupContent(
                                 shape = RoundedCornerShape(24.dp),
                             ) {
                                 Text(
-                                    text = "Open App",
+                                    text = stringResource(R.string.popup_open_app),
                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                 )
                             }
@@ -332,7 +332,7 @@ fun AirPodsBatteryPopupContent(
                             ),
                         ) {
                             Text(
-                                text = "Done",
+                                text = stringResource(R.string.popup_done),
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black),
                             )
                         }
@@ -352,9 +352,9 @@ private fun PopupBatteryGauge(
     label: String,
     icon: ImageVector,
     battery: BatteryComponentState?,
-    inEar: Boolean? = null,
     isConnected: Boolean,
     modifier: Modifier = Modifier,
+    inEar: Boolean? = null,
 ) {
     val haptics = rememberAppHaptics()
     val interactionSource = remember { MutableInteractionSource() }
@@ -435,7 +435,7 @@ private fun PopupBatteryGauge(
                 if (isConnected && isCharging) {
                     Icon(
                         imageVector = Icons.Outlined.Bolt,
-                        contentDescription = "Charging",
+                        contentDescription = stringResource(R.string.charging_description),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp),
                     )
@@ -470,7 +470,7 @@ private fun PopupBatteryGauge(
             if (inEar != null) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = if (inEar) "In Ear" else "Out",
+                    text = stringResource(if (inEar) R.string.home_status_in_ear else R.string.popup_out_of_ear),
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                     color = if (inEar) Color(0xFF22C55E) else MaterialTheme.colorScheme.onSurfaceVariant,
                 )

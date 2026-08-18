@@ -17,7 +17,6 @@ class HeadGestureDetectorTest {
             val gesture = detector.onSample(
                 pitch = pitchSamples[i],
                 yaw = 1f,
-                roll = 0f,
                 nowMs = baseTime + (i * 100L),
             )
             if (gesture != HeadGesture.NONE) {
@@ -40,7 +39,6 @@ class HeadGestureDetectorTest {
             val gesture = detector.onSample(
                 pitch = 1f,
                 yaw = yawSamples[i],
-                roll = 0f,
                 nowMs = baseTime + (i * 100L),
             )
             if (gesture != HeadGesture.NONE) {
@@ -62,7 +60,6 @@ class HeadGestureDetectorTest {
             val gesture = detector.onSample(
                 pitch = samples[i],
                 yaw = samples[i],
-                roll = 0f,
                 nowMs = baseTime + (i * 100L),
             )
             if (gesture != HeadGesture.NONE) {
@@ -85,7 +82,6 @@ class HeadGestureDetectorTest {
             val gesture = detector.onSample(
                 pitch = samples[i],
                 yaw = 0f,
-                roll = 0f,
                 nowMs = baseTime + (i * 100L),
             )
             if (gesture != HeadGesture.NONE) {

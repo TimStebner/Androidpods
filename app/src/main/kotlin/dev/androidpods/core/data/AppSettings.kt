@@ -15,7 +15,6 @@ data class AppSettings(
     val dynamicColor: Boolean = true,
     val autoPauseEnabled: Boolean = true,
     val autoResumeEnabled: Boolean = true,
-    val assistantTriggerEnabled: Boolean = true,
     val pressSpeed: PressSpeed = PressSpeed.DEFAULT,
     val holdDuration: HoldDuration = HoldDuration.DEFAULT,
     val headGesturesEnabled: Boolean = true,

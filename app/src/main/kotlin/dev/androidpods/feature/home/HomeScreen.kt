@@ -42,14 +42,10 @@ import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Face
-import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.Headphones
-import androidx.compose.material.icons.outlined.Hearing
-import androidx.compose.material.icons.outlined.HearingDisabled
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.SpatialAudio
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -63,7 +59,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,7 +86,6 @@ import dev.androidpods.core.airpods.BatteryComponentState
 import dev.androidpods.core.airpods.BatteryState
 import dev.androidpods.core.airpods.CapabilityResolver
 import dev.androidpods.core.airpods.EarDetectionState
-import dev.androidpods.core.airpods.NoiseControlMode
 import dev.androidpods.core.bluetooth.AirPodsTransport
 import dev.androidpods.core.bluetooth.hasNotificationPermission
 import dev.androidpods.core.bluetooth.resumeObservingAssociatedDevices
@@ -124,8 +119,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToControls: (ControlsSection) -> Unit = {},
 ) {
-    val state by AirPodsRepositoryProvider.state.collectAsState()
-    val settings by AppSettingsRepositoryProvider.settings.collectAsState()
+    val state by AirPodsRepositoryProvider.state.collectAsStateWithLifecycle()
+    val settings by AppSettingsRepositoryProvider.settings.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -158,11 +153,11 @@ fun HomeScreen(
 @Composable
 internal fun HomeScreenContent(
     state: AirPodsState,
+    modifier: Modifier = Modifier,
     autoPauseActive: Boolean = true,
     onToggleAutoPause: (Boolean) -> Unit = {},
     onRetry: () -> Unit = {},
     onNavigateToControls: (ControlsSection) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
     val haptics = rememberAppHaptics()
@@ -187,8 +182,8 @@ internal fun HomeScreenContent(
     ) {
         // 1. Brand Hero Header with Custom Androidpods App Icon
         ExpressiveScreenHeader(
-            title = "Androidpods",
-            subtitle = if (isConnected) "${state.capabilities.modelName} · Active" else "Ready to Connect",
+            title = stringResource(R.string.app_name),
+            subtitle = if (isConnected) stringResource(R.string.home_header_connected_subtitle, state.capabilities.modelName) else stringResource(R.string.home_header_disconnected_subtitle),
             badgeContent = {
                 Surface(
                     shape = RoundedCornerShape(14.dp),
@@ -210,7 +205,7 @@ internal fun HomeScreenContent(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_androidpods_logo),
-                        contentDescription = "Androidpods Logo",
+                        contentDescription = stringResource(R.string.home_logo_description),
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -230,13 +225,7 @@ internal fun HomeScreenContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 3. Noise Control: ONLY shown if supported by the hardware (e.g. AirPods Pro / AirPods 4 with ANC)
-        if (isConnected && state.capabilities.supportsNoiseControl) {
-            NoiseControlSection(state = state)
-            Spacer(modifier = Modifier.height(14.dp))
-        }
-
-        // 4. Feature Cards when Connected
+        // 3. Feature Cards when Connected
         if (isConnected) {
             AutoPauseCard(
                 active = autoPauseActive,
@@ -260,7 +249,7 @@ internal fun HomeScreenContent(
                 onClick = { onNavigateToControls(ControlsSection.SPATIAL_MOTION) },
             )
         } else {
-            // 5. Rich Disconnected / Failed State
+            // 4. Rich Disconnected / Failed State
             DisconnectedGuideCard(
                 connection = state.connection,
                 onRetry = onRetry,
@@ -311,16 +300,16 @@ private fun HeroDeviceCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (isConnected) state.capabilities.modelName else "AirPods",
+                        text = if (isConnected) state.capabilities.modelName else stringResource(R.string.home_device_fallback),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = when (state.connection) {
-                            AirPodsTransport.ConnectionState.Connected -> "L2CAP Tier B Active · 50Hz IMU"
-                            AirPodsTransport.ConnectionState.Connecting -> "Connecting L2CAP channel…"
-                            is AirPodsTransport.ConnectionState.Failed -> "Connection Failed"
-                            AirPodsTransport.ConnectionState.Disconnected -> "Not Connected · Open Case"
+                            AirPodsTransport.ConnectionState.Connected -> stringResource(R.string.home_connection_active)
+                            AirPodsTransport.ConnectionState.Connecting -> stringResource(R.string.home_connection_connecting)
+                            is AirPodsTransport.ConnectionState.Failed -> stringResource(R.string.home_connection_failed)
+                            AirPodsTransport.ConnectionState.Disconnected -> stringResource(R.string.home_connection_disconnected)
                         },
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -337,7 +326,7 @@ private fun HeroDeviceCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Refresh,
-                        contentDescription = "Refresh connection",
+                        contentDescription = stringResource(R.string.home_refresh_connection_description),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(22.dp)
@@ -428,10 +417,10 @@ private fun UnifiedBatteryPillar(
     label: String,
     icon: ImageVector,
     battery: BatteryComponentState?,
-    inEar: Boolean? = null,
-    isCase: Boolean = false,
     isConnected: Boolean,
     modifier: Modifier = Modifier,
+    inEar: Boolean? = null,
+    isCase: Boolean = false,
 ) {
     val haptics = rememberAppHaptics()
     val interactionSource = remember { MutableInteractionSource() }
@@ -512,7 +501,7 @@ private fun UnifiedBatteryPillar(
                 if (isConnected && isCharging) {
                     Icon(
                         imageVector = Icons.Outlined.Bolt,
-                        contentDescription = "Charging",
+                        contentDescription = stringResource(R.string.charging_description),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp),
                     )
@@ -523,12 +512,12 @@ private fun UnifiedBatteryPillar(
 
             // Status tag
             val statusText = when {
-                !isConnected -> "Offline"
-                isCase -> if (isCharging) "Charging" else "Case Ready"
+                !isConnected -> stringResource(R.string.home_status_offline)
+                isCase -> if (isCharging) stringResource(R.string.home_status_charging) else stringResource(R.string.home_status_case_ready)
                 inEar == true -> stringResource(R.string.home_status_in_ear)
                 inEar == false -> stringResource(R.string.home_status_out_of_ear)
                 isCharging -> stringResource(R.string.home_status_charging)
-                else -> "Ready"
+                else -> stringResource(R.string.home_status_ready)
             }
             val isStatusActive = inEar == true || isCharging
 
@@ -542,7 +531,7 @@ private fun UnifiedBatteryPillar(
 
             // Bottom Action Pill
             val actionText = when {
-                isCase -> if (isCharging) "Charging" else "In Case"
+                isCase -> if (isCharging) stringResource(R.string.home_status_charging) else stringResource(R.string.home_status_in_case)
                 inEar == true -> stringResource(R.string.home_status_in_ear)
                 else -> stringResource(R.string.home_action_press_stem)
             }
@@ -566,135 +555,6 @@ private fun UnifiedBatteryPillar(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 )
             }
-        }
-    }
-}
-
-/**
- * Noise Control Section with 4 segmented options: Off, Transparency, Adaptive, ANC.
- * Only rendered for hardware that supports it.
- */
-@Composable
-private fun NoiseControlSection(
-    state: AirPodsState,
-) {
-    val haptics = rememberAppHaptics()
-    var selectedMode by remember { mutableStateOf(NoiseControlMode.OFF) }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(
-            text = stringResource(R.string.home_noise_control_header),
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
-        )
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(6.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                NoiseModePill(
-                    icon = Icons.Outlined.HearingDisabled,
-                    label = "Off",
-                    selected = selectedMode == NoiseControlMode.OFF,
-                    onClick = {
-                        haptics.confirm()
-                        selectedMode = NoiseControlMode.OFF
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-                NoiseModePill(
-                    icon = Icons.Outlined.Hearing,
-                    label = "Transp.",
-                    selected = selectedMode == NoiseControlMode.TRANSPARENCY,
-                    onClick = {
-                        haptics.confirm()
-                        selectedMode = NoiseControlMode.TRANSPARENCY
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-                NoiseModePill(
-                    icon = Icons.Outlined.Tune,
-                    label = "Adaptive",
-                    selected = selectedMode == NoiseControlMode.ADAPTIVE,
-                    onClick = {
-                        haptics.confirm()
-                        selectedMode = NoiseControlMode.ADAPTIVE
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-                NoiseModePill(
-                    icon = Icons.Outlined.GraphicEq,
-                    label = "ANC",
-                    selected = selectedMode == NoiseControlMode.NOISE_CANCELLATION,
-                    onClick = {
-                        haptics.confirm()
-                        selectedMode = NoiseControlMode.NOISE_CANCELLATION
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun NoiseModePill(
-    icon: ImageVector,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val backgroundColor by animateColorAsState(
-        targetValue = when {
-            selected -> MaterialTheme.colorScheme.primary
-            else -> Color.Transparent
-        },
-        animationSpec = androidpodsSpatialSpec(),
-        label = "noise-pill-bg-$label",
-    )
-    val contentColor by animateColorAsState(
-        targetValue = when {
-            selected -> MaterialTheme.colorScheme.onPrimary
-            else -> MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        animationSpec = androidpodsSpatialSpec(),
-        label = "noise-pill-fg-$label",
-    )
-
-    Surface(
-        modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(18.dp),
-        color = backgroundColor,
-    ) {
-        Column(
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = contentColor,
-                modifier = Modifier.size(20.dp),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = if (selected) FontWeight.Black else FontWeight.SemiBold),
-                color = contentColor,
-                maxLines = 1,
-            )
         }
     }
 }
@@ -827,7 +687,7 @@ private fun HeadGesturesQuickCard(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "Nod to answer, shake to decline calls",
+                        text = stringResource(R.string.home_head_gestures_summary),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -841,7 +701,7 @@ private fun HeadGesturesQuickCard(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                    contentDescription = "Open Setting",
+                    contentDescription = stringResource(R.string.home_open_setting_description),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .padding(8.dp)
@@ -921,7 +781,7 @@ private fun SpatialAudioQuickCard(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = if (state.motionStreamActive) "50Hz 6-Axis Stream Active" else "Ready · 50Hz Head Tracking",
+                        text = stringResource(if (state.motionStreamActive) R.string.home_spatial_active else R.string.home_spatial_ready),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -935,7 +795,7 @@ private fun SpatialAudioQuickCard(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                    contentDescription = "Open Setting",
+                    contentDescription = stringResource(R.string.home_open_setting_description),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .padding(8.dp)
@@ -990,7 +850,7 @@ private fun DisconnectedGuideCard(
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = if (isFailed) "Connection Issue" else "AirPods Disconnected",
+                text = stringResource(if (isFailed) R.string.home_connection_issue else R.string.home_airpods_disconnected),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                 color = if (isFailed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             )
@@ -1001,7 +861,7 @@ private fun DisconnectedGuideCard(
                 text = if (connection is AirPodsTransport.ConnectionState.Failed) {
                     connection.reason
                 } else {
-                    "Open your AirPods case or put them into your ears to automatically connect."
+                    stringResource(R.string.home_disconnected_hint)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1053,16 +913,21 @@ private fun ConnectionBadge(connection: AirPodsTransport.ConnectionState) {
 
     val reduceMotion = androidpodsReduceMotion()
     val isConnected = connection == AirPodsTransport.ConnectionState.Connected
-    val pulseTransition = rememberInfiniteTransition(label = "badge-pulse")
-    val dotAlpha by pulseTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "badge-dot-alpha",
-    )
+    val dotAlpha: androidx.compose.runtime.State<Float>?
+    if (isConnected && !reduceMotion) {
+        val pulseTransition = rememberInfiniteTransition(label = "badge-pulse")
+        dotAlpha = pulseTransition.animateFloat(
+            initialValue = 0.4f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1000, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "badge-dot-alpha",
+        )
+    } else {
+        dotAlpha = null
+    }
 
     Surface(
         shape = CircleShape,
@@ -1080,7 +945,7 @@ private fun ConnectionBadge(connection: AirPodsTransport.ConnectionState) {
                     color = primaryColor,
                     modifier = Modifier
                         .size(7.dp)
-                        .graphicsLayer { alpha = if (reduceMotion) 1f else dotAlpha },
+                        .graphicsLayer { alpha = dotAlpha?.value ?: 1f },
                 ) {}
             }
             Text(

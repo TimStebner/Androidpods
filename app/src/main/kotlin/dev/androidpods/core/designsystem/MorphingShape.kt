@@ -179,16 +179,21 @@ fun MorphingShapeHero(
     }
 
     // Subtle breathing rotation
-    val infiniteTransition = rememberInfiniteTransition(label = "hero-rotation")
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = -3f,
-        targetValue = 3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 4000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "hero-rotation-val",
-    )
+    val rotation: androidx.compose.runtime.State<Float>?
+    if (!reduceMotion) {
+        val infiniteTransition = rememberInfiniteTransition(label = "hero-rotation")
+        rotation = infiniteTransition.animateFloat(
+            initialValue = -3f,
+            targetValue = 3f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 4000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "hero-rotation-val",
+        )
+    } else {
+        rotation = null
+    }
 
     val currentMorph = remember(currentShapeIndex, nextShapeIndex) {
         Morph(shapes[currentShapeIndex], shapes[nextShapeIndex])
@@ -229,7 +234,7 @@ fun MorphingShapeHero(
         contentAlignment = Alignment.Center,
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val rot = if (reduceMotion) 0f else rotation
+            val rot = rotation?.value ?: 0f
 
             // 1. Outer Accent Aura Shape
             drawMorphShape(

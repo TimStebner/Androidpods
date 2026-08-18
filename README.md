@@ -263,6 +263,8 @@ Additional optimizations include:
 
 Androidpods is designed to work locally.
 
+See the full [Privacy Policy](PRIVACY.md).
+
 It does **not** require:
 
 - an Apple ID
@@ -344,7 +346,12 @@ Run Android Lint:
 ./gradlew :app:lintDebug
 ```
 
-The current documented project baseline contains **67 JVM unit tests** with **0 Android Lint errors**.
+Build the optimized release bundle and run device benchmarks:
+
+```bash
+./gradlew :app:bundleRelease
+./gradlew :benchmark:connectedBenchmarkAndroidTest
+```
 
 ---
 
@@ -380,13 +387,16 @@ dev.androidpods
     └── widgets/
 ```
 
-The project intentionally remains a single Gradle `app` module while keeping the Kotlin source tree separated into clear architectural layers.
+Production code intentionally remains in the single Gradle `app` module. The separate
+`benchmark` module contains only Macrobenchmark and Baseline Profile instrumentation.
 
 ---
 
 ## Current Status
 
-Androidpods is currently an **early MVP**.
+Androidpods is currently a **release candidate**. Publication remains gated by the signed-artifact,
+hardware-benchmark, Play pre-launch, permission-policy, and non-SDK API checks documented in the
+release review.
 
 Milestones 0–7, the Material 3 Expressive redesign, battery pop-up and the current performance/battery optimization pass are implemented.
 
@@ -417,6 +427,8 @@ More detailed technical information is available inside the repository:
 - [`ROADMAP.md`](ROADMAP.md) — current implementation and hardware-verification status
 - [`docs/adr/`](docs/adr/) — architectural decision records
 - [`NOTICE.md`](NOTICE.md) — third-party attribution
+- [`PRIVACY.md`](PRIVACY.md) — local data handling and permissions
+- [`STORE_LISTING.md`](STORE_LISTING.md) — Play listing, Data Safety and permission-review notes
 
 Notable architectural decisions:
 

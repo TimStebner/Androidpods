@@ -51,7 +51,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -95,7 +95,7 @@ fun OnboardingScreen(onAssociated: () -> Unit, modifier: Modifier = Modifier) {
     var isPairing by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val bluetoothAvailability by remember { bluetoothAvailability(context) }
-        .collectAsState(initial = BluetoothAvailability.Disabled)
+        .collectAsStateWithLifecycle(initialValue = BluetoothAvailability.Disabled)
     val cancelledMessage = stringResource(R.string.onboarding_pairing_cancelled)
 
     val associationLauncher = rememberLauncherForActivityResult(

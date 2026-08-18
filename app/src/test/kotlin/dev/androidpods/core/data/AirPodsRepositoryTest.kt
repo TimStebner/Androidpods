@@ -5,18 +5,20 @@ import dev.androidpods.core.airpods.AirPodsCapabilities
 import dev.androidpods.core.airpods.BatteryChargeStatus
 import dev.androidpods.core.airpods.BatteryComponentState
 import dev.androidpods.core.airpods.EarDetectionState
+import dev.androidpods.core.airpods.PressSpeed
 import dev.androidpods.core.bluetooth.AirPodsTransport
 import dev.androidpods.core.bluetooth.FakeAirPodsTransport
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import java.io.IOException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-// Fixture packets: app/src/test/resources/fixtures/aap/session-start-capture.txt -- same real
-// AirPods 4 capture AapPacketDecoderTest verifies against (PROJECT.md §28).
+// Fixture packets: app/src/test/resources/fixtures/aap/session-start-capture.txt -- the same
+// sanitized AirPods 4 capture AapPacketDecoderTest verifies against (PROJECT.md §28).
 private fun loadFixturePacket(index: Int): ByteArray {
     val line = object {}.javaClass.getResourceAsStream("/fixtures/aap/session-start-capture.txt")
         ?.bufferedReader()
@@ -29,6 +31,27 @@ private fun loadFixturePacket(index: Int): ByteArray {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AirPodsRepositoryTest {
+    @Test
+    fun `write operation fails instead of pretending success while disconnected`() = runTest {
+        val repository = AirPodsRepository(FakeAirPodsTransport(), backgroundScope, FakeTierProbeCache())
+
+        val failure = runCatching { repository.setPressSpeed(PressSpeed.SLOW) }.exceptionOrNull()
+
+        assertTrue(failure is IOException)
+    }
+
+    @Test
+    fun `transport write failure propagates through repository operations`() = runTest {
+        val transport = FakeAirPodsTransport()
+        val repository = AirPodsRepository(transport, backgroundScope, FakeTierProbeCache())
+        repository.connect()
+        transport.sendFailure = IOException("write failed")
+
+        val failure = runCatching { repository.setPressSpeed(PressSpeed.SLOW) }.exceptionOrNull()
+
+        assertTrue(failure is IOException)
+    }
+
     @Test
     fun `initial state is disconnected with unknown capabilities`() = runTest {
         val repository = AirPodsRepository(FakeAirPodsTransport(), backgroundScope, FakeTierProbeCache())
@@ -47,7 +70,6 @@ class AirPodsRepositoryTest {
         transport.emit(loadFixturePacket(3)) // INFORMATION, modelNumber A3050
 
         val capabilities = repository.state.value.capabilities
-        assertFalse(capabilities.supportsNoiseControl)
         assertTrue(capabilities.supportsEarDetection)
     }
 

@@ -48,11 +48,11 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun AnimatedLeftAirPod(
+    modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary,
     accentTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     inEar: Boolean? = null,
     isCharging: Boolean = false,
-    modifier: Modifier = Modifier,
     sizeDp: Dp = 92.dp,
     onClick: (() -> Unit)? = null,
 ) {
@@ -74,11 +74,11 @@ fun AnimatedLeftAirPod(
  */
 @Composable
 fun AnimatedRightAirPod(
+    modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary,
     accentTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     inEar: Boolean? = null,
     isCharging: Boolean = false,
-    modifier: Modifier = Modifier,
     sizeDp: Dp = 92.dp,
     onClick: (() -> Unit)? = null,
 ) {
@@ -122,40 +122,43 @@ private fun AnimatedAirPodExpressiveItem(
     )
 
     val reduceMotion = androidpodsReduceMotion()
-    val floatTransition = rememberInfiniteTransition(label = "m3-airpod-3d-motion")
-
-    // 1. Smooth 3D Levitation Float
-    val floatY by floatTransition.animateFloat(
-        initialValue = if (isLeft) -4.5f else 4.5f,
-        targetValue = if (isLeft) 4.5f else -4.5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "m3-float-y",
-    )
-
-    // 2. Smooth 3D Yaw Rotation (perspective turn)
-    val yawAngle by floatTransition.animateFloat(
-        initialValue = if (isLeft) -12f else 12f,
-        targetValue = if (isLeft) 8f else -8f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2900, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "m3-yaw-angle",
-    )
-
-    // 3. Smooth 3D Pitch Tilt
-    val pitchAngle by floatTransition.animateFloat(
-        initialValue = if (isLeft) 6f else -5f,
-        targetValue = if (isLeft) -5f else 6f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2600, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "m3-pitch-angle",
-    )
+    val floatY: androidx.compose.runtime.State<Float>?
+    val yawAngle: androidx.compose.runtime.State<Float>?
+    val pitchAngle: androidx.compose.runtime.State<Float>?
+    if (!reduceMotion) {
+        val floatTransition = rememberInfiniteTransition(label = "m3-airpod-3d-motion")
+        floatY = floatTransition.animateFloat(
+            initialValue = if (isLeft) -4.5f else 4.5f,
+            targetValue = if (isLeft) 4.5f else -4.5f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 2400, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "m3-float-y",
+        )
+        yawAngle = floatTransition.animateFloat(
+            initialValue = if (isLeft) -12f else 12f,
+            targetValue = if (isLeft) 8f else -8f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 2900, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "m3-yaw-angle",
+        )
+        pitchAngle = floatTransition.animateFloat(
+            initialValue = if (isLeft) 6f else -5f,
+            targetValue = if (isLeft) -5f else 6f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 2600, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "m3-pitch-angle",
+        )
+    } else {
+        floatY = null
+        yawAngle = null
+        pitchAngle = null
+    }
 
     val headPath = remember { Path() }
 
@@ -166,9 +169,9 @@ private fun AnimatedAirPodExpressiveItem(
                 cameraDistance = 14f * density
                 scaleX = pressScale
                 scaleY = pressScale
-                translationY = if (!reduceMotion) floatY else 0f
-                rotationX = (if (!reduceMotion) pitchAngle else 0f) + pressPitch
-                rotationY = if (!reduceMotion) yawAngle else 0f
+                translationY = floatY?.value ?: 0f
+                rotationX = (pitchAngle?.value ?: 0f) + pressPitch
+                rotationY = yawAngle?.value ?: 0f
             }
             .clickable(
                 interactionSource = interactionSource,
@@ -197,11 +200,11 @@ private fun AnimatedAirPodExpressiveItem(
  */
 @Composable
 fun AnimatedAirPodsCase(
+    modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary,
     accentTint: Color = MaterialTheme.colorScheme.outlineVariant,
     batteryLevel: Int? = null,
     isCharging: Boolean = false,
-    modifier: Modifier = Modifier,
     sizeDp: Dp = 102.dp,
     onClick: (() -> Unit)? = null,
 ) {
@@ -222,27 +225,37 @@ fun AnimatedAirPodsCase(
     )
 
     val reduceMotion = androidpodsReduceMotion()
-    val glowTransition = rememberInfiniteTransition(label = "m3-case-led-glow")
-    val ledGlowAlpha by glowTransition.animateFloat(
-        initialValue = 0.45f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "m3-led-glow-alpha",
-    )
+    val ledGlowAlpha: androidx.compose.runtime.State<Float>?
+    if (isCharging && !reduceMotion) {
+        val glowTransition = rememberInfiniteTransition(label = "m3-case-led-glow")
+        ledGlowAlpha = glowTransition.animateFloat(
+            initialValue = 0.45f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "m3-led-glow-alpha",
+        )
+    } else {
+        ledGlowAlpha = null
+    }
 
-    val caseFloatTransition = rememberInfiniteTransition(label = "m3-case-float")
-    val caseYaw by caseFloatTransition.animateFloat(
-        initialValue = -3f,
-        targetValue = 3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "m3-case-yaw",
-    )
+    val caseYaw: androidx.compose.runtime.State<Float>?
+    if (!reduceMotion) {
+        val caseFloatTransition = rememberInfiniteTransition(label = "m3-case-float")
+        caseYaw = caseFloatTransition.animateFloat(
+            initialValue = -3f,
+            targetValue = 3f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 3400, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "m3-case-yaw",
+        )
+    } else {
+        caseYaw = null
+    }
 
     val ledColor = when {
         isCharging -> Color(0xFF22C55E) // Bright Emerald Green charging
@@ -259,7 +272,7 @@ fun AnimatedAirPodsCase(
                 scaleX = pressScale
                 scaleY = pressScale
                 rotationX = 5f + pressPitch
-                rotationY = if (!reduceMotion) caseYaw else 0f
+                rotationY = caseYaw?.value ?: 0f
             }
             .clickable(
                 interactionSource = interactionSource,
@@ -275,7 +288,7 @@ fun AnimatedAirPodsCase(
                 bodyColor = tint,
                 seamColor = accentTint,
                 ledColor = ledColor,
-                ledAlpha = if (reduceMotion) 1f else ledGlowAlpha,
+                ledAlpha = ledGlowAlpha?.value ?: 1f,
                 isCharging = isCharging,
             )
         }
@@ -288,6 +301,7 @@ fun AnimatedAirPodsCase(
  */
 @Composable
 fun AirPodsExpressiveTrio(
+    modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary,
     accentTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     leftInEar: Boolean? = null,
@@ -296,7 +310,6 @@ fun AirPodsExpressiveTrio(
     rightCharging: Boolean = false,
     caseCharging: Boolean = false,
     caseBatteryLevel: Int? = null,
-    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.androidpods.core.bluetooth
 
+import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +18,7 @@ class FakeAirPodsTransport(
     override val packets: Flow<ByteArray> = inbound
 
     val sent = mutableListOf<ByteArray>()
+    var sendFailure: IOException? = null
     var connectCallCount = 0
         private set
 
@@ -30,6 +32,7 @@ class FakeAirPodsTransport(
     }
 
     override suspend fun send(packet: ByteArray) {
+        sendFailure?.let { throw it }
         sent.add(packet)
     }
 

@@ -137,15 +137,22 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
     }
 
     override suspend fun send(packet: ByteArray) {
-        val activeSocket = socket ?: return
-        if (dev.androidpods.app.BuildConfig.DEBUG) {
-            android.util.Log.d(TAG, "SEND [${packet.size}b]: ${packet.joinToString(" ") { "%02x".format(it) }}")
+        val activeSocket = socket ?: throw IOException("AirPods transport is not connected")
+        ProtocolLogging.rawPacket(TAG) {
+            "SEND [${packet.size}b]: ${packet.joinToString(" ") { "%02x".format(it) }}"
         }
-        withContext(Dispatchers.IO) {
-            runCatching {
+        try {
+            withContext(Dispatchers.IO) {
                 activeSocket.outputStream.write(packet)
                 activeSocket.outputStream.flush()
             }
+        } catch (failure: IOException) {
+            if (socket === activeSocket) {
+                runCatching { activeSocket.close() }
+                socket = null
+                _state.value = AirPodsTransport.ConnectionState.Failed("transport write failed")
+            }
+            throw failure
         }
     }
 
@@ -160,8 +167,8 @@ class AapTransport(private val device: BluetoothDevice) : AirPodsTransport {
                     val read = input.read(buffer)
                     if (read <= 0) break
                     val packet = buffer.copyOf(read)
-                    if (dev.androidpods.app.BuildConfig.DEBUG) {
-                        android.util.Log.d(TAG, "RECV [${read}b]: ${packet.joinToString(" ") { "%02x".format(it) }}")
+                    ProtocolLogging.rawPacket(TAG) {
+                        "RECV [${read}b]: ${packet.joinToString(" ") { "%02x".format(it) }}"
                     }
                     ProtocolLogging.rawPacket(TAG) { "read $read bytes" }
                     _packets.emit(packet)

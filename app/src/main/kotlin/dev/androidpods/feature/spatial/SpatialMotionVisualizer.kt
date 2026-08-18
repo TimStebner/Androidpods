@@ -4,7 +4,6 @@ package dev.androidpods.feature.spatial
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -55,13 +56,14 @@ import dev.androidpods.core.data.AirPodsState
 import dev.androidpods.core.designsystem.androidpodsSpatialSpec
 import dev.androidpods.core.gestures.HeadGesture
 import dev.androidpods.core.gestures.HeadGestureDetector
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
 @Composable
 fun SpatialMotionCard(
-    state: AirPodsState,
     modifier: Modifier = Modifier,
 ) {
+    val state by AirPodsRepositoryProvider.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val isConnected = state.connection is AirPodsTransport.ConnectionState.Connected
@@ -74,7 +76,7 @@ fun SpatialMotionCard(
 
     LaunchedEffect(orientation) {
         if (orientation != null) {
-            val gesture = detector.onSample(orientation.pitch, orientation.yaw, orientation.roll)
+            val gesture = detector.onSample(orientation.pitch, orientation.yaw)
             if (gesture != HeadGesture.NONE) {
                 detectedGesture = gesture
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -147,7 +149,7 @@ fun SpatialMotionCard(
                     ) {
                         Icon(
                             imageVector = if (isStreaming) Icons.Default.Stop else Icons.Default.PlayArrow,
-                            contentDescription = if (isStreaming) "Stop Motion Stream" else "Start Motion Stream",
+                            contentDescription = stringResource(if (isStreaming) R.string.spatial_stop_motion_stream else R.string.spatial_start_motion_stream),
                             tint = if (isStreaming) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
                         )
                     }
@@ -168,17 +170,17 @@ fun SpatialMotionCard(
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                     contentAlignment = Alignment.Center,
                 ) {
-                    val animatedPitch by animateFloatAsState(
+                    val animatedPitch = animateFloatAsState(
                         targetValue = currentPitch,
                         animationSpec = androidpodsSpatialSpec(),
                         label = "pitch-anim",
                     )
-                    val animatedYaw by animateFloatAsState(
+                    val animatedYaw = animateFloatAsState(
                         targetValue = currentYaw,
                         animationSpec = androidpodsSpatialSpec(),
                         label = "yaw-anim",
                     )
-                    val animatedRoll by animateFloatAsState(
+                    val animatedRoll = animateFloatAsState(
                         targetValue = currentRoll,
                         animationSpec = androidpodsSpatialSpec(),
                         label = "roll-anim",
@@ -204,8 +206,8 @@ fun SpatialMotionCard(
                         ) {
                             Text(
                                 text = when (detectedGesture) {
-                                    HeadGesture.NOD -> "✨ Nod Detected (Yes)"
-                                    HeadGesture.SHAKE -> "❌ Shake Detected (No)"
+                                    HeadGesture.NOD -> stringResource(R.string.spatial_nod_detected)
+                                    HeadGesture.SHAKE -> stringResource(R.string.spatial_shake_detected)
                                     HeadGesture.NONE -> ""
                                 },
                                 style = MaterialTheme.typography.labelMedium,
@@ -222,17 +224,17 @@ fun SpatialMotionCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     OrientationPill(
-                        label = "Pitch",
+                        label = stringResource(R.string.spatial_pitch),
                         value = if (orientation != null) "%.1f°".format(orientation.pitch) else "--",
                         modifier = Modifier.weight(1f),
                     )
                     OrientationPill(
-                        label = "Yaw",
+                        label = stringResource(R.string.spatial_yaw),
                         value = if (orientation != null) "%.1f°".format(orientation.yaw) else "--",
                         modifier = Modifier.weight(1f),
                     )
                     OrientationPill(
-                        label = "Roll",
+                        label = stringResource(R.string.spatial_roll),
                         value = if (orientation != null) "%.1f°".format(orientation.roll) else "--",
                         modifier = Modifier.weight(1f),
                     )
@@ -262,9 +264,9 @@ fun SpatialMotionCard(
 
 @Composable
 private fun HeadOrientation3DView(
-    pitch: Float,
-    yaw: Float,
-    roll: Float,
+    pitch: State<Float>,
+    yaw: State<Float>,
+    roll: State<Float>,
     modifier: Modifier = Modifier,
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -274,61 +276,52 @@ private fun HeadOrientation3DView(
     Box(
         modifier = modifier
             .graphicsLayer {
-                rotationX = -pitch
-                rotationY = yaw
-                rotationZ = -roll
+                rotationX = -pitch.value
+                rotationY = yaw.value
+                rotationZ = -roll.value
                 cameraDistance = 12f * density
             },
         contentAlignment = Alignment.Center,
     ) {
-        Canvas(modifier = Modifier.size(140.dp)) {
+        Box(modifier = Modifier.size(140.dp).drawWithCache {
             val center = Offset(size.width / 2f, size.height / 2f)
             val radius = size.minDimension / 2.5f
-
-            // Reference Orbital Ring (Spatial Frame)
-            drawCircle(
-                color = surfaceVariant.copy(alpha = 0.25f),
-                radius = radius * 1.2f,
-                center = center,
-                style = Stroke(width = 2.dp.toPx()),
-            )
-
-            // Head / Sphere Gradient
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        primaryColor.copy(alpha = 0.9f),
-                        primaryColor.copy(alpha = 0.4f),
-                        Color.Transparent,
-                    ),
-                    center = center - Offset(radius * 0.3f, radius * 0.3f),
-                    radius = radius * 1.3f,
+            val orbitalStroke = Stroke(width = 2.dp.toPx())
+            val headGradient = Brush.radialGradient(
+                colors = listOf(
+                    primaryColor.copy(alpha = 0.9f),
+                    primaryColor.copy(alpha = 0.4f),
+                    Color.Transparent,
                 ),
-                radius = radius,
-                center = center,
+                center = center - Offset(radius * 0.3f, radius * 0.3f),
+                radius = radius * 1.3f,
             )
 
-            // Front Nose/Facing Indicator
-            drawCircle(
-                color = secondaryColor,
-                radius = 8.dp.toPx(),
-                center = center + Offset(0f, -radius * 0.7f),
-            )
-
-            // Left Ear Marker
-            drawCircle(
-                color = primaryColor,
-                radius = 6.dp.toPx(),
-                center = center + Offset(-radius * 0.9f, 0f),
-            )
-
-            // Right Ear Marker
-            drawCircle(
-                color = primaryColor,
-                radius = 6.dp.toPx(),
-                center = center + Offset(radius * 0.9f, 0f),
-            )
-        }
+            onDrawBehind {
+                drawCircle(
+                    color = surfaceVariant.copy(alpha = 0.25f),
+                    radius = radius * 1.2f,
+                    center = center,
+                    style = orbitalStroke,
+                )
+                drawCircle(brush = headGradient, radius = radius, center = center)
+                drawCircle(
+                    color = secondaryColor,
+                    radius = 8.dp.toPx(),
+                    center = center + Offset(0f, -radius * 0.7f),
+                )
+                drawCircle(
+                    color = primaryColor,
+                    radius = 6.dp.toPx(),
+                    center = center + Offset(-radius * 0.9f, 0f),
+                )
+                drawCircle(
+                    color = primaryColor,
+                    radius = 6.dp.toPx(),
+                    center = center + Offset(radius * 0.9f, 0f),
+                )
+            }
+        })
     }
 }
 

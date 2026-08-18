@@ -4,12 +4,10 @@ package dev.androidpods.core.telecom
 import android.annotation.SuppressLint
 import android.content.Context
 import android.media.AudioManager
-import android.os.Build
 import android.telecom.TelecomManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
-import androidx.annotation.RequiresApi
 import dev.androidpods.core.airpods.AapEvent
 import dev.androidpods.core.bluetooth.hasCallPermissions
 import dev.androidpods.core.data.AirPodsRepositoryProvider
@@ -17,8 +15,16 @@ import dev.androidpods.core.data.AppSettingsRepositoryProvider
 import dev.androidpods.core.gestures.HeadGesture
 import dev.androidpods.core.gestures.HeadGestureDetector
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+
+internal fun shouldStartCallGestureMotion(
+    settingEnabled: Boolean,
+    capabilitySupported: Boolean,
+    connected: Boolean,
+): Boolean = settingEnabled && capabilitySupported && connected
 
 class CallGestureManager(
     private val context: Context,
@@ -47,8 +53,14 @@ class CallGestureManager(
                         return@collect
                     }
                     val settings = AppSettingsRepositoryProvider.settings.value
-                    if (settings.headGesturesEnabled) {
-                        val detected = detector.onSample(event.pitch, event.yaw, event.roll, now)
+                    val state = AirPodsRepositoryProvider.state.value
+                    if (shouldStartCallGestureMotion(
+                            settingEnabled = settings.headGesturesEnabled,
+                            capabilitySupported = state.capabilities.supportsHeadGestures,
+                            connected = state.connection is dev.androidpods.core.bluetooth.AirPodsTransport.ConnectionState.Connected,
+                        )
+                    ) {
+                        val detected = detector.onSample(event.pitch, event.yaw, now)
                         if (detected != HeadGesture.NONE) {
                             handleGesture(detected)
                         }
@@ -56,26 +68,38 @@ class CallGestureManager(
                 }
             }
         }
+
+        scope.launch {
+            combine(
+                AppSettingsRepositoryProvider.settings,
+                AirPodsRepositoryProvider.state,
+            ) { settings, state ->
+                shouldStartCallGestureMotion(
+                    settingEnabled = settings.headGesturesEnabled,
+                    capabilitySupported = state.capabilities.supportsHeadGestures,
+                    connected = state.connection is dev.androidpods.core.bluetooth.AirPodsTransport.ConnectionState.Connected,
+                )
+            }
+                .distinctUntilChanged()
+                .collect { if (isRinging) syncMotionStreamForRinging() }
+        }
     }
 
     fun registerIfPossible() {
         if (isRegistered || !hasCallPermissions(context)) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            registerTelephonyCallback()
-        }
+        registerTelephonyCallback()
     }
 
     @SuppressLint("MissingPermission")
+    @Suppress("DEPRECATION")
     private fun handleGesture(gesture: HeadGesture) {
         if (!hasCallPermissions(context)) return
         when (gesture) {
             HeadGesture.NOD -> {
                 var accepted = false
                 runCatching {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        telecomManager?.acceptRingingCall()
-                        accepted = true
-                    }
+                    telecomManager?.acceptRingingCall()
+                    accepted = true
                 }
                 if (!accepted) {
                     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
@@ -98,9 +122,7 @@ class CallGestureManager(
         isRinging = true
         ringingStartTimeMs = System.currentTimeMillis()
         detector.reset()
-        scope.launch {
-            AirPodsRepositoryProvider.current?.startMotionStream()
-        }
+        scope.launch { syncMotionStreamForRinging() }
     }
 
     private fun onRingingFinished() {
@@ -111,7 +133,21 @@ class CallGestureManager(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
+    private suspend fun syncMotionStreamForRinging() {
+        val repository = AirPodsRepositoryProvider.current ?: return
+        val state = AirPodsRepositoryProvider.state.value
+        val shouldRun = isRinging && shouldStartCallGestureMotion(
+            settingEnabled = AppSettingsRepositoryProvider.settings.value.headGesturesEnabled,
+            capabilitySupported = state.capabilities.supportsHeadGestures,
+            connected = state.connection is dev.androidpods.core.bluetooth.AirPodsTransport.ConnectionState.Connected,
+        )
+        if (shouldRun && !state.motionStreamActive) {
+            runCatching { repository.startMotionStream() }
+        } else if (!shouldRun && state.motionStreamActive) {
+            runCatching { repository.stopMotionStream() }
+        }
+    }
+
     @SuppressLint("MissingPermission")
     private fun registerTelephonyCallback() {
         if (!hasCallPermissions(context)) return
@@ -134,6 +170,7 @@ class CallGestureManager(
 }
 
 object CallGestureManagerProvider {
+    @SuppressLint("StaticFieldLeak") // Process singleton intentionally retains only applicationContext.
     private var instance: CallGestureManager? = null
 
     fun get(context: Context, scope: CoroutineScope): CallGestureManager {

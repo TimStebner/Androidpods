@@ -8,47 +8,47 @@ import org.junit.Test
 
 class CapabilityResolverTest {
     @Test
-    fun `A3050 -- this project's own AirPods 4 -- has no noise control and no stem configuration`() {
+    fun `write capabilities stay disabled for hardware families not validated by this project`() {
+        listOf("A3055", "A2083", "A2931", "A2096", "A2564", "A2031", "A1523").forEach { modelNumber ->
+            val capabilities = CapabilityResolver.resolve(modelNumber)
+
+            assertFalse("$modelNumber press-speed writes", capabilities.supportsPressSpeed)
+            assertFalse("$modelNumber head-gesture writes", capabilities.supportsHeadGestures)
+            assertFalse("$modelNumber chime writes", capabilities.supportsEarbudChime)
+        }
+    }
+
+    @Test
+    fun `validated AirPods 4 exposes only hardware verified write capabilities`() {
         val capabilities = CapabilityResolver.resolve("A3050")
 
         assertEquals("AirPods 4", capabilities.modelName)
-        assertFalse(capabilities.supportsNoiseControl)
-        assertFalse(capabilities.supportsStemConfiguration)
-        assertEquals(emptySet<NoiseControlMode>(), capabilities.supportedNoiseControlModes)
         assertTrue(capabilities.supportsEarDetection)
+        assertTrue(capabilities.supportsPressSpeed)
+        assertTrue(capabilities.supportsHeadGestures)
         assertTrue(capabilities.supportsEarbudChime)
-        assertFalse(capabilities.supportsCaseSpeaker)
     }
 
     @Test
-    fun `ANC AirPods 4 model number supports all noise control modes and stem configuration`() {
+    fun `ANC AirPods 4 is recognized but remains read only without hardware validation`() {
         val capabilities = CapabilityResolver.resolve("A3055")
 
         assertEquals("AirPods 4 with ANC", capabilities.modelName)
-        assertTrue(capabilities.supportsNoiseControl)
-        assertTrue(capabilities.supportsStemConfiguration)
-        assertTrue(capabilities.supportsEarbudChime)
-        assertTrue(capabilities.supportsCaseSpeaker)
-        assertEquals(
-            setOf(
-                NoiseControlMode.OFF,
-                NoiseControlMode.TRANSPARENCY,
-                NoiseControlMode.ADAPTIVE,
-                NoiseControlMode.NOISE_CANCELLATION,
-            ),
-            capabilities.supportedNoiseControlModes,
-        )
+        assertTrue(capabilities.supportsEarDetection)
+        assertFalse(capabilities.supportsPressSpeed)
+        assertFalse(capabilities.supportsHeadGestures)
+        assertFalse(capabilities.supportsEarbudChime)
     }
 
     @Test
-    fun `AirPods Pro 2 supports stem configuration and noise control`() {
+    fun `AirPods Pro 2 is recognized but remains read only without hardware validation`() {
         val capabilities = CapabilityResolver.resolve("A2931")
 
         assertEquals("AirPods Pro (2nd gen)", capabilities.modelName)
-        assertTrue(capabilities.supportsNoiseControl)
-        assertTrue(capabilities.supportsStemConfiguration)
-        assertTrue(capabilities.supportsEarbudChime)
-        assertTrue(capabilities.supportsCaseSpeaker)
+        assertTrue(capabilities.supportsEarDetection)
+        assertFalse(capabilities.supportsPressSpeed)
+        assertFalse(capabilities.supportsHeadGestures)
+        assertFalse(capabilities.supportsEarbudChime)
     }
 
     @Test
@@ -57,6 +57,5 @@ class CapabilityResolverTest {
 
         assertEquals(AirPodsCapabilities.UNKNOWN, capabilities)
         assertFalse(capabilities.supportsEarbudChime)
-        assertFalse(capabilities.supportsCaseSpeaker)
     }
 }

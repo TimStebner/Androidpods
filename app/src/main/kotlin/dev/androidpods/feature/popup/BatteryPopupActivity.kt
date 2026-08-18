@@ -3,13 +3,13 @@ package dev.androidpods.feature.popup
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.graphics.drawable.toDrawable
 import androidx.compose.runtime.getValue
 import dev.androidpods.app.MainActivity
 import dev.androidpods.core.data.AirPodsRepositoryProvider
@@ -28,12 +28,12 @@ class BatteryPopupActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+        window.setBackgroundDrawable(android.graphics.Color.TRANSPARENT.toDrawable())
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
         setContent {
-            val settings by AppSettingsRepositoryProvider.settings.collectAsState()
-            val state by AirPodsRepositoryProvider.state.collectAsState()
+            val settings by AppSettingsRepositoryProvider.settings.collectAsStateWithLifecycle()
+            val state by AirPodsRepositoryProvider.state.collectAsStateWithLifecycle()
 
             AndroidpodsTheme(
                 themeMode = settings.themeMode,

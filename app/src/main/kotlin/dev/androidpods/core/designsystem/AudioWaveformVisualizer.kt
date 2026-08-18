@@ -39,26 +39,32 @@ fun AudioWaveformVisualizer(
 ) {
     val reduceMotion = androidpodsReduceMotion()
 
-    val infiniteTransition = rememberInfiniteTransition(label = "waveform-anim")
-    val phase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = (2 * PI).toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2600, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "waveform-phase",
-    )
-
-    val pulse by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 1.15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "waveform-pulse",
-    )
+    val animatedPhase: androidx.compose.runtime.State<Float>?
+    val animatedPulse: androidx.compose.runtime.State<Float>?
+    if (active && !reduceMotion) {
+        val infiniteTransition = rememberInfiniteTransition(label = "waveform-anim")
+        animatedPhase = infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = (2 * PI).toFloat(),
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 2600, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "waveform-phase",
+        )
+        animatedPulse = infiniteTransition.animateFloat(
+            initialValue = 0.8f,
+            targetValue = 1.15f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "waveform-pulse",
+        )
+    } else {
+        animatedPhase = null
+        animatedPulse = null
+    }
 
     val baseHeights = remember(barCount) {
         FloatArray(barCount) { index ->
@@ -76,6 +82,8 @@ fun AudioWaveformVisualizer(
     ) {
         val totalWidth = size.width
         val canvasHeight = size.height
+        val phase = animatedPhase?.value ?: 0f
+        val pulse = animatedPulse?.value ?: 1f
         val barWidth = (totalWidth / (barCount * 1.8f)).coerceIn(2.5f, 6.5f)
         val availableGap = (totalWidth - (barCount * barWidth)) / (barCount - 1).coerceAtLeast(1)
 

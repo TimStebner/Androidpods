@@ -46,32 +46,6 @@ class AapSessionTest {
     }
 
     @Test
-    fun `setStemAction sends correctly formatted configuration packet`() = runTest {
-        val transport = FakeAirPodsTransport()
-        val session = AapSession(transport)
-
-        session.setStemAction(isLeft = true, StemPressAndHoldAction.VOICE_ASSISTANT)
-
-        val expected = byteArrayOf(0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00)
-        assertEquals(listOf(expected.toList()), transport.sent.map { it.toList() })
-    }
-
-    @Test
-    fun `setAssistantTriggerEnabled dispatches configuration for both earbuds`() = runTest {
-        val transport = FakeAirPodsTransport()
-        val session = AapSession(transport)
-
-        session.setAssistantTriggerEnabled(false)
-
-        val expectedLeft = byteArrayOf(0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x18, 0x00, 0x02, 0x00, 0x00)
-        val expectedRight = byteArrayOf(0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x17, 0x00, 0x02, 0x00, 0x00)
-        assertEquals(
-            listOf(expectedLeft.toList(), expectedRight.toList()),
-            transport.sent.map { it.toList() },
-        )
-    }
-
-    @Test
     fun `setPressSpeed sends config 0x25 packet`() = runTest {
         val transport = FakeAirPodsTransport()
         val session = AapSession(transport)

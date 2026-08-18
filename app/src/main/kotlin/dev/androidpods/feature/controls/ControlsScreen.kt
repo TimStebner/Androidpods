@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.androidpods.feature.controls
 
-import android.content.Intent
-import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
@@ -34,7 +33,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.androidpods.app.R
 import dev.androidpods.core.airpods.HoldDuration
+import dev.androidpods.core.airpods.HeadGesturesState
 import dev.androidpods.core.airpods.PressSpeed
 import dev.androidpods.core.designsystem.ExpressiveScreenHeader
 import dev.androidpods.core.bluetooth.AirPodsTransport
@@ -61,7 +61,18 @@ import dev.androidpods.core.data.AppSettingsRepositoryProvider
 import dev.androidpods.core.designsystem.AndroidpodsTheme
 import dev.androidpods.core.designsystem.androidpodsSpatialSpec
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import java.io.IOException
+
+internal fun AirPodsState.hasSameControlsContentAs(other: AirPodsState): Boolean =
+    connection == other.connection &&
+        capabilities == other.capabilities &&
+        battery == other.battery &&
+        earDetection == other.earDetection &&
+        pressSpeed == other.pressSpeed &&
+        holdDuration == other.holdDuration &&
+        headGesturesState == other.headGesturesState
 
 enum class ControlsSection {
     EAR_DETECTION,
@@ -75,12 +86,31 @@ fun ControlsScreen(
     modifier: Modifier = Modifier,
     initialSection: ControlsSection? = null,
 ) {
-    val state by AirPodsRepositoryProvider.state.collectAsState()
-    val settings by AppSettingsRepositoryProvider.settings.collectAsState()
+    val controlsState = remember {
+        AirPodsRepositoryProvider.state.distinctUntilChanged { previous, next ->
+            previous.hasSameControlsContentAs(next)
+        }
+    }
+    val state by controlsState.collectAsStateWithLifecycle(
+        initialValue = AirPodsState.INITIAL,
+    )
+    val settings by AppSettingsRepositoryProvider.settings.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val settingsRepo = AppSettingsRepositoryProvider.get(context)
+    val writeFailedMessage = stringResource(R.string.controls_write_failed)
+
+    fun submitDeviceSetting(
+        writeToDevice: suspend () -> Unit,
+        persist: suspend () -> Unit,
+    ) {
+        scope.launch {
+            writeDeviceSetting(writeToDevice, persist).onFailure {
+                Toast.makeText(context, writeFailedMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     ControlsScreenContent(
         state = state,
@@ -94,37 +124,42 @@ fun ControlsScreen(
             haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
             scope.launch { settingsRepo.setAutoResume(enabled) }
         },
-        assistantTriggerEnabled = settings.assistantTriggerEnabled,
-        onAssistantTriggerChanged = { enabled ->
-            haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
-            scope.launch {
-                settingsRepo.setAssistantTrigger(enabled)
-                AirPodsRepositoryProvider.current?.setAssistantTriggerEnabled(enabled)
-            }
-        },
-        headGesturesEnabled = settings.headGesturesEnabled,
+        headGesturesEnabled = state.headGesturesState?.let { it == HeadGesturesState.ENABLED }
+            ?: settings.headGesturesEnabled,
         onHeadGesturesChanged = { enabled ->
             haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
-            scope.launch {
-                settingsRepo.setHeadGestures(enabled)
-                AirPodsRepositoryProvider.current?.setHeadGesturesEnabled(enabled)
-            }
+            submitDeviceSetting(
+                writeToDevice = {
+                    val repository = AirPodsRepositoryProvider.current
+                        ?: throw IOException("AirPods repository is unavailable")
+                    repository.setHeadGesturesEnabled(enabled)
+                },
+                persist = { settingsRepo.setHeadGestures(enabled) },
+            )
         },
-        pressSpeed = settings.pressSpeed,
+        pressSpeed = state.pressSpeed ?: settings.pressSpeed,
         onPressSpeedChanged = { speed ->
             haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
-            scope.launch {
-                settingsRepo.setPressSpeed(speed)
-                AirPodsRepositoryProvider.current?.setPressSpeed(speed)
-            }
+            submitDeviceSetting(
+                writeToDevice = {
+                    val repository = AirPodsRepositoryProvider.current
+                        ?: throw IOException("AirPods repository is unavailable")
+                    repository.setPressSpeed(speed)
+                },
+                persist = { settingsRepo.setPressSpeed(speed) },
+            )
         },
-        holdDuration = settings.holdDuration,
+        holdDuration = state.holdDuration ?: settings.holdDuration,
         onHoldDurationChanged = { duration ->
             haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
-            scope.launch {
-                settingsRepo.setHoldDuration(duration)
-                AirPodsRepositoryProvider.current?.setHoldDuration(duration)
-            }
+            submitDeviceSetting(
+                writeToDevice = {
+                    val repository = AirPodsRepositoryProvider.current
+                        ?: throw IOException("AirPods repository is unavailable")
+                    repository.setHoldDuration(duration)
+                },
+                persist = { settingsRepo.setHoldDuration(duration) },
+            )
         },
         initialSection = initialSection,
         modifier = modifier,
@@ -138,8 +173,7 @@ internal fun ControlsScreenContent(
     onAutoPauseChanged: (Boolean) -> Unit,
     autoResumeEnabled: Boolean,
     onAutoResumeChanged: (Boolean) -> Unit,
-    assistantTriggerEnabled: Boolean = true,
-    onAssistantTriggerChanged: (Boolean) -> Unit = {},
+    modifier: Modifier = Modifier,
     headGesturesEnabled: Boolean = true,
     onHeadGesturesChanged: (Boolean) -> Unit = {},
     pressSpeed: PressSpeed = PressSpeed.DEFAULT,
@@ -147,7 +181,6 @@ internal fun ControlsScreenContent(
     holdDuration: HoldDuration = HoldDuration.DEFAULT,
     onHoldDurationChanged: (HoldDuration) -> Unit = {},
     initialSection: ControlsSection? = null,
-    modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
     val headGesturesRequester = remember { BringIntoViewRequester() }
@@ -183,7 +216,7 @@ internal fun ControlsScreenContent(
     ) {
         ExpressiveScreenHeader(
             title = stringResource(R.string.controls_title),
-            subtitle = "Custom Gestures & Audio Tuning",
+            subtitle = stringResource(R.string.controls_subtitle),
             icon = Icons.Default.Tune,
             iconBadgeColor = MaterialTheme.colorScheme.primaryContainer,
             iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -253,7 +286,7 @@ internal fun ControlsScreenContent(
                 if (state.connection is AirPodsTransport.ConnectionState.Connected && state.capabilities.supportsEarDetection) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Current Sensor State",
+                        text = stringResource(R.string.controls_current_sensor_state),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -285,7 +318,7 @@ internal fun ControlsScreenContent(
                     color = MaterialTheme.colorScheme.primary,
                 )
 
-                dev.androidpods.feature.spatial.SpatialMotionCard(state = state)
+                dev.androidpods.feature.spatial.SpatialMotionCard()
             }
         }
 
@@ -474,116 +507,7 @@ internal fun ControlsScreenContent(
             }
         }
 
-        // Section 4: Digital Assistant (Gemini / Google Assistant)
-        if (state.capabilities.supportsStemConfiguration) {
-            Text(
-                text = stringResource(R.string.controls_assistant_header),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-            ) {
-                val context = LocalContext.current
-                val isSupported = state.capabilities.supportsStemConfiguration
-                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
-                            Text(
-                                text = stringResource(R.string.controls_assistant_title),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                            )
-                            Text(
-                                text = stringResource(
-                                    if (isSupported) R.string.controls_assistant_desc_supported else R.string.controls_assistant_desc_unsupported,
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 4.dp),
-                            )
-                        }
-                        Switch(
-                            checked = if (isSupported) assistantTriggerEnabled else false,
-                            onCheckedChange = if (isSupported) onAssistantTriggerChanged else null,
-                            enabled = isSupported,
-                        )
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            val intent = Intent(Settings.ACTION_VOICE_INPUT_SETTINGS).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            }
-                            if (intent.resolveActivity(context.packageManager) != null) {
-                                context.startActivity(intent)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(stringResource(R.string.controls_assistant_settings_button))
-                    }
-                }
-            }
-        }
-
-        // Section 5: Noise Control (Only if supported by hardware)
-        if (state.capabilities.supportsNoiseControl) {
-            Text(
-                text = stringResource(R.string.controls_noise_header),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = stringResource(R.string.controls_noise_gated_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 12.dp),
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        NoiseModeChip(
-                            label = stringResource(R.string.controls_noise_off),
-                            selected = true,
-                            modifier = Modifier.weight(1f),
-                        )
-                        NoiseModeChip(
-                            label = stringResource(R.string.controls_noise_transparency),
-                            selected = false,
-                            modifier = Modifier.weight(1f),
-                        )
-                        NoiseModeChip(
-                            label = stringResource(R.string.controls_noise_adaptive),
-                            selected = false,
-                            modifier = Modifier.weight(1f),
-                        )
-                        NoiseModeChip(
-                            label = stringResource(R.string.controls_noise_anc),
-                            selected = false,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
-            }
-        }
-
-        // Section 6: Device Information
+        // Section 5: Device Information
         Text(
             text = stringResource(R.string.controls_info_header),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -687,23 +611,6 @@ private fun SensorStatusPill(
                 modifier = Modifier.padding(start = 6.dp),
             )
         }
-    }
-}
-
-@Composable
-private fun NoiseModeChip(label: String, selected: Boolean, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier,
-        shape = CircleShape,
-        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
-            maxLines = 1,
-        )
     }
 }
 

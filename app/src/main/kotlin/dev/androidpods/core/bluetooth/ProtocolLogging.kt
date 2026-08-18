@@ -8,10 +8,16 @@ import dev.androidpods.app.BuildConfig
 // through this instead of calling Log.v directly, so release builds can never emit packet bytes
 // no matter how the flag is set.
 object ProtocolLogging {
+    @Volatile
     var rawPacketLoggingEnabled: Boolean = false
 
+    internal fun isRawPacketLoggingAllowed(
+        isDebugBuild: Boolean,
+        isOptedIn: Boolean,
+    ): Boolean = isDebugBuild && isOptedIn
+
     fun rawPacket(tag: String, message: () -> String) {
-        if (BuildConfig.DEBUG && rawPacketLoggingEnabled) {
+        if (isRawPacketLoggingAllowed(BuildConfig.DEBUG, rawPacketLoggingEnabled)) {
             Log.v(tag, message())
         }
     }

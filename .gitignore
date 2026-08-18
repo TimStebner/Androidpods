@@ -14,3 +14,9 @@ build/
 .cxx/
 local.properties
 *.hprof
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+local-signing.properties
+graphify-out/

@@ -10,7 +10,6 @@ enum class HeadGesture {
 data class MotionSample(
     val pitch: Float, // Up/down tilt (degrees or rad)
     val yaw: Float,   // Left/right rotation
-    val roll: Float,  // Side tilt
     val timestampMs: Long = System.currentTimeMillis(),
 )
 
@@ -24,12 +23,12 @@ class HeadGestureDetector(
     private val samples = ArrayDeque<MotionSample>()
     private var lastGestureTimeMs = 0L
 
-    fun onSample(pitch: Float, yaw: Float, roll: Float, nowMs: Long = System.currentTimeMillis()): HeadGesture {
+    fun onSample(pitch: Float, yaw: Float, nowMs: Long = System.currentTimeMillis()): HeadGesture {
         if (lastGestureTimeMs > 0L && nowMs - lastGestureTimeMs < cooldownMs) {
             return HeadGesture.NONE
         }
 
-        samples.addLast(MotionSample(pitch, yaw, roll, nowMs))
+        samples.addLast(MotionSample(pitch, yaw, nowMs))
         while (samples.isNotEmpty() && nowMs - samples.first().timestampMs > gestureWindowMs) {
             samples.removeFirst()
         }
@@ -41,14 +40,19 @@ class HeadGestureDetector(
         val baselinePitch = samples.first().pitch
         val baselineYaw = samples.first().yaw
 
-        val relPitches = samples.map { it.pitch - baselinePitch }
-        val maxRelPitch = relPitches.maxOrNull() ?: 0f
-        val minRelPitch = relPitches.minOrNull() ?: 0f
+        var maxRelPitch = 0f
+        var minRelPitch = 0f
+        var maxRelYaw = 0f
+        var minRelYaw = 0f
+        samples.forEach { sample ->
+            val relativePitch = sample.pitch - baselinePitch
+            val relativeYaw = sample.yaw - baselineYaw
+            if (relativePitch > maxRelPitch) maxRelPitch = relativePitch
+            if (relativePitch < minRelPitch) minRelPitch = relativePitch
+            if (relativeYaw > maxRelYaw) maxRelYaw = relativeYaw
+            if (relativeYaw < minRelYaw) minRelYaw = relativeYaw
+        }
         val pitchRange = maxRelPitch - minRelPitch
-
-        val relYaws = samples.map { it.yaw - baselineYaw }
-        val maxRelYaw = relYaws.maxOrNull() ?: 0f
-        val minRelYaw = relYaws.minOrNull() ?: 0f
         val yawRange = maxRelYaw - minRelYaw
 
         // Nod requires bidirectional oscillation (e.g. up then down, or down then up)

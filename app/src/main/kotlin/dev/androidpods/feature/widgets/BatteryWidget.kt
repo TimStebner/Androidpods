@@ -104,7 +104,7 @@ private fun NoDataContent() {
         )
         Spacer(modifier = GlanceModifier.height(2.dp))
         Text(
-            text = "Tap to open Androidpods",
+            text = LocalContext.current.getString(R.string.widget_tap_to_open),
             style = TextStyle(
                 color = GlanceTheme.colors.onSurfaceVariant,
                 fontSize = 11.sp,
@@ -123,7 +123,7 @@ private fun BatteryContent(state: BatteryWidgetUiState.Battery) {
     ) {
         // Left AirPod Card
         BatteryCard(
-            label = "Left",
+            label = LocalContext.current.getString(R.string.home_battery_left),
             iconRes = R.drawable.ic_airpod_left,
             battery = state.left,
             isCase = false,
@@ -132,7 +132,7 @@ private fun BatteryContent(state: BatteryWidgetUiState.Battery) {
         Spacer(modifier = GlanceModifier.width(6.dp))
         // Case Card (Center)
         BatteryCard(
-            label = "Case",
+            label = LocalContext.current.getString(R.string.home_battery_case),
             iconRes = R.drawable.ic_airpods_case,
             battery = state.case,
             isCase = true,
@@ -141,7 +141,7 @@ private fun BatteryContent(state: BatteryWidgetUiState.Battery) {
         Spacer(modifier = GlanceModifier.width(6.dp))
         // Right AirPod Card
         BatteryCard(
-            label = "Right",
+            label = LocalContext.current.getString(R.string.home_battery_right),
             iconRes = R.drawable.ic_airpod_right,
             battery = state.right,
             isCase = false,

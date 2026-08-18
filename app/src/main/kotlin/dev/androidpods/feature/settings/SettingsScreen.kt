@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.androidpods.feature.settings
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +26,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.net.toUri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -48,7 +50,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
-    val settings by AppSettingsRepositoryProvider.settings.collectAsState()
+    val settings by AppSettingsRepositoryProvider.settings.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
@@ -92,6 +94,16 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 Toast.makeText(context, resetDoneMessage, Toast.LENGTH_SHORT).show()
             }
         },
+        onPrivacyPolicyClick = {
+            runCatching {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        "https://github.com/TimStebner/Androidpods/blob/main/PRIVACY.md".toUri(),
+                    ),
+                )
+            }
+        },
         modifier = modifier,
     )
 }
@@ -107,6 +119,7 @@ internal fun SettingsScreenContent(
     onBatteryNotificationChanged: (Boolean) -> Unit,
     onProtocolLoggingChanged: (Boolean) -> Unit,
     onResetProbeCache: () -> Unit,
+    onPrivacyPolicyClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -122,7 +135,7 @@ internal fun SettingsScreenContent(
     ) {
         ExpressiveScreenHeader(
             title = stringResource(R.string.settings_title),
-            subtitle = "Preferences & Diagnostics",
+            subtitle = stringResource(R.string.settings_subtitle),
             icon = Icons.Default.Settings,
             iconBadgeColor = MaterialTheme.colorScheme.primaryContainer,
             iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -260,23 +273,25 @@ internal fun SettingsScreenContent(
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         )
                         Text(
-                            text = "Cached results for classic L2CAP PSM 0x1001.",
+                            text = stringResource(R.string.settings_probe_cache_desc),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 2.dp),
                         )
                     }
                     OutlinedButton(onClick = onResetProbeCache) {
-                        Text(text = "Reset")
+                        Text(text = stringResource(R.string.settings_probe_cache_reset))
                     }
                 }
 
-                SettingSwitchRow(
-                    title = stringResource(R.string.settings_logging_title),
-                    subtitle = stringResource(R.string.settings_logging_desc),
-                    checked = settings.protocolLoggingEnabled,
-                    onCheckedChange = onProtocolLoggingChanged,
-                )
+                if (dev.androidpods.app.BuildConfig.DEBUG) {
+                    SettingSwitchRow(
+                        title = stringResource(R.string.settings_logging_title),
+                        subtitle = stringResource(R.string.settings_logging_desc),
+                        checked = settings.protocolLoggingEnabled,
+                        onCheckedChange = onProtocolLoggingChanged,
+                    )
+                }
             }
         }
 
@@ -305,7 +320,13 @@ internal fun SettingsScreenContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(text = stringResource(R.string.settings_license_title), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "GPL-3.0", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = stringResource(R.string.settings_license_value), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
+                }
+                OutlinedButton(
+                    onClick = onPrivacyPolicyClick,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(text = stringResource(R.string.settings_privacy_policy))
                 }
             }
         }
@@ -384,6 +405,7 @@ private fun SettingsScreenPreview() {
             onBatteryNotificationChanged = {},
             onProtocolLoggingChanged = {},
             onResetProbeCache = {},
+            onPrivacyPolicyClick = {},
         )
     }
 }

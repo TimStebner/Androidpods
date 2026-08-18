@@ -30,7 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +47,7 @@ import dev.androidpods.core.audio.ChimePlayer
 import dev.androidpods.core.audio.ChimeTarget
 import dev.androidpods.core.bluetooth.AirPodsTransport
 import dev.androidpods.core.data.AirPodsState
+import dev.androidpods.core.designsystem.androidpodsReduceMotion
 
 @Composable
 fun FindMyCard(
@@ -55,12 +56,10 @@ fun FindMyCard(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val chimePlayer = remember { ChimePlayer(context = context.applicationContext) }
-    val isPlaying by chimePlayer.isPlaying.collectAsState()
-    val activeTarget by chimePlayer.activeTarget.collectAsState()
+    val isPlaying by chimePlayer.isPlaying.collectAsStateWithLifecycle()
     var selectedTarget by remember { mutableStateOf(ChimeTarget.BOTH) }
 
     val isConnected = state.connection is AirPodsTransport.ConnectionState.Connected
-    val supportsCaseSpeaker = state.capabilities.supportsCaseSpeaker
 
     DisposableEffect(Unit) {
         onDispose {
@@ -116,7 +115,7 @@ fun FindMyCard(
                 }
             }
 
-            // Target selector chips: Left, Both, Right (and Case Speaker if supported)
+            // Target selector chips: the two earbuds only.
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "Select Target",
@@ -153,18 +152,6 @@ fun FindMyCard(
                         },
                         label = { Text(stringResource(R.string.findmy_target_right)) },
                         modifier = Modifier.weight(1f),
-                    )
-                }
-
-                if (supportsCaseSpeaker) {
-                    FilterChip(
-                        selected = selectedTarget == ChimeTarget.CASE,
-                        onClick = {
-                            selectedTarget = ChimeTarget.CASE
-                            if (isPlaying) chimePlayer.play(ChimeTarget.CASE)
-                        },
-                        label = { Text(stringResource(R.string.findmy_target_case)) },
-                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -213,33 +200,41 @@ fun FindMyCard(
 
 @Composable
 private fun PulsingSonarIcon(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "sonar-transition")
-    val pulseRadius by transition.animateFloat(
-        initialValue = 12f,
-        targetValue = 38f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "sonar-radius",
-    )
-    val pulseAlpha by transition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 0.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "sonar-alpha",
-    )
+    val reduceMotion = androidpodsReduceMotion()
+    val pulseRadius: androidx.compose.runtime.State<Float>?
+    val pulseAlpha: androidx.compose.runtime.State<Float>?
+    if (!reduceMotion) {
+        val transition = rememberInfiniteTransition(label = "sonar-transition")
+        pulseRadius = transition.animateFloat(
+            initialValue = 12f,
+            targetValue = 38f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "sonar-radius",
+        )
+        pulseAlpha = transition.animateFloat(
+            initialValue = 0.8f,
+            targetValue = 0.0f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "sonar-alpha",
+        )
+    } else {
+        pulseRadius = null
+        pulseAlpha = null
+    }
     val primaryColor = MaterialTheme.colorScheme.primary
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val center = Offset(size.width / 2f, size.height / 2f)
             drawCircle(
-                color = primaryColor.copy(alpha = pulseAlpha),
-                radius = pulseRadius,
+                color = primaryColor.copy(alpha = pulseAlpha?.value ?: 0.5f),
+                radius = pulseRadius?.value ?: 18f,
                 center = center,
                 style = Stroke(width = 3.dp.toPx()),
             )

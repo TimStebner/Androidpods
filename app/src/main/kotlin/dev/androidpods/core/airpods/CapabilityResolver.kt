@@ -1,33 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.androidpods.core.airpods
 
-// PROJECT.md §18.
-enum class NoiseControlMode { OFF, TRANSPARENCY, ADAPTIVE, NOISE_CANCELLATION }
-
 // Per-device feature flags (PROJECT.md §9): UI renders capabilities, it does not infer them.
 // Unknown model number = AirPodsCapabilities.UNKNOWN = nothing supported.
 data class AirPodsCapabilities(
     val modelName: String,
-    val supportsNoiseControl: Boolean,
-    val supportedNoiseControlModes: Set<NoiseControlMode>,
     val supportsEarDetection: Boolean,
-    val supportsStemConfiguration: Boolean,
-    val supportsPressSpeed: Boolean,
-    val supportsHeadGestures: Boolean,
-    val supportsEarbudChime: Boolean = true,
-    val supportsCaseSpeaker: Boolean = false,
+    val supportsPressSpeed: Boolean = false,
+    val supportsHeadGestures: Boolean = false,
+    val supportsEarbudChime: Boolean = false,
 ) {
     companion object {
         val UNKNOWN = AirPodsCapabilities(
             modelName = "AirPods",
-            supportsNoiseControl = false,
-            supportedNoiseControlModes = emptySet(),
             supportsEarDetection = false,
-            supportsStemConfiguration = false,
-            supportsPressSpeed = false,
-            supportsHeadGestures = false,
-            supportsEarbudChime = false,
-            supportsCaseSpeaker = false,
         )
     }
 }
@@ -46,109 +32,38 @@ object CapabilityResolver {
     fun resolve(modelNumber: String): AirPodsCapabilities = when (modelNumber) {
         in NON_ANC_AIRPODS_4 -> AirPodsCapabilities(
             modelName = "AirPods 4",
-            supportsNoiseControl = false,
-            supportedNoiseControlModes = emptySet(),
             supportsEarDetection = true,
-            supportsStemConfiguration = false,
             supportsPressSpeed = true,
             supportsHeadGestures = true,
             supportsEarbudChime = true,
-            supportsCaseSpeaker = false,
         )
         in ANC_AIRPODS_4 -> AirPodsCapabilities(
             modelName = "AirPods 4 with ANC",
-            supportsNoiseControl = true,
-            supportedNoiseControlModes = setOf(
-                NoiseControlMode.OFF,
-                NoiseControlMode.TRANSPARENCY,
-                NoiseControlMode.ADAPTIVE,
-                NoiseControlMode.NOISE_CANCELLATION,
-            ),
             supportsEarDetection = true,
-            supportsStemConfiguration = true,
-            supportsPressSpeed = true,
-            supportsHeadGestures = true,
-            supportsEarbudChime = true,
-            supportsCaseSpeaker = true,
         )
         in AIRPODS_PRO_1 -> AirPodsCapabilities(
             modelName = "AirPods Pro (1st gen)",
-            supportsNoiseControl = true,
-            supportedNoiseControlModes = setOf(
-                NoiseControlMode.OFF,
-                NoiseControlMode.TRANSPARENCY,
-                NoiseControlMode.NOISE_CANCELLATION,
-            ),
             supportsEarDetection = true,
-            supportsStemConfiguration = true,
-            supportsPressSpeed = true,
-            supportsHeadGestures = false,
-            supportsEarbudChime = true,
-            supportsCaseSpeaker = false,
         )
         in AIRPODS_PRO_2 -> AirPodsCapabilities(
             modelName = "AirPods Pro (2nd gen)",
-            supportsNoiseControl = true,
-            supportedNoiseControlModes = setOf(
-                NoiseControlMode.OFF,
-                NoiseControlMode.TRANSPARENCY,
-                NoiseControlMode.ADAPTIVE,
-                NoiseControlMode.NOISE_CANCELLATION,
-            ),
             supportsEarDetection = true,
-            supportsStemConfiguration = true,
-            supportsPressSpeed = true,
-            supportsHeadGestures = true,
-            supportsEarbudChime = true,
-            supportsCaseSpeaker = true,
         )
         in AIRPODS_MAX -> AirPodsCapabilities(
             modelName = "AirPods Max",
-            supportsNoiseControl = true,
-            supportedNoiseControlModes = setOf(
-                NoiseControlMode.OFF,
-                NoiseControlMode.TRANSPARENCY,
-                NoiseControlMode.NOISE_CANCELLATION,
-            ),
             supportsEarDetection = true,
-            supportsStemConfiguration = false,
-            supportsPressSpeed = false,
-            supportsHeadGestures = false,
-            supportsEarbudChime = true,
-            supportsCaseSpeaker = false,
         )
         in AIRPODS_3 -> AirPodsCapabilities(
             modelName = "AirPods (3rd gen)",
-            supportsNoiseControl = false,
-            supportedNoiseControlModes = emptySet(),
             supportsEarDetection = true,
-            supportsStemConfiguration = false,
-            supportsPressSpeed = true,
-            supportsHeadGestures = false,
-            supportsEarbudChime = true,
-            supportsCaseSpeaker = false,
         )
         in AIRPODS_2 -> AirPodsCapabilities(
             modelName = "AirPods (2nd gen)",
-            supportsNoiseControl = false,
-            supportedNoiseControlModes = emptySet(),
             supportsEarDetection = true,
-            supportsStemConfiguration = false,
-            supportsPressSpeed = false,
-            supportsHeadGestures = false,
-            supportsEarbudChime = true,
-            supportsCaseSpeaker = false,
         )
         in AIRPODS_1 -> AirPodsCapabilities(
             modelName = "AirPods (1st gen)",
-            supportsNoiseControl = false,
-            supportedNoiseControlModes = emptySet(),
             supportsEarDetection = true,
-            supportsStemConfiguration = false,
-            supportsPressSpeed = false,
-            supportsHeadGestures = false,
-            supportsEarbudChime = true,
-            supportsCaseSpeaker = false,
         )
         else -> AirPodsCapabilities.UNKNOWN
     }

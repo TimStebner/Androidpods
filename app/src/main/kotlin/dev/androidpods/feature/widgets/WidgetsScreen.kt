@@ -38,7 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,7 +63,7 @@ import dev.androidpods.core.designsystem.rememberAppHaptics
 
 @Composable
 fun WidgetsScreen(modifier: Modifier = Modifier) {
-    val state by AirPodsRepositoryProvider.state.collectAsState()
+    val state by AirPodsRepositoryProvider.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val haptics = rememberAppHaptics()
     val unsupportedMessage = stringResource(R.string.widgets_pin_unsupported)
@@ -112,7 +112,7 @@ internal fun WidgetsScreenContent(
     ) {
         ExpressiveScreenHeader(
             title = stringResource(R.string.widgets_title),
-            subtitle = "Home Screen Battery Glance",
+            subtitle = stringResource(R.string.widgets_subtitle),
             icon = Icons.Default.Widgets,
             iconBadgeColor = MaterialTheme.colorScheme.primaryContainer,
             iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -202,7 +202,7 @@ internal fun WidgetsScreenContent(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Connect AirPods to preview battery levels",
+                        text = stringResource(R.string.widgets_preview_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -368,7 +368,7 @@ private fun WidgetBatteryCard(
                     Spacer(modifier = Modifier.width(2.dp))
                     Icon(
                         imageVector = Icons.Default.Bolt,
-                        contentDescription = "Charging",
+                        contentDescription = stringResource(R.string.charging_description),
                         tint = contentColor,
                         modifier = Modifier.size(18.dp),
                     )

@@ -6,7 +6,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
-import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import dev.androidpods.app.MainActivity
@@ -20,8 +19,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+
+internal fun AirPodsState.hasSameTileContentAs(other: AirPodsState): Boolean =
+    (connection is AirPodsTransport.ConnectionState.Connected) ==
+        (other.connection is AirPodsTransport.ConnectionState.Connected) &&
+        battery == other.battery &&
+        capabilities.modelName == other.capabilities.modelName
 
 class AirPodsTileService : TileService() {
     private var scope: CoroutineScope? = null
@@ -34,13 +39,7 @@ class AirPodsTileService : TileService() {
 
         newScope.launch {
             AirPodsRepositoryProvider.state
-                .distinctUntilChangedBy { state ->
-                    Triple(
-                        state.connection is AirPodsTransport.ConnectionState.Connected,
-                        state.battery,
-                        state.capabilities.modelName,
-                    )
-                }
+                .distinctUntilChanged { previous, next -> previous.hasSameTileContentAs(next) }
                 .collectLatest { state ->
                     updateTileState(state)
                 }
@@ -115,13 +114,7 @@ fun observeTileUpdates(
 ) {
     scope.launch {
         stateFlow
-            .distinctUntilChangedBy { state ->
-                Triple(
-                    state.connection is AirPodsTransport.ConnectionState.Connected,
-                    state.battery,
-                    state.capabilities.modelName,
-                )
-            }
+            .distinctUntilChanged { previous, next -> previous.hasSameTileContentAs(next) }
             .collectLatest {
                 AirPodsTileService.requestUpdate(context)
             }

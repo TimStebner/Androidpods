@@ -43,36 +43,12 @@ import androidx.compose.ui.unit.dp
 /**
  * The 5 iconic hardware generations of Apple AirPods.
  */
-enum class AirPodsGeneration(
-    val title: String,
-    val shortLabel: String,
-    val year: String,
-) {
-    GEN_4(
-        title = "AirPods 4",
-        shortLabel = "Gen 4",
-        year = "2024",
-    ),
-    PRO(
-        title = "AirPods Pro",
-        shortLabel = "Pro",
-        year = "2019-2023",
-    ),
-    GEN_3(
-        title = "AirPods 3",
-        shortLabel = "Gen 3",
-        year = "2021",
-    ),
-    GEN_1_2(
-        title = "AirPods 1 & 2",
-        shortLabel = "Gen 1/2",
-        year = "2016-2019",
-    ),
-    MAX(
-        title = "AirPods Max",
-        shortLabel = "Max",
-        year = "2020",
-    );
+enum class AirPodsGeneration {
+    GEN_4,
+    PRO,
+    GEN_3,
+    GEN_1_2,
+    MAX;
 
     fun next(): AirPodsGeneration {
         val entries = entries

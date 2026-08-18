@@ -7,8 +7,8 @@ package dev.androidpods.core.airpods
 // https://github.com/kavishdevar/librepods/blob/790e3963451002a3aabf8dcd71d40c635724176a/android/app/src/main/java/me/kavishdevar/librepods/data/Packets.kt
 // https://github.com/kavishdevar/librepods/blob/790e3963451002a3aabf8dcd71d40c635724176a/android/app/src/main/java/me/kavishdevar/librepods/bluetooth/AACPManager.kt
 // These are protocol facts (PROJECT.md §25), not copied code -- verified against
-// app/src/test/resources/fixtures/aap/session-start-capture.txt, a real capture from this
-// project's own AirPods 4.
+// app/src/test/resources/fixtures/aap/session-start-capture.txt, a sanitized capture from the
+// project's AirPods 4 reference hardware.
 
 enum class BatteryChargeStatus { CHARGING, NOT_CHARGING, DISCONNECTED, OPTIMIZED_CHARGING }
 
@@ -46,7 +46,6 @@ sealed interface AapEvent {
 
 // Transport-layer-agnostic: takes the raw bytes a socket read produced, no I/O here (§11).
 object AapPacketDecoder {
-    private val HEADER = byteArrayOf(0x04, 0x00, 0x04, 0x00)
     private const val OPCODE_BATTERY_INFO = 0x04
     private const val OPCODE_EAR_DETECTION = 0x06
     private const val OPCODE_CONTROL = 0x09
@@ -55,7 +54,12 @@ object AapPacketDecoder {
     private const val COMPONENT_LEFT = 2 // In AAP: 0x02 = Left, 0x04 = Right, 0x08 = Case
 
     fun decode(packet: ByteArray): AapEvent {
-        if (packet.size < 6 || !packet.copyOfRange(0, 4).contentEquals(HEADER)) {
+        if (packet.size < 6 ||
+            packet[0] != 0x04.toByte() ||
+            packet[1] != 0x00.toByte() ||
+            packet[2] != 0x04.toByte() ||
+            packet[3] != 0x00.toByte()
+        ) {
             return AapEvent.Unrecognized
         }
         return when (packet[4].toInt() and 0xFF) {

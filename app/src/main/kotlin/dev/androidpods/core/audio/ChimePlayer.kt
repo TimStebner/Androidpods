@@ -7,7 +7,6 @@ import android.media.AudioDeviceInfo
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
-import android.os.Build
 import dev.androidpods.core.bluetooth.ProtocolLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +25,6 @@ enum class ChimeTarget {
     LEFT,
     RIGHT,
     BOTH,
-    CASE,
 }
 
 class ChimePlayer(
@@ -54,7 +52,7 @@ class ChimePlayer(
                 val (leftVol, rightVol) = when (target) {
                     ChimeTarget.LEFT -> 1.0 to 0.0
                     ChimeTarget.RIGHT -> 0.0 to 1.0
-                    ChimeTarget.BOTH, ChimeTarget.CASE -> 1.0 to 1.0
+                    ChimeTarget.BOTH -> 1.0 to 1.0
                 }
                 val pcmData = generateFindMyChirpPcm(sampleRate, leftGain = leftVol, rightGain = rightVol)
 
@@ -85,8 +83,8 @@ class ChimePlayer(
                 audioTrack = track
 
                 // Route audio directly to connected Bluetooth headphones/AirPods
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null) {
-                    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                context?.let {
+                    val audioManager = it.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
                     val btDevice = audioManager?.getDevices(AudioManager.GET_DEVICES_OUTPUTS)?.firstOrNull {
                         it.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP ||
                         it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||

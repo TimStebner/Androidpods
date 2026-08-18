@@ -33,6 +33,6 @@ class ForceTierBUnsupportedTest {
     }
 
     private companion object {
-        const val DEVICE_ADDRESS = "TEST-DEVICE-ID"
+        const val DEVICE_ADDRESS = "02:00:00:00:00:01"
     }
 }

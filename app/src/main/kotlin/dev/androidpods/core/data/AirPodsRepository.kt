@@ -10,8 +10,8 @@ import dev.androidpods.core.airpods.CapabilityResolver
 import dev.androidpods.core.airpods.HeadGesturesState
 import dev.androidpods.core.airpods.HoldDuration
 import dev.androidpods.core.airpods.PressSpeed
-import dev.androidpods.core.airpods.StemPressAndHoldAction
 import dev.androidpods.core.bluetooth.AirPodsTransport
+import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,45 +71,41 @@ class AirPodsRepository(
 
     suspend fun disconnect() = transport.disconnect()
 
-    suspend fun setAssistantTriggerEnabled(enabled: Boolean) {
-        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
-            session.setAssistantTriggerEnabled(enabled)
-        }
-    }
-
     suspend fun setPressSpeed(speed: PressSpeed) {
-        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
-            session.setPressSpeed(speed)
-        }
+        requireConnected()
+        session.setPressSpeed(speed)
     }
 
     suspend fun setHoldDuration(duration: HoldDuration) {
-        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
-            session.setHoldDuration(duration)
-        }
+        requireConnected()
+        session.setHoldDuration(duration)
     }
 
     suspend fun setHeadGesturesEnabled(enabled: Boolean) {
-        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
-            session.setHeadGesturesEnabled(enabled)
-        }
+        requireConnected()
+        session.setHeadGesturesEnabled(enabled)
     }
 
     private var motionStreamRequested: Boolean = false
 
     suspend fun startMotionStream() {
-        if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
-            motionStreamRequested = true
-            session.startMotionStream()
-            _state.update { it.copy(motionStreamActive = true) }
-        }
+        requireConnected()
+        motionStreamRequested = true
+        session.startMotionStream()
+        _state.update { it.copy(motionStreamActive = true) }
     }
 
     suspend fun stopMotionStream() {
+        motionStreamRequested = false
         if (transport.state.value == AirPodsTransport.ConnectionState.Connected) {
-            motionStreamRequested = false
             session.stopMotionStream()
-            _state.update { it.copy(motionStreamActive = false, headOrientation = null) }
+        }
+        _state.update { it.copy(motionStreamActive = false, headOrientation = null) }
+    }
+
+    private fun requireConnected() {
+        if (transport.state.value != AirPodsTransport.ConnectionState.Connected) {
+            throw IOException("AirPods transport is not connected")
         }
     }
 
@@ -149,7 +145,7 @@ class AirPodsRepository(
         is AapEvent.Battery -> copy(battery = mergeBatteryEvent(event))
         is AapEvent.EarDetection -> copy(earDetection = event.state)
         is AapEvent.DeviceInfo -> copy(capabilities = CapabilityResolver.resolve(event.info.modelNumber))
-        is AapEvent.StemConfig -> if (event.isLeft) copy(stemLeftAction = event.action) else copy(stemRightAction = event.action)
+        is AapEvent.StemConfig -> this
         is AapEvent.PressSpeedConfig -> copy(pressSpeed = event.speed)
         is AapEvent.HoldDurationConfig -> copy(holdDuration = event.duration)
         is AapEvent.HeadGesturesConfig -> copy(headGesturesState = event.state)

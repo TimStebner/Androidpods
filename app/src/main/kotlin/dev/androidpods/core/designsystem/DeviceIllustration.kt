@@ -58,16 +58,21 @@ fun AirPodsIllustration(
     accentTint: Color = tint.copy(alpha = 0.65f),
 ) {
     val reduceMotion = androidpodsReduceMotion()
-    val transition = rememberInfiniteTransition(label = "airpods-illustration-pulse")
-    val pulse by transition.animateFloat(
-        initialValue = 0.94f,
-        targetValue = 1.02f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "airpods-illustration-pulse-value",
-    )
+    val pulse: androidx.compose.runtime.State<Float>?
+    if (pulsing && !reduceMotion) {
+        val transition = rememberInfiniteTransition(label = "airpods-illustration-pulse")
+        pulse = transition.animateFloat(
+            initialValue = 0.94f,
+            targetValue = 1.02f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "airpods-illustration-pulse-value",
+        )
+    } else {
+        pulse = null
+    }
 
     val leftPath = remember { Path() }
     val rightPath = remember { Path() }
@@ -78,7 +83,7 @@ fun AirPodsIllustration(
         modifier
             .size(136.dp)
             .graphicsLayer {
-                val scale = if (pulsing && !reduceMotion) pulse else 1f
+                val scale = pulse?.value ?: 1f
                 scaleX = scale
                 scaleY = scale
             },

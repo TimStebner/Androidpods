@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 private val Context.settingsDataStore by preferencesDataStore(name = "app_settings")
 
-class AppSettingsRepository(private val context: Context) {
+class AppSettingsRepository(context: Context) {
     private val dataStore = context.applicationContext.settingsDataStore
 
     val settingsFlow = dataStore.data.map { prefs ->
@@ -28,7 +28,6 @@ class AppSettingsRepository(private val context: Context) {
             dynamicColor = prefs[KEY_DYNAMIC_COLOR] ?: true,
             autoPauseEnabled = prefs[KEY_AUTO_PAUSE] ?: true,
             autoResumeEnabled = prefs[KEY_AUTO_RESUME] ?: true,
-            assistantTriggerEnabled = prefs[KEY_ASSISTANT_TRIGGER] ?: true,
             pressSpeed = prefs[KEY_PRESS_SPEED]?.let { runCatching { PressSpeed.valueOf(it) }.getOrNull() } ?: PressSpeed.DEFAULT,
             holdDuration = prefs[KEY_HOLD_DURATION]?.let { runCatching { HoldDuration.valueOf(it) }.getOrNull() } ?: HoldDuration.DEFAULT,
             headGesturesEnabled = prefs[KEY_HEAD_GESTURES] ?: true,
@@ -53,10 +52,6 @@ class AppSettingsRepository(private val context: Context) {
 
     suspend fun setAutoResume(enabled: Boolean) {
         dataStore.edit { it[KEY_AUTO_RESUME] = enabled }
-    }
-
-    suspend fun setAssistantTrigger(enabled: Boolean) {
-        dataStore.edit { it[KEY_ASSISTANT_TRIGGER] = enabled }
     }
 
     suspend fun setPressSpeed(speed: PressSpeed) {
@@ -92,7 +87,6 @@ class AppSettingsRepository(private val context: Context) {
         private val KEY_DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         private val KEY_AUTO_PAUSE = booleanPreferencesKey("auto_pause")
         private val KEY_AUTO_RESUME = booleanPreferencesKey("auto_resume")
-        private val KEY_ASSISTANT_TRIGGER = booleanPreferencesKey("assistant_trigger")
         private val KEY_PRESS_SPEED = stringPreferencesKey("press_speed")
         private val KEY_HOLD_DURATION = stringPreferencesKey("hold_duration")
         private val KEY_HEAD_GESTURES = booleanPreferencesKey("head_gestures")

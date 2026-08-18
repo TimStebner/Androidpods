@@ -7,7 +7,6 @@ import dev.androidpods.core.airpods.EarDetectionState
 import dev.androidpods.core.airpods.HeadGesturesState
 import dev.androidpods.core.airpods.HoldDuration
 import dev.androidpods.core.airpods.PressSpeed
-import dev.androidpods.core.airpods.StemPressAndHoldAction
 import dev.androidpods.core.bluetooth.AirPodsTransport
 
 data class HeadOrientation(
@@ -23,8 +22,6 @@ data class AirPodsState(
     val capabilities: AirPodsCapabilities,
     val battery: BatteryState?,
     val earDetection: EarDetectionState?,
-    val stemLeftAction: StemPressAndHoldAction? = null,
-    val stemRightAction: StemPressAndHoldAction? = null,
     val pressSpeed: PressSpeed? = null,
     val holdDuration: HoldDuration? = null,
     val headGesturesState: HeadGesturesState? = null,
@@ -37,8 +34,6 @@ data class AirPodsState(
             capabilities = AirPodsCapabilities.UNKNOWN,
             battery = null,
             earDetection = null,
-            stemLeftAction = null,
-            stemRightAction = null,
             pressSpeed = null,
             holdDuration = null,
             headGesturesState = null,
