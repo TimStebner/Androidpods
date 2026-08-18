@@ -57,43 +57,37 @@ fun AirPodsIllustration(
     generation: AirPodsGeneration = AirPodsGeneration.GEN_4,
     accentTint: Color = tint.copy(alpha = 0.65f),
 ) {
-    var appeared by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { appeared = true }
-    val entryScale by animateFloatAsState(
-        targetValue = if (appeared) 1f else 0.85f,
-        animationSpec = androidpodsSpatialSpec(),
-        label = "airpods-illustration-entry",
+    val reduceMotion = androidpodsReduceMotion()
+    val transition = rememberInfiniteTransition(label = "airpods-illustration-pulse")
+    val pulse by transition.animateFloat(
+        initialValue = 0.94f,
+        targetValue = 1.02f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "airpods-illustration-pulse-value",
     )
 
-    val pulseScale = if (pulsing && !androidpodsReduceMotion()) {
-        val transition = rememberInfiniteTransition(label = "airpods-illustration-pulse")
-        val pulse by transition.animateFloat(
-            initialValue = 0.94f,
-            targetValue = 1.02f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-                repeatMode = RepeatMode.Reverse,
-            ),
-            label = "airpods-illustration-pulse-value",
-        )
-        pulse
-    } else {
-        1f
-    }
+    val leftPath = remember { Path() }
+    val rightPath = remember { Path() }
+    val tipLeftPath = remember { Path() }
+    val tipRightPath = remember { Path() }
 
     Canvas(
         modifier
             .size(136.dp)
             .graphicsLayer {
-                scaleX = entryScale * pulseScale
-                scaleY = entryScale * pulseScale
+                val scale = if (pulsing && !reduceMotion) pulse else 1f
+                scaleX = scale
+                scaleY = scale
             },
     ) {
         when (generation) {
-            AirPodsGeneration.GEN_4 -> drawAirPodPairGen4(tint, accentTint)
-            AirPodsGeneration.PRO -> drawAirPodPairPro(tint, accentTint)
-            AirPodsGeneration.GEN_1_2 -> drawAirPodPairGen1(tint, accentTint)
-            AirPodsGeneration.GEN_3 -> drawAirPodPairGen3(tint, accentTint)
+            AirPodsGeneration.GEN_4 -> drawAirPodPairGen4(tint, accentTint, leftPath, rightPath)
+            AirPodsGeneration.PRO -> drawAirPodPairPro(tint, accentTint, leftPath, rightPath, tipLeftPath, tipRightPath)
+            AirPodsGeneration.GEN_1_2 -> drawAirPodPairGen1(tint, accentTint, leftPath, rightPath)
+            AirPodsGeneration.GEN_3 -> drawAirPodPairGen3(tint, accentTint, leftPath, rightPath)
             AirPodsGeneration.MAX -> drawAirPodsMaxSilhouette(tint, accentTint)
         }
     }
@@ -102,17 +96,23 @@ fun AirPodsIllustration(
 /**
  * Draws a mirrored pair of AirPods 4 with compact stems, acoustic cavity, and port notch.
  */
-private fun DrawScope.drawAirPodPairGen4(primaryColor: Color, accentColor: Color) {
+private fun DrawScope.drawAirPodPairGen4(primaryColor: Color, accentColor: Color, leftPath: Path, rightPath: Path) {
     val w = size.width
     val h = size.height
 
     // Left Bud
-    drawSingleAirPodGen4(primaryColor, accentColor, isLeft = true, offsetCenterX = w * 0.34f)
+    drawSingleAirPodGen4(primaryColor, accentColor, isLeft = true, offsetCenterX = w * 0.34f, headPath = leftPath)
     // Right Bud
-    drawSingleAirPodGen4(primaryColor, accentColor, isLeft = false, offsetCenterX = w * 0.66f)
+    drawSingleAirPodGen4(primaryColor, accentColor, isLeft = false, offsetCenterX = w * 0.66f, headPath = rightPath)
 }
 
-private fun DrawScope.drawSingleAirPodGen4(primaryColor: Color, accentColor: Color, isLeft: Boolean, offsetCenterX: Float) {
+private fun DrawScope.drawSingleAirPodGen4(
+    primaryColor: Color,
+    accentColor: Color,
+    isLeft: Boolean,
+    offsetCenterX: Float,
+    headPath: Path,
+) {
     val w = size.width
     val h = size.height
     val stemWidth = w * 0.12f
@@ -128,34 +128,33 @@ private fun DrawScope.drawSingleAirPodGen4(primaryColor: Color, accentColor: Col
     )
 
     // Pod head
-    val headPath = Path().apply {
-        if (isLeft) {
-            moveTo(stemLeft + stemWidth * 0.95f, stemTop + stemHeight * 0.12f)
-            cubicTo(
-                stemLeft + stemWidth * 0.95f, h * 0.16f,
-                offsetCenterX - w * 0.22f, h * 0.18f,
-                offsetCenterX - w * 0.22f, h * 0.38f,
-            )
-            cubicTo(
-                offsetCenterX - w * 0.22f, h * 0.52f,
-                stemLeft - w * 0.04f, stemTop + stemHeight * 0.24f,
-                stemLeft + stemWidth * 0.25f, stemTop + stemHeight * 0.12f,
-            )
-            close()
-        } else {
-            moveTo(stemLeft + stemWidth * 0.05f, stemTop + stemHeight * 0.12f)
-            cubicTo(
-                stemLeft + stemWidth * 0.05f, h * 0.16f,
-                offsetCenterX + w * 0.22f, h * 0.18f,
-                offsetCenterX + w * 0.22f, h * 0.38f,
-            )
-            cubicTo(
-                offsetCenterX + w * 0.22f, h * 0.52f,
-                stemLeft + stemWidth + w * 0.04f, stemTop + stemHeight * 0.24f,
-                stemLeft + stemWidth * 0.75f, stemTop + stemHeight * 0.12f,
-            )
-            close()
-        }
+    headPath.rewind()
+    if (isLeft) {
+        headPath.moveTo(stemLeft + stemWidth * 0.95f, stemTop + stemHeight * 0.12f)
+        headPath.cubicTo(
+            stemLeft + stemWidth * 0.95f, h * 0.16f,
+            offsetCenterX - w * 0.22f, h * 0.18f,
+            offsetCenterX - w * 0.22f, h * 0.38f,
+        )
+        headPath.cubicTo(
+            offsetCenterX - w * 0.22f, h * 0.52f,
+            stemLeft - w * 0.04f, stemTop + stemHeight * 0.24f,
+            stemLeft + stemWidth * 0.25f, stemTop + stemHeight * 0.12f,
+        )
+        headPath.close()
+    } else {
+        headPath.moveTo(stemLeft + stemWidth * 0.05f, stemTop + stemHeight * 0.12f)
+        headPath.cubicTo(
+            stemLeft + stemWidth * 0.05f, h * 0.16f,
+            offsetCenterX + w * 0.22f, h * 0.18f,
+            offsetCenterX + w * 0.22f, h * 0.38f,
+        )
+        headPath.cubicTo(
+            offsetCenterX + w * 0.22f, h * 0.52f,
+            stemLeft + stemWidth + w * 0.04f, stemTop + stemHeight * 0.24f,
+            stemLeft + stemWidth * 0.75f, stemTop + stemHeight * 0.12f,
+        )
+        headPath.close()
     }
     drawPath(headPath, color = primaryColor, style = Fill)
 
@@ -172,17 +171,30 @@ private fun DrawScope.drawSingleAirPodGen4(primaryColor: Color, accentColor: Col
 /**
  * Draws a mirrored pair of AirPods Pro with short stems, silicone ear tips, and black ANC mesh vents.
  */
-private fun DrawScope.drawAirPodPairPro(primaryColor: Color, accentColor: Color) {
+private fun DrawScope.drawAirPodPairPro(
+    primaryColor: Color,
+    accentColor: Color,
+    leftPath: Path,
+    rightPath: Path,
+    tipLeftPath: Path,
+    tipRightPath: Path,
+) {
     val w = size.width
-    val h = size.height
 
     // Left Pro Bud
-    drawSingleAirPodPro(primaryColor, accentColor, isLeft = true, offsetCenterX = w * 0.34f)
+    drawSingleAirPodPro(primaryColor, accentColor, isLeft = true, offsetCenterX = w * 0.34f, bodyPath = leftPath, tipPath = tipLeftPath)
     // Right Pro Bud
-    drawSingleAirPodPro(primaryColor, accentColor, isLeft = false, offsetCenterX = w * 0.66f)
+    drawSingleAirPodPro(primaryColor, accentColor, isLeft = false, offsetCenterX = w * 0.66f, bodyPath = rightPath, tipPath = tipRightPath)
 }
 
-private fun DrawScope.drawSingleAirPodPro(primaryColor: Color, accentColor: Color, isLeft: Boolean, offsetCenterX: Float) {
+private fun DrawScope.drawSingleAirPodPro(
+    primaryColor: Color,
+    accentColor: Color,
+    isLeft: Boolean,
+    offsetCenterX: Float,
+    bodyPath: Path,
+    tipPath: Path,
+) {
     val w = size.width
     val h = size.height
     val stemWidth = w * 0.13f
@@ -199,56 +211,54 @@ private fun DrawScope.drawSingleAirPodPro(primaryColor: Color, accentColor: Colo
     )
 
     // Body
-    val bodyPath = Path().apply {
-        if (isLeft) {
-            moveTo(stemLeft + stemWidth, stemTop + stemHeight * 0.1f)
-            cubicTo(
-                stemLeft + stemWidth, h * 0.20f,
-                offsetCenterX - w * 0.16f, h * 0.20f,
-                offsetCenterX - w * 0.16f, h * 0.42f,
-            )
-            cubicTo(
-                offsetCenterX - w * 0.16f, h * 0.54f,
-                stemLeft, stemTop + stemHeight * 0.2f,
-                stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.1f,
-            )
-            close()
-        } else {
-            moveTo(stemLeft, stemTop + stemHeight * 0.1f)
-            cubicTo(
-                stemLeft, h * 0.20f,
-                offsetCenterX + w * 0.16f, h * 0.20f,
-                offsetCenterX + w * 0.16f, h * 0.42f,
-            )
-            cubicTo(
-                offsetCenterX + w * 0.16f, h * 0.54f,
-                stemLeft + stemWidth, stemTop + stemHeight * 0.2f,
-                stemLeft + stemWidth * 0.7f, stemTop + stemHeight * 0.1f,
-            )
-            close()
-        }
+    bodyPath.rewind()
+    if (isLeft) {
+        bodyPath.moveTo(stemLeft + stemWidth, stemTop + stemHeight * 0.1f)
+        bodyPath.cubicTo(
+            stemLeft + stemWidth, h * 0.20f,
+            offsetCenterX - w * 0.16f, h * 0.20f,
+            offsetCenterX - w * 0.16f, h * 0.42f,
+        )
+        bodyPath.cubicTo(
+            offsetCenterX - w * 0.16f, h * 0.54f,
+            stemLeft, stemTop + stemHeight * 0.2f,
+            stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.1f,
+        )
+        bodyPath.close()
+    } else {
+        bodyPath.moveTo(stemLeft, stemTop + stemHeight * 0.1f)
+        bodyPath.cubicTo(
+            stemLeft, h * 0.20f,
+            offsetCenterX + w * 0.16f, h * 0.20f,
+            offsetCenterX + w * 0.16f, h * 0.42f,
+        )
+        bodyPath.cubicTo(
+            offsetCenterX + w * 0.16f, h * 0.54f,
+            stemLeft + stemWidth, stemTop + stemHeight * 0.2f,
+            stemLeft + stemWidth * 0.7f, stemTop + stemHeight * 0.1f,
+        )
+        bodyPath.close()
     }
     drawPath(bodyPath, color = primaryColor, style = Fill)
 
     // Silicone Ear Tip
-    val tipPath = Path().apply {
-        if (isLeft) {
-            moveTo(offsetCenterX - w * 0.14f, h * 0.28f)
-            cubicTo(
-                offsetCenterX - w * 0.26f, h * 0.26f,
-                offsetCenterX - w * 0.26f, h * 0.44f,
-                offsetCenterX - w * 0.14f, h * 0.42f,
-            )
-            close()
-        } else {
-            moveTo(offsetCenterX + w * 0.14f, h * 0.28f)
-            cubicTo(
-                offsetCenterX + w * 0.26f, h * 0.26f,
-                offsetCenterX + w * 0.26f, h * 0.44f,
-                offsetCenterX + w * 0.14f, h * 0.42f,
-            )
-            close()
-        }
+    tipPath.rewind()
+    if (isLeft) {
+        tipPath.moveTo(offsetCenterX - w * 0.14f, h * 0.28f)
+        tipPath.cubicTo(
+            offsetCenterX - w * 0.26f, h * 0.26f,
+            offsetCenterX - w * 0.26f, h * 0.44f,
+            offsetCenterX - w * 0.14f, h * 0.42f,
+        )
+        tipPath.close()
+    } else {
+        tipPath.moveTo(offsetCenterX + w * 0.14f, h * 0.28f)
+        tipPath.cubicTo(
+            offsetCenterX + w * 0.26f, h * 0.26f,
+            offsetCenterX + w * 0.26f, h * 0.44f,
+            offsetCenterX + w * 0.14f, h * 0.42f,
+        )
+        tipPath.close()
     }
     drawPath(tipPath, color = accentColor, style = Fill)
 
@@ -264,15 +274,20 @@ private fun DrawScope.drawSingleAirPodPro(primaryColor: Color, accentColor: Colo
 /**
  * Draws a mirrored pair of AirPods 1 & 2 with classic long straight stems and round heads.
  */
-private fun DrawScope.drawAirPodPairGen1(primaryColor: Color, accentColor: Color) {
+private fun DrawScope.drawAirPodPairGen1(primaryColor: Color, accentColor: Color, leftPath: Path, rightPath: Path) {
     val w = size.width
-    val h = size.height
 
-    drawSingleAirPodGen1(primaryColor, accentColor, isLeft = true, offsetCenterX = w * 0.34f)
-    drawSingleAirPodGen1(primaryColor, accentColor, isLeft = false, offsetCenterX = w * 0.66f)
+    drawSingleAirPodGen1(primaryColor, accentColor, isLeft = true, offsetCenterX = w * 0.34f, headPath = leftPath)
+    drawSingleAirPodGen1(primaryColor, accentColor, isLeft = false, offsetCenterX = w * 0.66f, headPath = rightPath)
 }
 
-private fun DrawScope.drawSingleAirPodGen1(primaryColor: Color, accentColor: Color, isLeft: Boolean, offsetCenterX: Float) {
+private fun DrawScope.drawSingleAirPodGen1(
+    primaryColor: Color,
+    accentColor: Color,
+    isLeft: Boolean,
+    offsetCenterX: Float,
+    headPath: Path,
+) {
     val w = size.width
     val h = size.height
     val stemWidth = w * 0.11f
@@ -289,34 +304,33 @@ private fun DrawScope.drawSingleAirPodGen1(primaryColor: Color, accentColor: Col
     )
 
     // Round open ear head
-    val headPath = Path().apply {
-        if (isLeft) {
-            moveTo(stemLeft + stemWidth * 0.8f, stemTop + stemHeight * 0.15f)
-            cubicTo(
-                stemLeft + stemWidth * 0.8f, h * 0.10f,
-                offsetCenterX - w * 0.20f, h * 0.10f,
-                offsetCenterX - w * 0.20f, h * 0.28f,
-            )
-            cubicTo(
-                offsetCenterX - w * 0.20f, h * 0.42f,
-                stemLeft, stemTop + stemHeight * 0.24f,
-                stemLeft + stemWidth * 0.2f, stemTop + stemHeight * 0.15f,
-            )
-            close()
-        } else {
-            moveTo(stemLeft + stemWidth * 0.2f, stemTop + stemHeight * 0.15f)
-            cubicTo(
-                stemLeft + stemWidth * 0.2f, h * 0.10f,
-                offsetCenterX + w * 0.20f, h * 0.10f,
-                offsetCenterX + w * 0.20f, h * 0.28f,
-            )
-            cubicTo(
-                offsetCenterX + w * 0.20f, h * 0.42f,
-                stemLeft + stemWidth, stemTop + stemHeight * 0.24f,
-                stemLeft + stemWidth * 0.8f, stemTop + stemHeight * 0.15f,
-            )
-            close()
-        }
+    headPath.rewind()
+    if (isLeft) {
+        headPath.moveTo(stemLeft + stemWidth * 0.8f, stemTop + stemHeight * 0.15f)
+        headPath.cubicTo(
+            stemLeft + stemWidth * 0.8f, h * 0.10f,
+            offsetCenterX - w * 0.20f, h * 0.10f,
+            offsetCenterX - w * 0.20f, h * 0.28f,
+        )
+        headPath.cubicTo(
+            offsetCenterX - w * 0.20f, h * 0.42f,
+            stemLeft, stemTop + stemHeight * 0.24f,
+            stemLeft + stemWidth * 0.2f, stemTop + stemHeight * 0.15f,
+        )
+        headPath.close()
+    } else {
+        headPath.moveTo(stemLeft + stemWidth * 0.2f, stemTop + stemHeight * 0.15f)
+        headPath.cubicTo(
+            stemLeft + stemWidth * 0.2f, h * 0.10f,
+            offsetCenterX + w * 0.20f, h * 0.10f,
+            offsetCenterX + w * 0.20f, h * 0.28f,
+        )
+        headPath.cubicTo(
+            offsetCenterX + w * 0.20f, h * 0.42f,
+            stemLeft + stemWidth, stemTop + stemHeight * 0.24f,
+            stemLeft + stemWidth * 0.8f, stemTop + stemHeight * 0.15f,
+        )
+        headPath.close()
     }
     drawPath(headPath, color = primaryColor, style = Fill)
 
@@ -333,15 +347,20 @@ private fun DrawScope.drawSingleAirPodGen1(primaryColor: Color, accentColor: Col
 /**
  * Draws a mirrored pair of AirPods 3 with medium angled stems and contoured heads.
  */
-private fun DrawScope.drawAirPodPairGen3(primaryColor: Color, accentColor: Color) {
+private fun DrawScope.drawAirPodPairGen3(primaryColor: Color, accentColor: Color, leftPath: Path, rightPath: Path) {
     val w = size.width
-    val h = size.height
 
-    drawSingleAirPodGen3(primaryColor, accentColor, isLeft = true, offsetCenterX = w * 0.34f)
-    drawSingleAirPodGen3(primaryColor, accentColor, isLeft = false, offsetCenterX = w * 0.66f)
+    drawSingleAirPodGen3(primaryColor, accentColor, isLeft = true, offsetCenterX = w * 0.34f, headPath = leftPath)
+    drawSingleAirPodGen3(primaryColor, accentColor, isLeft = false, offsetCenterX = w * 0.66f, headPath = rightPath)
 }
 
-private fun DrawScope.drawSingleAirPodGen3(primaryColor: Color, accentColor: Color, isLeft: Boolean, offsetCenterX: Float) {
+private fun DrawScope.drawSingleAirPodGen3(
+    primaryColor: Color,
+    accentColor: Color,
+    isLeft: Boolean,
+    offsetCenterX: Float,
+    headPath: Path,
+) {
     val w = size.width
     val h = size.height
     val stemWidth = w * 0.12f
@@ -356,34 +375,33 @@ private fun DrawScope.drawSingleAirPodGen3(primaryColor: Color, accentColor: Col
         cornerRadius = CornerRadius(stemWidth / 2f, stemWidth / 2f),
     )
 
-    val headPath = Path().apply {
-        if (isLeft) {
-            moveTo(stemLeft + stemWidth * 0.9f, stemTop + stemHeight * 0.15f)
-            cubicTo(
-                stemLeft + stemWidth * 0.9f, h * 0.14f,
-                offsetCenterX - w * 0.22f, h * 0.16f,
-                offsetCenterX - w * 0.22f, h * 0.36f,
-            )
-            cubicTo(
-                offsetCenterX - w * 0.22f, h * 0.50f,
-                stemLeft - w * 0.04f, stemTop + stemHeight * 0.26f,
-                stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.15f,
-            )
-            close()
-        } else {
-            moveTo(stemLeft + stemWidth * 0.1f, stemTop + stemHeight * 0.15f)
-            cubicTo(
-                stemLeft + stemWidth * 0.1f, h * 0.14f,
-                offsetCenterX + w * 0.22f, h * 0.16f,
-                offsetCenterX + w * 0.22f, h * 0.36f,
-            )
-            cubicTo(
-                offsetCenterX + w * 0.22f, h * 0.50f,
-                stemLeft + stemWidth + w * 0.04f, stemTop + stemHeight * 0.26f,
-                stemLeft + stemWidth * 0.7f, stemTop + stemHeight * 0.15f,
-            )
-            close()
-        }
+    headPath.rewind()
+    if (isLeft) {
+        headPath.moveTo(stemLeft + stemWidth * 0.9f, stemTop + stemHeight * 0.15f)
+        headPath.cubicTo(
+            stemLeft + stemWidth * 0.9f, h * 0.14f,
+            offsetCenterX - w * 0.22f, h * 0.16f,
+            offsetCenterX - w * 0.22f, h * 0.36f,
+        )
+        headPath.cubicTo(
+            offsetCenterX - w * 0.22f, h * 0.50f,
+            stemLeft - w * 0.04f, stemTop + stemHeight * 0.26f,
+            stemLeft + stemWidth * 0.3f, stemTop + stemHeight * 0.15f,
+        )
+        headPath.close()
+    } else {
+        headPath.moveTo(stemLeft + stemWidth * 0.1f, stemTop + stemHeight * 0.15f)
+        headPath.cubicTo(
+            stemLeft + stemWidth * 0.1f, h * 0.14f,
+            offsetCenterX + w * 0.22f, h * 0.16f,
+            offsetCenterX + w * 0.22f, h * 0.36f,
+        )
+        headPath.cubicTo(
+            offsetCenterX + w * 0.22f, h * 0.50f,
+            stemLeft + stemWidth + w * 0.04f, stemTop + stemHeight * 0.26f,
+            stemLeft + stemWidth * 0.7f, stemTop + stemHeight * 0.15f,
+        )
+        headPath.close()
     }
     drawPath(headPath, color = primaryColor, style = Fill)
 

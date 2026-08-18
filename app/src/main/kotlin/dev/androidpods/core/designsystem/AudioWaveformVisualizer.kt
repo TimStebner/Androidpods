@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -59,6 +60,15 @@ fun AudioWaveformVisualizer(
         label = "waveform-pulse",
     )
 
+    val baseHeights = remember(barCount) {
+        FloatArray(barCount) { index ->
+            val normalizedX = index.toFloat() / (barCount - 1).toFloat()
+            val envelope = sin(normalizedX * PI).toFloat()
+            val harmonic = (sin(normalizedX * 4 * PI + 0.5f) * 0.35f + 0.65f).toFloat()
+            (envelope * harmonic).coerceIn(0.15f, 1f)
+        }
+    }
+
     Canvas(
         modifier = modifier
             .fillMaxWidth()
@@ -68,15 +78,6 @@ fun AudioWaveformVisualizer(
         val canvasHeight = size.height
         val barWidth = (totalWidth / (barCount * 1.8f)).coerceIn(2.5f, 6.5f)
         val availableGap = (totalWidth - (barCount * barWidth)) / (barCount - 1).coerceAtLeast(1)
-
-        val baseHeights = FloatArray(barCount) { index ->
-            // Symmetrical envelope curve (tapered at ends, fuller in the middle/lobes)
-            val normalizedX = index.toFloat() / (barCount - 1).toFloat() // 0f..1f
-            val envelope = sin(normalizedX * PI).toFloat()
-            // Multiple harmonic peaks
-            val harmonic = (sin(normalizedX * 4 * PI + 0.5f) * 0.35f + 0.65f).toFloat()
-            (envelope * harmonic).coerceIn(0.15f, 1f)
-        }
 
         for (i in 0 until barCount) {
             val normalizedX = i.toFloat() / (barCount - 1).toFloat()

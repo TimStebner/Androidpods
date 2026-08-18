@@ -55,4 +55,37 @@ class AirPodsTileServiceTest {
         assertEquals(AirPodsTransport.ConnectionState.Connected, state.connection)
         assertNotNull(state.capabilities.modelName)
     }
+
+    @Test
+    fun `spatial orientation updates do not alter tile distinct key`() {
+        val baseState = AirPodsState(
+            connection = AirPodsTransport.ConnectionState.Connected,
+            capabilities = CapabilityResolver.resolve("A3050"),
+            battery = BatteryState(
+                left = BatteryComponentState(95, BatteryChargeStatus.NOT_CHARGING),
+                right = BatteryComponentState(90, BatteryChargeStatus.NOT_CHARGING),
+                case = BatteryComponentState(100, BatteryChargeStatus.CHARGING),
+            ),
+            earDetection = EarDetectionState(leftInEar = true, rightInEar = true),
+            headOrientation = dev.androidpods.core.data.HeadOrientation(0f, 0f, 0f),
+            motionStreamActive = true,
+        )
+
+        val updatedOrientationState = baseState.copy(
+            headOrientation = dev.androidpods.core.data.HeadOrientation(15.5f, -22.1f, 3.4f),
+        )
+
+        val tileKey1 = Triple(
+            baseState.connection is AirPodsTransport.ConnectionState.Connected,
+            baseState.battery,
+            baseState.capabilities.modelName,
+        )
+        val tileKey2 = Triple(
+            updatedOrientationState.connection is AirPodsTransport.ConnectionState.Connected,
+            updatedOrientationState.battery,
+            updatedOrientationState.capabilities.modelName,
+        )
+
+        assertEquals(tileKey1, tileKey2)
+    }
 }

@@ -1,207 +1,243 @@
 {
   ".agents/skills/material-3/.claude-plugin/plugin.json": {
     "mtime": 1786567209.7440305,
-    "seen": 1786661059.2032342,
-    "ast_hash": "",
-    "semantic_hash": ""
+    "seen": 1787054974.289619,
+    "ast_hash": "a827df301630b4453c459aaa4e0ae3ea",
+    "semantic_hash": "a827df301630b4453c459aaa4e0ae3ea"
   },
   ".claude/settings.local.json": {
     "mtime": 1786651868.8393347,
-    "seen": 1786661059.203236,
-    "ast_hash": "",
-    "semantic_hash": ""
+    "seen": 1787054974.2896209,
+    "ast_hash": "49470ddfa021de8ab74e0484fc5dd2a5",
+    "semantic_hash": "49470ddfa021de8ab74e0484fc5dd2a5"
   },
   ".codex/hooks.json": {
     "mtime": 1786563075.2045064,
-    "seen": 1786661059.2032368,
-    "ast_hash": "",
-    "semantic_hash": ""
+    "seen": 1787054974.2896218,
+    "ast_hash": "250ddbd3a8e0041c495f3c516e2d9982",
+    "semantic_hash": "250ddbd3a8e0041c495f3c516e2d9982"
   },
   "app/build.gradle.kts": {
     "mtime": 1786977701.3805304,
+    "seen": 1787054974.2896225,
     "ast_hash": "10a6272dc5170d9c30d6bbef3ec103cc",
     "semantic_hash": "10a6272dc5170d9c30d6bbef3ec103cc"
   },
   "app/src/androidTest/kotlin/dev/androidpods/core/bluetooth/L2capTierBProbeTest.kt": {
     "mtime": 1786637791.8370302,
+    "seen": 1787054974.2896228,
     "ast_hash": "a06f7b66f6ecd4018a081a668a476270",
     "semantic_hash": "a06f7b66f6ecd4018a081a668a476270"
   },
   "app/src/main/kotlin/dev/androidpods/app/AndroidpodsApp.kt": {
-    "mtime": 1786986816.0412018,
-    "ast_hash": "2a3c0b929e0a7f4527cc7348050b0837",
-    "semantic_hash": "2a3c0b929e0a7f4527cc7348050b0837"
+    "mtime": 1787006536.6009197,
+    "seen": 1787054974.2896235,
+    "ast_hash": "e069e850b20ee45d6d17ac25867e0271",
+    "semantic_hash": "e069e850b20ee45d6d17ac25867e0271"
   },
   "app/src/main/kotlin/dev/androidpods/app/MainActivity.kt": {
     "mtime": 1787002899.9116325,
+    "seen": 1787054974.289624,
     "ast_hash": "f0a5ec958836034eb0efea20fec3c858",
     "semantic_hash": "f0a5ec958836034eb0efea20fec3c858"
   },
   "app/src/main/kotlin/dev/androidpods/core/airpods/AapPacketDecoder.kt": {
     "mtime": 1786986680.7996337,
+    "seen": 1787054974.289625,
     "ast_hash": "fc70c06665d39204d14f72f5143e3526",
     "semantic_hash": "fc70c06665d39204d14f72f5143e3526"
   },
   "app/src/main/kotlin/dev/androidpods/core/airpods/AapSession.kt": {
     "mtime": 1786986658.2583723,
+    "seen": 1787054974.2896252,
     "ast_hash": "29a42188e48899be125dd9bd96ff6838",
     "semantic_hash": "29a42188e48899be125dd9bd96ff6838"
   },
   "app/src/main/kotlin/dev/androidpods/core/airpods/CapabilityResolver.kt": {
     "mtime": 1786987840.7270947,
+    "seen": 1787054974.289626,
     "ast_hash": "ef167db103affd6339c29adee3aa9e18",
     "semantic_hash": "ef167db103affd6339c29adee3aa9e18"
   },
   "app/src/main/kotlin/dev/androidpods/core/bluetooth/AapTransport.kt": {
-    "mtime": 1787001717.255558,
-    "ast_hash": "ad0bdcb242fb371beadd5897b7a39737",
-    "semantic_hash": "ad0bdcb242fb371beadd5897b7a39737"
+    "mtime": 1787053419.6169581,
+    "seen": 1787054974.2896266,
+    "ast_hash": "cd540d4dc226018b7e1d9bbf289dcdb6",
+    "semantic_hash": "cd540d4dc226018b7e1d9bbf289dcdb6"
   },
   "app/src/main/kotlin/dev/androidpods/core/bluetooth/AirPodsAssociationManager.kt": {
-    "mtime": 1787006226.2006311,
-    "ast_hash": "461e5a20d531cb03df402eb3cf9a547f",
-    "semantic_hash": "461e5a20d531cb03df402eb3cf9a547f"
+    "mtime": 1787054682.087502,
+    "seen": 1787054974.2896268,
+    "ast_hash": "e5a7b5458c41e25dcd9bed1e723a9866",
+    "semantic_hash": "e5a7b5458c41e25dcd9bed1e723a9866"
   },
   "app/src/main/kotlin/dev/androidpods/core/bluetooth/AirPodsPresence.kt": {
     "mtime": 1786656702.4561331,
+    "seen": 1787054974.289627,
     "ast_hash": "185fd1f213c3bd94cb135701071a1d2e",
     "semantic_hash": "185fd1f213c3bd94cb135701071a1d2e"
   },
   "app/src/main/kotlin/dev/androidpods/core/bluetooth/AirPodsTransport.kt": {
     "mtime": 1786647894.5256257,
+    "seen": 1787054974.2896276,
     "ast_hash": "663248a1272dc66bd9ff4130fe67c7e2",
     "semantic_hash": "663248a1272dc66bd9ff4130fe67c7e2"
   },
   "app/src/main/kotlin/dev/androidpods/core/bluetooth/BluetoothAvailability.kt": {
     "mtime": 1786632921.4965618,
+    "seen": 1787054974.2896278,
     "ast_hash": "934efd7e8939e55a597eccf0adb4d59b",
     "semantic_hash": "934efd7e8939e55a597eccf0adb4d59b"
   },
   "app/src/main/kotlin/dev/androidpods/core/bluetooth/ProtocolLogging.kt": {
     "mtime": 1786660442.8173523,
+    "seen": 1787054974.2896283,
     "ast_hash": "03fc5c76a4dfa471536f51ff1ec06945",
     "semantic_hash": "03fc5c76a4dfa471536f51ff1ec06945"
   },
   "app/src/main/kotlin/dev/androidpods/core/bluetooth/RequiredPermissions.kt": {
     "mtime": 1786984785.4365902,
+    "seen": 1787054974.2896285,
     "ast_hash": "46b22734177c7a136ec8f81a8eb1f6a6",
     "semantic_hash": "46b22734177c7a136ec8f81a8eb1f6a6"
   },
   "app/src/main/kotlin/dev/androidpods/core/data/AirPodsRepository.kt": {
-    "mtime": 1787001703.2894087,
-    "ast_hash": "7ea8a5e26eacf8e906e9fd17356e11c1",
-    "semantic_hash": "7ea8a5e26eacf8e906e9fd17356e11c1"
+    "mtime": 1787053429.908015,
+    "seen": 1787054974.289629,
+    "ast_hash": "b30a9e484a52006dc8f0678311d5a44d",
+    "semantic_hash": "b30a9e484a52006dc8f0678311d5a44d"
   },
   "app/src/main/kotlin/dev/androidpods/core/data/AirPodsRepositoryProvider.kt": {
     "mtime": 1786987243.2491531,
+    "seen": 1787054974.2896292,
     "ast_hash": "27d3ce05c9ad9f7bc41f185b90e2ce9d",
     "semantic_hash": "27d3ce05c9ad9f7bc41f185b90e2ce9d"
   },
   "app/src/main/kotlin/dev/androidpods/core/data/AirPodsState.kt": {
     "mtime": 1786985671.5359046,
+    "seen": 1787054974.2896295,
     "ast_hash": "4c3e07a75f59e1717a76fd2831eab82f",
     "semantic_hash": "4c3e07a75f59e1717a76fd2831eab82f"
   },
   "app/src/main/kotlin/dev/androidpods/core/data/DataStoreTierProbeCache.kt": {
     "mtime": 1786977545.723346,
+    "seen": 1787054974.2896304,
     "ast_hash": "fe48b26091532656c2cf8279e0bd7d40",
     "semantic_hash": "fe48b26091532656c2cf8279e0bd7d40"
   },
   "app/src/main/kotlin/dev/androidpods/core/data/TierProbeCache.kt": {
     "mtime": 1786977542.9453056,
+    "seen": 1787054974.2896307,
     "ast_hash": "852eed8868d65a0bf93210b0ea306638",
     "semantic_hash": "852eed8868d65a0bf93210b0ea306638"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/Color.kt": {
     "mtime": 1787003661.465661,
+    "seen": 1787054974.2896323,
     "ast_hash": "1fa922ebb946017fa424d61cb18c75b7",
     "semantic_hash": "1fa922ebb946017fa424d61cb18c75b7"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/Theme.kt": {
     "mtime": 1787003665.4237056,
+    "seen": 1787054974.2896352,
     "ast_hash": "2de4ce37c21fa2878872aa9e37d81225",
     "semantic_hash": "2de4ce37c21fa2878872aa9e37d81225"
   },
   "app/src/main/kotlin/dev/androidpods/core/media/AutoPause.kt": {
-    "mtime": 1786979614.9340732,
-    "ast_hash": "13710dd9973a3893542015a6764dba2f",
-    "semantic_hash": "13710dd9973a3893542015a6764dba2f"
+    "mtime": 1787054691.2215626,
+    "seen": 1787054974.289636,
+    "ast_hash": "0d1c4bb84b41cddd54b898cf645d04ca",
+    "semantic_hash": "0d1c4bb84b41cddd54b898cf645d04ca"
   },
   "app/src/main/kotlin/dev/androidpods/core/media/AutoPauseDecider.kt": {
     "mtime": 1786979610.173014,
+    "seen": 1787054974.2896364,
     "ast_hash": "82cffc9910622c05b96d04bb00a0eb0a",
     "semantic_hash": "82cffc9910622c05b96d04bb00a0eb0a"
   },
   "app/src/main/kotlin/dev/androidpods/feature/home/HomeScreen.kt": {
-    "mtime": 1787005369.5849855,
-    "ast_hash": "8e3c8bd22a718f819c5b63042d51a4a6",
-    "semantic_hash": "8e3c8bd22a718f819c5b63042d51a4a6"
+    "mtime": 1787054710.8736928,
+    "seen": 1787054974.2896376,
+    "ast_hash": "23a8ff88f7d7463e6390ebd358e28d88",
+    "semantic_hash": "23a8ff88f7d7463e6390ebd358e28d88"
   },
   "app/src/main/kotlin/dev/androidpods/feature/onboarding/OnboardingScreen.kt": {
-    "mtime": 1786999976.0522366,
-    "ast_hash": "a0f316c168b7c619a1e3d07b8cc0b2f9",
-    "semantic_hash": "a0f316c168b7c619a1e3d07b8cc0b2f9"
+    "mtime": 1787052147.6959093,
+    "seen": 1787054974.2896397,
+    "ast_hash": "6a296ff22445cbc100f97609bc58968d",
+    "semantic_hash": "6a296ff22445cbc100f97609bc58968d"
   },
   "app/src/test/kotlin/dev/androidpods/SmokeTest.kt": {
     "mtime": 1786632102.731612,
+    "seen": 1787054974.2896438,
     "ast_hash": "cb3bb82e26b352fb95b070a5562a3ab4",
     "semantic_hash": "cb3bb82e26b352fb95b070a5562a3ab4"
   },
   "app/src/test/kotlin/dev/androidpods/core/airpods/AapPacketDecoderTest.kt": {
     "mtime": 1786985731.5946052,
+    "seen": 1787054974.289644,
     "ast_hash": "839a2b2bd1c1b482a850fbe02e321315",
     "semantic_hash": "839a2b2bd1c1b482a850fbe02e321315"
   },
   "app/src/test/kotlin/dev/androidpods/core/airpods/AapSessionTest.kt": {
     "mtime": 1786986668.1144867,
+    "seen": 1787054974.2896442,
     "ast_hash": "277e6a54cc3c0d1b064d93389cacd329",
     "semantic_hash": "277e6a54cc3c0d1b064d93389cacd329"
   },
   "app/src/test/kotlin/dev/androidpods/core/airpods/CapabilityResolverTest.kt": {
     "mtime": 1786987882.2215762,
+    "seen": 1787054974.2896447,
     "ast_hash": "3d65732be06e491861d51d4a0d82bca3",
     "semantic_hash": "3d65732be06e491861d51d4a0d82bca3"
   },
   "app/src/test/kotlin/dev/androidpods/core/bluetooth/FakeAirPodsTransport.kt": {
     "mtime": 1786647903.021728,
+    "seen": 1787054974.2896452,
     "ast_hash": "64ab0dc7a6c0e9412049fbe2e7a0ac37",
     "semantic_hash": "64ab0dc7a6c0e9412049fbe2e7a0ac37"
   },
   "app/src/test/kotlin/dev/androidpods/core/data/AirPodsRepositoryTest.kt": {
-    "mtime": 1786986671.2185228,
-    "ast_hash": "97f2220b8d39610482d0f862ac4cfdb8",
-    "semantic_hash": "97f2220b8d39610482d0f862ac4cfdb8"
+    "mtime": 1787052499.0636873,
+    "seen": 1787054974.2896457,
+    "ast_hash": "306219f51d86345b4d198fd86432fdaf",
+    "semantic_hash": "306219f51d86345b4d198fd86432fdaf"
   },
   "app/src/test/kotlin/dev/androidpods/core/data/FakeTierProbeCache.kt": {
     "mtime": 1786977553.528459,
+    "seen": 1787054974.2896461,
     "ast_hash": "fc77042ee38ac9352057088ef8efc8a5",
     "semantic_hash": "fc77042ee38ac9352057088ef8efc8a5"
   },
   "app/src/test/kotlin/dev/androidpods/core/media/AutoPauseDeciderTest.kt": {
     "mtime": 1786979635.9083335,
+    "seen": 1787054974.289647,
     "ast_hash": "abf9dd93ffe08cde1a16d1d918742718",
     "semantic_hash": "abf9dd93ffe08cde1a16d1d918742718"
   },
   "build.gradle.kts": {
     "mtime": 1786631719.3241363,
+    "seen": 1787054974.2896485,
     "ast_hash": "f9c6afb25329a1b465595209859baa27",
     "semantic_hash": "f9c6afb25329a1b465595209859baa27"
   },
   "gradlew": {
     "mtime": 1786631279.3991249,
+    "seen": 1787054974.2896492,
     "ast_hash": "41adef6fe68f541f0d82776c9cb83482",
     "semantic_hash": "41adef6fe68f541f0d82776c9cb83482"
   },
   "settings.gradle.kts": {
     "mtime": 1786711770.4377532,
+    "seen": 1787054974.2896495,
     "ast_hash": "1ebfc011ae32db20bd725a77bf63daba",
     "semantic_hash": "1ebfc011ae32db20bd725a77bf63daba"
   },
   "skills-lock.json": {
     "mtime": 1786567209.7478344,
-    "seen": 1786661059.203254,
-    "ast_hash": "",
-    "semantic_hash": ""
+    "seen": 1787054974.2896497,
+    "ast_hash": "73957406233eebef2790b9919e5b4911",
+    "semantic_hash": "73957406233eebef2790b9919e5b4911"
   },
   ".agents/skills/material-3/SKILL.md": {
     "mtime": 1786567209.7439718,
@@ -249,7 +285,7 @@
     "mtime": 1786566744.9616024,
     "seen": 1786649553.4539979,
     "ast_hash": "741a7f6108ad1f384b69817f996a9609",
-    "semantic_hash": "741a7f6108ad1f384b69817f996a9609"
+    "semantic_hash": ""
   },
   "NOTICE.md": {
     "mtime": 1786645270.89097,
@@ -267,13 +303,13 @@
     "mtime": 1786631707.8369837,
     "seen": 1786649553.4539988,
     "ast_hash": "05ab448814a214c5b7bb7fc6edba7871",
-    "semantic_hash": "05ab448814a214c5b7bb7fc6edba7871"
+    "semantic_hash": ""
   },
   "ROADMAP.md": {
     "mtime": 1786660856.0963807,
     "seen": 1786661059.2032545,
     "ast_hash": "dd16a6f653d8de9097904f53f78c1cac",
-    "semantic_hash": "dd16a6f653d8de9097904f53f78c1cac"
+    "semantic_hash": ""
   },
   "app/src/test/resources/fixtures/aap/session-start-capture.txt": {
     "mtime": 1786638384.6961792,
@@ -307,192 +343,266 @@
   },
   "app/src/androidTest/kotlin/dev/androidpods/core/data/ForceTierBUnsupportedTest.kt": {
     "mtime": 1786659155.738737,
+    "seen": 1787054974.2896233,
     "ast_hash": "4c0b5a9e0233cdb8692203226bc5104c",
     "semantic_hash": "4c0b5a9e0233cdb8692203226bc5104c"
   },
   "app/src/main/kotlin/dev/androidpods/feature/notifications/BatteryNotification.kt": {
-    "mtime": 1786653883.8822258,
-    "ast_hash": "3fef1100f3bb9c6d3a6ef7052c9add1a",
-    "semantic_hash": "3fef1100f3bb9c6d3a6ef7052c9add1a"
+    "mtime": 1787052104.840764,
+    "seen": 1787054974.2896383,
+    "ast_hash": "4264088623011d9219f0ed157e3fcac2",
+    "semantic_hash": "4264088623011d9219f0ed157e3fcac2"
   },
   "app/src/main/kotlin/dev/androidpods/feature/notifications/BatteryNotificationContent.kt": {
     "mtime": 1786653771.5598423,
+    "seen": 1787054974.2896388,
     "ast_hash": "1cb29eb38e0bb31256f1993f78ccec4e",
     "semantic_hash": "1cb29eb38e0bb31256f1993f78ccec4e"
   },
   "app/src/main/kotlin/dev/androidpods/feature/notifications/NotificationUpdates.kt": {
     "mtime": 1786977637.507651,
+    "seen": 1787054974.2896395,
     "ast_hash": "70e690598b86bdfdb4c0bda8fbc882a7",
     "semantic_hash": "70e690598b86bdfdb4c0bda8fbc882a7"
   },
   "app/src/main/kotlin/dev/androidpods/feature/widgets/BatteryWidget.kt": {
     "mtime": 1787003448.546291,
+    "seen": 1787054974.2896423,
     "ast_hash": "fca387393c965188b62d135c4e2c1f4d",
     "semantic_hash": "fca387393c965188b62d135c4e2c1f4d"
   },
   "app/src/main/kotlin/dev/androidpods/feature/widgets/BatteryWidgetContent.kt": {
     "mtime": 1786652203.8874257,
+    "seen": 1787054974.2896426,
     "ast_hash": "98e60a3b46c6db20c4f0e788f78f8bd9",
     "semantic_hash": "98e60a3b46c6db20c4f0e788f78f8bd9"
   },
   "app/src/main/kotlin/dev/androidpods/feature/widgets/BatteryWidgetReceiver.kt": {
     "mtime": 1786652372.9865067,
+    "seen": 1787054974.2896428,
     "ast_hash": "9c326e63201b9e216665094acf8fb66d",
     "semantic_hash": "9c326e63201b9e216665094acf8fb66d"
   },
   "app/src/main/kotlin/dev/androidpods/feature/widgets/WidgetUpdates.kt": {
     "mtime": 1786652731.6099415,
+    "seen": 1787054974.289643,
     "ast_hash": "7a6e44d4412306b259b62f6ccd2ba441",
     "semantic_hash": "7a6e44d4412306b259b62f6ccd2ba441"
   },
   "app/src/test/kotlin/dev/androidpods/feature/notifications/BatteryNotificationContentTest.kt": {
     "mtime": 1786653774.9468842,
+    "seen": 1787054974.2896473,
     "ast_hash": "c86b7fc11cd586870316b5886c9206dc",
     "semantic_hash": "c86b7fc11cd586870316b5886c9206dc"
   },
   "app/src/test/kotlin/dev/androidpods/feature/widgets/BatteryWidgetContentTest.kt": {
     "mtime": 1786652191.9312787,
+    "seen": 1787054974.2896483,
     "ast_hash": "ced6aa616d435c7dd7456845cab4645d",
     "semantic_hash": "ced6aa616d435c7dd7456845cab4645d"
   },
   "app/src/main/kotlin/dev/androidpods/core/data/AppSettings.kt": {
-    "mtime": 1786984154.001293,
-    "ast_hash": "9a5eb4363ab8b3961d53b32fa2508db1",
-    "semantic_hash": "9a5eb4363ab8b3961d53b32fa2508db1"
+    "mtime": 1787006502.2815862,
+    "seen": 1787054974.2896297,
+    "ast_hash": "deac4a913bc71caa1c56b1444d52865d",
+    "semantic_hash": "deac4a913bc71caa1c56b1444d52865d"
   },
   "app/src/main/kotlin/dev/androidpods/core/data/AppSettingsRepository.kt": {
-    "mtime": 1786984158.5783458,
-    "ast_hash": "7110ef3423f68e35c4bc205a1951d0e4",
-    "semantic_hash": "7110ef3423f68e35c4bc205a1951d0e4"
+    "mtime": 1787006506.3146253,
+    "seen": 1787054974.2896302,
+    "ast_hash": "5b0ccbabf4287103ccc581ae5b7633cc",
+    "semantic_hash": "5b0ccbabf4287103ccc581ae5b7633cc"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/DeviceIllustration.kt": {
-    "mtime": 1786974780.1852403,
-    "ast_hash": "a0ac33647c561eebe5e62551b67c1ec6",
-    "semantic_hash": "a0ac33647c561eebe5e62551b67c1ec6"
+    "mtime": 1787054640.342223,
+    "seen": 1787054974.2896328,
+    "ast_hash": "c5af19357897601e79a6030f857245a1",
+    "semantic_hash": "c5af19357897601e79a6030f857245a1"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/Shape.kt": {
     "mtime": 1786974732.871831,
+    "seen": 1787054974.289634,
     "ast_hash": "5c6e54de9b9d506e6e2b03542a880800",
     "semantic_hash": "5c6e54de9b9d506e6e2b03542a880800"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/Typography.kt": {
     "mtime": 1786974735.9398577,
+    "seen": 1787054974.2896354,
     "ast_hash": "f90d9ea1ebfd4a19afd295283be6bc26",
     "semantic_hash": "f90d9ea1ebfd4a19afd295283be6bc26"
   },
   "app/src/main/kotlin/dev/androidpods/feature/controls/ControlsScreen.kt": {
-    "mtime": 1787003227.041906,
-    "ast_hash": "8fdaae150bee0d4748573c11e52710a2",
-    "semantic_hash": "8fdaae150bee0d4748573c11e52710a2"
+    "mtime": 1787053090.053991,
+    "seen": 1787054974.289637,
+    "ast_hash": "a4cab7b38eec81949ae7bfb68d124377",
+    "semantic_hash": "a4cab7b38eec81949ae7bfb68d124377"
   },
   "app/src/main/kotlin/dev/androidpods/feature/navigation/AppNavigation.kt": {
-    "mtime": 1787003876.95911,
-    "ast_hash": "c1ca540ab83b8f9d1662d1da70f7a931",
-    "semantic_hash": "c1ca540ab83b8f9d1662d1da70f7a931"
+    "mtime": 1787054714.3337154,
+    "seen": 1787054974.2896378,
+    "ast_hash": "2db9d733bbfd93cae6b618f7d24685a7",
+    "semantic_hash": "2db9d733bbfd93cae6b618f7d24685a7"
   },
   "app/src/main/kotlin/dev/androidpods/feature/notifications/ConnectionNotification.kt": {
-    "mtime": 1786976041.2619443,
-    "ast_hash": "00363dc97e211da7830a25e7946d1e2a",
-    "semantic_hash": "00363dc97e211da7830a25e7946d1e2a"
+    "mtime": 1787052112.0257897,
+    "seen": 1787054974.2896392,
+    "ast_hash": "9ecb49ee29697c188d7728f7cf883130",
+    "semantic_hash": "9ecb49ee29697c188d7728f7cf883130"
   },
   "app/src/main/kotlin/dev/androidpods/feature/settings/SettingsScreen.kt": {
-    "mtime": 1787003254.610197,
-    "ast_hash": "0b4ce6dbe85d21d6af89d5c4888fed3d",
-    "semantic_hash": "0b4ce6dbe85d21d6af89d5c4888fed3d"
+    "mtime": 1787006553.1090813,
+    "seen": 1787054974.2896411,
+    "ast_hash": "12135eefe4ff9a8a177a7e674e0138a4",
+    "semantic_hash": "12135eefe4ff9a8a177a7e674e0138a4"
   },
   "app/src/main/kotlin/dev/androidpods/feature/widgets/WidgetsScreen.kt": {
     "mtime": 1787003460.811426,
+    "seen": 1787054974.2896433,
     "ast_hash": "7d5c74f18f8db18f598b0c45ea70efab",
     "semantic_hash": "7d5c74f18f8db18f598b0c45ea70efab"
   },
   "app/src/test/kotlin/dev/androidpods/core/designsystem/ThemeTest.kt": {
     "mtime": 1786974764.1791022,
+    "seen": 1787054974.2896466,
     "ast_hash": "66398629e06429398bbde650f9d54b89",
     "semantic_hash": "66398629e06429398bbde650f9d54b89"
   },
   "app/src/main/kotlin/dev/androidpods/core/airpods/AapInteractionSettings.kt": {
     "mtime": 1786984118.379881,
+    "seen": 1787054974.2896242,
     "ast_hash": "f72a083ad26486be11f74ff44f197779",
     "semantic_hash": "f72a083ad26486be11f74ff44f197779"
   },
   "app/src/main/kotlin/dev/androidpods/core/airpods/AapStemAction.kt": {
     "mtime": 1786983410.643674,
+    "seen": 1787054974.2896256,
     "ast_hash": "3499a92616af78d4e85aa29ff56e254a",
     "semantic_hash": "3499a92616af78d4e85aa29ff56e254a"
   },
   "app/src/main/kotlin/dev/androidpods/core/audio/ChimePlayer.kt": {
     "mtime": 1786988058.8666255,
+    "seen": 1787054974.2896261,
     "ast_hash": "d5061b850d92f1d7540c39610397da78",
     "semantic_hash": "d5061b850d92f1d7540c39610397da78"
   },
   "app/src/main/kotlin/dev/androidpods/core/gestures/HeadGestureDetector.kt": {
     "mtime": 1786987491.8620436,
+    "seen": 1787054974.2896357,
     "ast_hash": "728a55561c7831b283187153766bb501",
     "semantic_hash": "728a55561c7831b283187153766bb501"
   },
   "app/src/main/kotlin/dev/androidpods/core/telecom/CallGestureManager.kt": {
     "mtime": 1786987498.0701158,
+    "seen": 1787054974.2896366,
     "ast_hash": "0d31e1ea37de906c21310a5ea0a963d5",
     "semantic_hash": "0d31e1ea37de906c21310a5ea0a963d5"
   },
   "app/src/main/kotlin/dev/androidpods/feature/findmy/FindMyCard.kt": {
     "mtime": 1787002687.8707705,
+    "seen": 1787054974.2896373,
     "ast_hash": "deb3725b33ade3de3f1bb47d8a83c8d2",
     "semantic_hash": "deb3725b33ade3de3f1bb47d8a83c8d2"
   },
   "app/src/main/kotlin/dev/androidpods/feature/spatial/SpatialMotionVisualizer.kt": {
-    "mtime": 1787002686.1417565,
-    "ast_hash": "f59b1882f42d2733d471b6de143291ac",
-    "semantic_hash": "f59b1882f42d2733d471b6de143291ac"
+    "mtime": 1787054700.933627,
+    "seen": 1787054974.2896414,
+    "ast_hash": "7c9adb6f96550095ea9c29f0875327c2",
+    "semantic_hash": "7c9adb6f96550095ea9c29f0875327c2"
   },
   "app/src/main/kotlin/dev/androidpods/feature/tiles/AirPodsTileService.kt": {
-    "mtime": 1786985249.510959,
-    "ast_hash": "b34074942d7a3d0917547890dd94092f",
-    "semantic_hash": "b34074942d7a3d0917547890dd94092f"
+    "mtime": 1787054724.4717822,
+    "seen": 1787054974.2896416,
+    "ast_hash": "535e825db7cad9c394dc3cc4b5d97d43",
+    "semantic_hash": "535e825db7cad9c394dc3cc4b5d97d43"
   },
   "app/src/test/kotlin/dev/androidpods/core/audio/ChimePlayerTest.kt": {
     "mtime": 1786987926.7340927,
+    "seen": 1787054974.289645,
     "ast_hash": "4a75c01f716d4ddae11599ee7b54f736",
     "semantic_hash": "4a75c01f716d4ddae11599ee7b54f736"
   },
   "app/src/test/kotlin/dev/androidpods/core/gestures/HeadGestureDetectorTest.kt": {
     "mtime": 1786987509.368247,
+    "seen": 1787054974.2896469,
     "ast_hash": "3525992bc9a0e0e3cf940ba5c4147f70",
     "semantic_hash": "3525992bc9a0e0e3cf940ba5c4147f70"
   },
   "app/src/test/kotlin/dev/androidpods/feature/tiles/AirPodsTileServiceTest.kt": {
-    "mtime": 1786985251.5659833,
-    "ast_hash": "bff5eea9dc4e1f08beb85910461f2f3a",
-    "semantic_hash": "bff5eea9dc4e1f08beb85910461f2f3a"
+    "mtime": 1787054759.686013,
+    "seen": 1787054974.289648,
+    "ast_hash": "24b693801aec1bf7b13b713a07b5d3db",
+    "semantic_hash": "24b693801aec1bf7b13b713a07b5d3db"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/AirPodsGenerationBadge.kt": {
-    "mtime": 1787004166.9934568,
-    "ast_hash": "231d4ef90396d75a8782bfb14f3be819",
-    "semantic_hash": "231d4ef90396d75a8782bfb14f3be819"
+    "mtime": 1787052755.9912183,
+    "seen": 1787054974.2896311,
+    "ast_hash": "720b98ac90e5fa89ba084e09f8bf270c",
+    "semantic_hash": "720b98ac90e5fa89ba084e09f8bf270c"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/AudioWaveformVisualizer.kt": {
-    "mtime": 1787002053.2663448,
-    "ast_hash": "a5b4df7639fc5fb9325fe5b0c8792f7e",
-    "semantic_hash": "a5b4df7639fc5fb9325fe5b0c8792f7e"
+    "mtime": 1787054619.9390852,
+    "seen": 1787054974.289632,
+    "ast_hash": "f5e4f773ee1a8c1837a56b7b1697a597",
+    "semantic_hash": "f5e4f773ee1a8c1837a56b7b1697a597"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/ExpressiveScreenHeader.kt": {
-    "mtime": 1787003193.6615562,
-    "ast_hash": "c021906de092c906e335817989fd96fb",
-    "semantic_hash": "c021906de092c906e335817989fd96fb"
+    "mtime": 1787054719.3618114,
+    "seen": 1787054974.289633,
+    "ast_hash": "b2f3a9b6bb3b878ee4873b724fe36f6c",
+    "semantic_hash": "b2f3a9b6bb3b878ee4873b724fe36f6c"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/Haptics.kt": {
     "mtime": 1786999929.5214374,
+    "seen": 1787054974.2896335,
     "ast_hash": "853c35cfad6742c82029f291978a613d",
     "semantic_hash": "853c35cfad6742c82029f291978a613d"
   },
   "app/src/main/kotlin/dev/androidpods/core/designsystem/MorphingShape.kt": {
-    "mtime": 1786999936.9145637,
-    "ast_hash": "68d51836d9a38963fafa3b3f1935adae",
-    "semantic_hash": "68d51836d9a38963fafa3b3f1935adae"
+    "mtime": 1787054678.4664779,
+    "seen": 1787054974.2896338,
+    "ast_hash": "db6b306d02300b454e11038632cb0afe",
+    "semantic_hash": "db6b306d02300b454e11038632cb0afe"
   },
   "app/src/test/kotlin/dev/androidpods/core/designsystem/MorphingShapeTest.kt": {
     "mtime": 1787000000.3506577,
+    "seen": 1787054974.2896464,
     "ast_hash": "67699afd92a85a4e6c507f5c23746dcf",
     "semantic_hash": "67699afd92a85a4e6c507f5c23746dcf"
+  },
+  "app/src/main/kotlin/dev/androidpods/core/designsystem/AirPodsHeroIllustration.kt": {
+    "mtime": 1787054662.3903706,
+    "seen": 1787054974.2896316,
+    "ast_hash": "88d652c7b5b934a469be72a7a33740c1",
+    "semantic_hash": "88d652c7b5b934a469be72a7a33740c1"
+  },
+  "app/src/main/kotlin/dev/androidpods/core/designsystem/StatusBarScrim.kt": {
+    "mtime": 1787052062.8145976,
+    "seen": 1787054974.2896345,
+    "ast_hash": "1e65cd5ad9b03488f768e8a1e573321e",
+    "semantic_hash": "1e65cd5ad9b03488f768e8a1e573321e"
+  },
+  "app/src/main/kotlin/dev/androidpods/feature/popup/AirPodsBatteryPopup.kt": {
+    "mtime": 1787007734.7116876,
+    "seen": 1787054974.28964,
+    "ast_hash": "c6473f51875647501299af6e977faf82",
+    "semantic_hash": "c6473f51875647501299af6e977faf82"
+  },
+  "app/src/main/kotlin/dev/androidpods/feature/popup/BatteryPopupActivity.kt": {
+    "mtime": 1787007840.3868597,
+    "seen": 1787054974.2896404,
+    "ast_hash": "7fb0a9fd7a3fdaf6ca63755469245e10",
+    "semantic_hash": "7fb0a9fd7a3fdaf6ca63755469245e10"
+  },
+  "app/src/main/kotlin/dev/androidpods/feature/popup/BatteryPopupObserver.kt": {
+    "mtime": 1787006520.117759,
+    "seen": 1787054974.2896407,
+    "ast_hash": "8b2249915b002de4b9b3fe3bc49078c9",
+    "semantic_hash": "8b2249915b002de4b9b3fe3bc49078c9"
+  },
+  "app/src/test/kotlin/dev/androidpods/feature/popup/AirPodsBatteryPopupTest.kt": {
+    "mtime": 1787006566.6682146,
+    "seen": 1787054974.2896476,
+    "ast_hash": "519a3b0e8e4d16efeab5aa2bf9bd7022",
+    "semantic_hash": "519a3b0e8e4d16efeab5aa2bf9bd7022"
   }
 }

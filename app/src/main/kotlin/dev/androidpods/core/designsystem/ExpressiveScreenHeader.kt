@@ -53,20 +53,6 @@ fun ExpressiveScreenHeader(
     trailingAction: (@Composable () -> Unit)? = null,
 ) {
     val haptics = rememberAppHaptics()
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { visible = true }
-
-    val enterScale by animateFloatAsState(
-        targetValue = if (visible) 1f else 0.92f,
-        animationSpec = androidpodsSpatialSpec(),
-        label = "header-enter-scale",
-    )
-    val enterAlpha by animateFloatAsState(
-        targetValue = if (visible) 1f else 0f,
-        animationSpec = androidpodsSpatialSpec(),
-        label = "header-enter-alpha",
-    )
-
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val pressScale by animateFloatAsState(
@@ -80,9 +66,8 @@ fun ExpressiveScreenHeader(
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 8.dp)
             .graphicsLayer {
-                scaleX = enterScale * pressScale
-                scaleY = enterScale * pressScale
-                alpha = enterAlpha
+                scaleX = pressScale
+                scaleY = pressScale
             },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

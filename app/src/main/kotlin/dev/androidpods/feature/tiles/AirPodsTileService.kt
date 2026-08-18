@@ -20,6 +20,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 
 class AirPodsTileService : TileService() {
@@ -32,9 +33,17 @@ class AirPodsTileService : TileService() {
         scope = newScope
 
         newScope.launch {
-            AirPodsRepositoryProvider.state.collectLatest { state ->
-                updateTileState(state)
-            }
+            AirPodsRepositoryProvider.state
+                .distinctUntilChangedBy { state ->
+                    Triple(
+                        state.connection is AirPodsTransport.ConnectionState.Connected,
+                        state.battery,
+                        state.capabilities.modelName,
+                    )
+                }
+                .collectLatest { state ->
+                    updateTileState(state)
+                }
         }
     }
 
@@ -105,8 +114,16 @@ fun observeTileUpdates(
     scope: CoroutineScope,
 ) {
     scope.launch {
-        stateFlow.collectLatest {
-            AirPodsTileService.requestUpdate(context)
-        }
+        stateFlow
+            .distinctUntilChangedBy { state ->
+                Triple(
+                    state.connection is AirPodsTransport.ConnectionState.Connected,
+                    state.battery,
+                    state.capabilities.modelName,
+                )
+            }
+            .collectLatest {
+                AirPodsTileService.requestUpdate(context)
+            }
     }
 }

@@ -89,8 +89,7 @@ fun Morph.toComposePath(progress: Float, path: Path = Path()): Path {
 /**
  * Calculates a normalized bounding [Rect] for this [Morph].
  */
-fun Morph.calculateBoundsRect(): Rect {
-    val bounds = FloatArray(4)
+fun Morph.calculateBoundsRect(bounds: FloatArray = FloatArray(4)): Rect {
     calculateBounds(bounds)
     return Rect(bounds[0], bounds[1], bounds[2], bounds[3])
 }
@@ -105,17 +104,22 @@ fun DrawScope.drawMorphShape(
     path: Path = Path(),
     rotationDegrees: Float = 0f,
     strokeWidth: Float? = null,
+    boundsArray: FloatArray = FloatArray(4),
 ) {
     val morphPath = morph.toComposePath(progress, path)
-    val bounds = morph.calculateBoundsRect()
-    val boundsWidth = bounds.width.coerceAtLeast(0.001f)
-    val boundsHeight = bounds.height.coerceAtLeast(0.001f)
+    morph.calculateBounds(boundsArray)
+    val left = boundsArray[0]
+    val top = boundsArray[1]
+    val right = boundsArray[2]
+    val bottom = boundsArray[3]
+    val boundsWidth = (right - left).coerceAtLeast(0.001f)
+    val boundsHeight = (bottom - top).coerceAtLeast(0.001f)
 
     val scaleFactor = minOf(size.width / boundsWidth, size.height / boundsHeight) * 0.9f
     val centerX = size.width / 2f
     val centerY = size.height / 2f
-    val boundsCenterX = bounds.center.x
-    val boundsCenterY = bounds.center.y
+    val boundsCenterX = (left + right) / 2f
+    val boundsCenterY = (top + bottom) / 2f
 
     rotate(rotationDegrees, pivot = Offset(centerX, centerY)) {
         translate(
@@ -202,6 +206,7 @@ fun MorphingShapeHero(
     val outlineColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
 
     val reusablePath = remember { Path() }
+    val reusableBounds = remember { FloatArray(4) }
 
     Box(
         modifier = modifier
@@ -233,6 +238,7 @@ fun MorphingShapeHero(
                 color = tertiaryContainerColor,
                 path = reusablePath,
                 rotationDegrees = -rot * 1.5f,
+                boundsArray = reusableBounds,
             )
 
             // 2. Main Bold Container Shape
@@ -242,6 +248,7 @@ fun MorphingShapeHero(
                 color = primaryContainerColor,
                 path = reusablePath,
                 rotationDegrees = rot,
+                boundsArray = reusableBounds,
             )
 
             // 3. Subtle Tonal Border Outline for crisp shape definition
@@ -252,6 +259,7 @@ fun MorphingShapeHero(
                 path = reusablePath,
                 rotationDegrees = rot,
                 strokeWidth = 3.dp.toPx(),
+                boundsArray = reusableBounds,
             )
         }
 

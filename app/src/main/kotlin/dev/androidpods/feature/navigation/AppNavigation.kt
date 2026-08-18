@@ -214,7 +214,6 @@ private fun FloatingNavPillItem(
     ) {
         Row(
             modifier = Modifier
-                .animateContentSize(animationSpec = androidpodsSpatialSpec())
                 .padding(horizontal = if (selected) 16.dp else 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,

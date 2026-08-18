@@ -1074,10 +1074,13 @@ private fun ConnectionBadge(connection: AirPodsTransport.ConnectionState) {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             if (isConnected) {
+                val primaryColor = MaterialTheme.colorScheme.primary
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = if (reduceMotion) 1f else dotAlpha),
-                    modifier = Modifier.size(7.dp),
+                    color = primaryColor,
+                    modifier = Modifier
+                        .size(7.dp)
+                        .graphicsLayer { alpha = if (reduceMotion) 1f else dotAlpha },
                 ) {}
             }
             Text(

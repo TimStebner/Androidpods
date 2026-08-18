@@ -82,9 +82,19 @@ fun SpatialMotionCard(
         }
     }
 
-    // Auto-stop stream when leaving this composable
-    DisposableEffect(Unit) {
+    // Auto-stop stream when leaving this composable or when activity is stopped/backgrounded
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, isStreaming) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP && isStreaming) {
+                scope.launch {
+                    AirPodsRepositoryProvider.current?.stopMotionStream()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
             if (isStreaming) {
                 scope.launch {
                     AirPodsRepositoryProvider.current?.stopMotionStream()

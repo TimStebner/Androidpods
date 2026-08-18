@@ -161,7 +161,6 @@ fun resumeObservingAssociatedDevices(context: Context, scope: CoroutineScope = C
 
         if (isBluetoothDeviceConnected(device, context)) {
             scope.launch {
-                DataStoreTierProbeCache(context).clear()
                 AirPodsRepositoryProvider.repositoryFor(device, context).connect()
             }
         }

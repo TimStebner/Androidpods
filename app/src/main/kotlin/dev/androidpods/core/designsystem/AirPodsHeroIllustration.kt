@@ -107,19 +107,6 @@ private fun AnimatedAirPodExpressiveItem(
 ) {
     val haptics = rememberAppHaptics()
     val density = LocalDensity.current.density
-    var entered by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { entered = true }
-
-    val entryScale by animateFloatAsState(
-        targetValue = if (entered) 1f else 0.4f,
-        animationSpec = androidpodsSpatialSpec(),
-        label = "m3-airpod-entry-scale",
-    )
-    val entryOffsetY by animateFloatAsState(
-        targetValue = if (entered) 0f else 28f,
-        animationSpec = androidpodsSpatialSpec(),
-        label = "m3-airpod-entry-y",
-    )
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -170,20 +157,18 @@ private fun AnimatedAirPodExpressiveItem(
         label = "m3-pitch-angle",
     )
 
-    val activeFloatY = if (!reduceMotion && entered) floatY else 0f
-    val activeYaw = if (!reduceMotion && entered) yawAngle else 0f
-    val activePitch = if (!reduceMotion && entered) pitchAngle + pressPitch else pressPitch
+    val headPath = remember { Path() }
 
     Box(
         modifier = modifier
             .size(sizeDp)
             .graphicsLayer {
                 cameraDistance = 14f * density
-                scaleX = entryScale * pressScale
-                scaleY = entryScale * pressScale
-                translationY = entryOffsetY + activeFloatY
-                rotationX = activePitch
-                rotationY = activeYaw
+                scaleX = pressScale
+                scaleY = pressScale
+                translationY = if (!reduceMotion) floatY else 0f
+                rotationX = (if (!reduceMotion) pitchAngle else 0f) + pressPitch
+                rotationY = if (!reduceMotion) yawAngle else 0f
             }
             .clickable(
                 interactionSource = interactionSource,
@@ -200,6 +185,7 @@ private fun AnimatedAirPodExpressiveItem(
                 accentColor = accentTint,
                 isLeft = isLeft,
                 inEar = inEar == true,
+                headPath = headPath,
             )
         }
     }
@@ -221,14 +207,6 @@ fun AnimatedAirPodsCase(
 ) {
     val haptics = rememberAppHaptics()
     val density = LocalDensity.current.density
-    var entered by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { entered = true }
-
-    val entryScale by animateFloatAsState(
-        targetValue = if (entered) 1f else 0.5f,
-        animationSpec = androidpodsSpatialSpec(),
-        label = "m3-case-entry-scale",
-    )
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -273,18 +251,15 @@ fun AnimatedAirPodsCase(
         else -> Color(0xFF22C55E) // Green charged
     }
 
-    val activeCaseYaw = if (!reduceMotion && entered) caseYaw else 0f
-    val activeCasePitch = 5f + pressPitch
-
     Box(
         modifier = modifier
             .size(sizeDp)
             .graphicsLayer {
                 cameraDistance = 14f * density
-                scaleX = entryScale * pressScale
-                scaleY = entryScale * pressScale
-                rotationX = activeCasePitch
-                rotationY = activeCaseYaw
+                scaleX = pressScale
+                scaleY = pressScale
+                rotationX = 5f + pressPitch
+                rotationY = if (!reduceMotion) caseYaw else 0f
             }
             .clickable(
                 interactionSource = interactionSource,
@@ -365,6 +340,7 @@ private fun DrawScope.drawExpressiveM3AirPod(
     accentColor: Color,
     isLeft: Boolean,
     inEar: Boolean,
+    headPath: Path,
 ) {
     val w = size.width
     val h = size.height
@@ -375,34 +351,33 @@ private fun DrawScope.drawExpressiveM3AirPod(
     val stemTop = h * 0.46f
 
     // 1. Ergonomic Sculpted Head Path (AirPods 4 / Pro Curvature)
-    val headPath = Path().apply {
-        if (isLeft) {
-            moveTo(stemLeft + stemWidth * 0.95f, stemTop + stemHeight * 0.12f)
-            cubicTo(
-                stemLeft + stemWidth * 0.95f, h * 0.15f,
-                w * 0.17f, h * 0.17f,
-                w * 0.17f, h * 0.38f,
-            )
-            cubicTo(
-                w * 0.17f, h * 0.54f,
-                stemLeft - w * 0.04f, stemTop + stemHeight * 0.25f,
-                stemLeft + stemWidth * 0.25f, stemTop + stemHeight * 0.12f,
-            )
-            close()
-        } else {
-            moveTo(stemLeft + stemWidth * 0.05f, stemTop + stemHeight * 0.12f)
-            cubicTo(
-                stemLeft + stemWidth * 0.05f, h * 0.15f,
-                w * 0.83f, h * 0.17f,
-                w * 0.83f, h * 0.38f,
-            )
-            cubicTo(
-                w * 0.83f, h * 0.54f,
-                stemLeft + stemWidth + w * 0.04f, stemTop + stemHeight * 0.25f,
-                stemLeft + stemWidth * 0.75f, stemTop + stemHeight * 0.12f,
-            )
-            close()
-        }
+    headPath.rewind()
+    if (isLeft) {
+        headPath.moveTo(stemLeft + stemWidth * 0.95f, stemTop + stemHeight * 0.12f)
+        headPath.cubicTo(
+            stemLeft + stemWidth * 0.95f, h * 0.15f,
+            w * 0.17f, h * 0.17f,
+            w * 0.17f, h * 0.38f,
+        )
+        headPath.cubicTo(
+            w * 0.17f, h * 0.54f,
+            stemLeft - w * 0.04f, stemTop + stemHeight * 0.25f,
+            stemLeft + stemWidth * 0.25f, stemTop + stemHeight * 0.12f,
+        )
+        headPath.close()
+    } else {
+        headPath.moveTo(stemLeft + stemWidth * 0.05f, stemTop + stemHeight * 0.12f)
+        headPath.cubicTo(
+            stemLeft + stemWidth * 0.05f, h * 0.15f,
+            w * 0.83f, h * 0.17f,
+            w * 0.83f, h * 0.38f,
+        )
+        headPath.cubicTo(
+            w * 0.83f, h * 0.54f,
+            stemLeft + stemWidth + w * 0.04f, stemTop + stemHeight * 0.25f,
+            stemLeft + stemWidth * 0.75f, stemTop + stemHeight * 0.12f,
+        )
+        headPath.close()
     }
 
     // Tonal body fill with subtle top specular sheen

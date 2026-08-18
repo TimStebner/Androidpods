@@ -8,7 +8,7 @@
 
 ## 1. Projektstatus & Hardware-Verifikation
 
-Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie alle Komfort- & Stabilitäts-Features sind vollständig implementiert, modular getestet (**66 JVM Unit-Tests, 100% bestanden, 0 Android-Lint-Fehler**) und auf physischer Hardware validiert:
+Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die umfassende **Performance- & Batterielaufzeit-Optimierung** sind vollständig implementiert, modular getestet (**67 JVM Unit-Tests, 100% bestanden, 0 Android-Lint-Fehler**) und auf physischer Hardware validiert:
 - **Test-Hardware:** Google Pixel 9 Pro XL (Android 17 / API 37)
 - **Kopfhörer:** Apple AirPods 4 (Modell `A3050` / `A3053`, H2-Chip)
 
@@ -26,21 +26,21 @@ dev.androidpods
 │   ├── audio/            # Akustische Signale, Chime-Synthese, Audio-Routing
 │   ├── bluetooth/        # L2CAP-Transport, CDM Presence Service, Permissions, ACL-Link-Checks
 │   ├── data/             # AirPodsRepository, AirPodsState, DataStore-Repositories, Battery-Merging
-│   ├── designsystem/     # Material 3 Expressive Theming, Hero-Illustrationen, Status Bar Scrim, Motion
+│   ├── designsystem/     # Material 3 Expressive Theming, Hero-Illustrationen, Zero-Allocation Motion & Paths
 │   ├── gestures/         # 6-Achsen-Kopfgestenerkennung (Nicken & Schütteln)
-│   ├── media/            # Auto-Pause & Auto-Resume bei Trageerkennung
+│   ├── media/            # Auto-Pause & Auto-Resume bei Trageerkennung (Flow-gefiltert)
 │   └── telecom/          # Anrufsteuerung über Kopfgesten (TelecomManager / KeyEvents)
 └── feature/
     ├── controls/         # Steuerungs-Tab (Spatial, Gesten, Chimes, Timing, BringIntoView Navigation)
     ├── findmy/           # Suchton-Assistent (Find My Audio Chime)
     ├── home/             # Hauptansicht (Brand Hero, dynamische Generation-Icons, Akkustand, Quick-Cards)
-    ├── navigation/       # Floating Navigation Pill mit Federphysik & Screen Transitions
+    ├── navigation/       # Floating Navigation Pill mit Federphysik & jitterfreien Transitions
     ├── notifications/    # Persistente Akku- & Verbindungsbenachrichtigungen inkl. Content-Intents
     ├── onboarding/       # Ersteinrichtung, CDM-Pairing & Morphing Shape Hero
     ├── popup/            # Material 3 Expressive AirPods Battery Pop-up & Dialog Activity
     ├── settings/         # App-Einstellungen (Theme, Dynamic Color, Pop-up Toggle, Logging)
-    ├── spatial/          # 3D-Kopforientierungs-Visualizer & IMU-Telemetrie
-    ├── tiles/            # Android Quick Settings Tile (Schnelleinstellungen)
+    ├── spatial/          # 3D-Kopforientierungs-Visualizer & Lifecycle-gebundener 50Hz IMU-Stream
+    ├── tiles/            # Android Quick Settings Tile mit distinctUntilChanged IPC-Filterung
     └── widgets/          # Android Glance Home-Screen Battery Widget & native Live-Vorschau
 ```
 
@@ -55,7 +55,7 @@ dev.androidpods
 - **[`AirPodsPresenceService.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/AirPodsPresenceService.kt):**  
   Android `CompanionDeviceService`. Reagiert auf System-Events (`EVENT_BT_CONNECTED`, `EVENT_BT_DISCONNECTED`) für stromsparendes Tracking ohne permanente WakeLocks oder BLE-Scans.
 - **[`AirPodsAssociationManager.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/AirPodsAssociationManager.kt):**  
-  Verwaltet CDM-Assoziationen, prüft Bluetooth-Verbindungsstatus (`isBluetoothDeviceConnected`) und steuert den automatischen Reconnect bei App-Start und `onResume()`.
+  Verwaltet CDM-Assoziationen, prüft Bluetooth-Verbindungsstatus (`isBluetoothDeviceConnected`) und steuert den automatischen Reconnect bei App-Start und `onResume()`. Bereinigt um redundante Cache-Löschungen zur Vermeidung unnötiger Disk-I/O.
 - **[`RequiredPermissions.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/RequiredPermissions.kt):**  
   Zentrale Definition und Prüfung von Bluetooth-, Benachrichtigungs- und Telefonie-Berechtigungen.
 
@@ -89,8 +89,8 @@ dev.androidpods
   Persistenter Cache für erfolgreiche Tier-B-Verbindungen mit Self-Healing-Funktion.
 
 ### 3.4 Interaktion, Audio & Gesten
-- **[`AutoPauseManager.kt`](app/src/main/kotlin/dev/androidpods/core/media/AutoPauseManager.kt):**  
-  Pausiert und setzt Medien-Wiedergabe (`AudioManager.dispatchMediaKeyEvent`) anhand der Trageerkennung fort.
+- **[`AutoPauseManager.kt`](app/src/main/kotlin/dev/androidpods/core/media/AutoPauseManager.kt) & [`AutoPause.kt`](app/src/main/kotlin/dev/androidpods/core/media/AutoPause.kt):**  
+  Pausiert und setzt Medien-Wiedergabe (`AudioManager.dispatchMediaKeyEvent`) anhand der Trageerkennung fort. Stream wird via `distinctUntilChangedBy` gefiltert, um redundante Auswertungen bei Telemetrie-Änderungen zu verhindern.
 - **[`HeadGestureDetector.kt`](app/src/main/kotlin/dev/androidpods/core/gestures/HeadGestureDetector.kt):**  
   Erkennt Nicken (**NOD**) und Kopfschütteln (**SHAKE**) über bidirektionale Oszillationsprüfung auf 50Hz-IMU-Daten. Verhindert Fehl-Auslösungen bei statischer Kopfneigung.
 - **[`CallGestureManager.kt`](app/src/main/kotlin/dev/androidpods/core/telecom/CallGestureManager.kt):**  
@@ -98,20 +98,24 @@ dev.androidpods
 - **[`ChimePlayer.kt`](app/src/main/kotlin/dev/androidpods/core/audio/ChimePlayer.kt):**  
   Synthetisiert das Apple Find-My Suchton-Signal (2.5kHz–5.5kHz Frequenz-Sweeps in 16-Bit 44.1kHz Stereo PCM) mit Kanaltrennung (Links, Beide, Rechts) und Bluetooth-Audio-Routing via `preferredDevice`.
 
-### 3.5 Designsystem & Material 3 Expressive (`dev.androidpods.core.designsystem`)
+### 3.5 Designsystem & Performance-Rendering (`dev.androidpods.core.designsystem`)
 - **[`StatusBarScrim.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/StatusBarScrim.kt):**  
   Material 3 Expressive Status Bar Scrim mit sanftem vertikalem Farbverlauf über `WindowInsets.statusBars` + 16dp Bleed. Schützt die System-Statusleiste bei Edge-to-Edge Scroll-Content.
 - **[`DeviceIllustration.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/DeviceIllustration.kt):**  
-  Dynamische Centerpiece-Vektor-Illustrationen (`AirPodsIllustration`), die passend zum verbundenen Modell (`AirPodsCapabilities.generation`) das exakte Kopfhörer-Paar mit sanfter Schwebung und Pulsieren rendern (AirPods 4, AirPods Pro, AirPods 1/2, AirPods 3, AirPods Max).
+  Dynamische Centerpiece-Vektor-Illustrationen (`AirPodsIllustration`) mit wiederverwendbaren `Path()`-Instanzen (`rewind()`) und RenderNode-gebundenem `graphicsLayer`-Pulsieren ohne Composable-Rekomposition.
 - **[`Color.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/Color.kt) & [`Theme.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/Theme.kt):**  
   - **Obsidian Dark:** `#0A0D14` Canvas/Surface, `#161B28` Container, `#1E2536` High Container, `#F8FAFC` reines Weiß für Typografie (WCAG AAA).
   - **High-Contrast Light:** `#F1F5F9` Slate-Canvas, `#FFFFFF` reine weiße Karten mit plastischer Elevation, `#0F172A` Deep Navy Text.
 - **[`ExpressiveScreenHeader.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/ExpressiveScreenHeader.kt):**  
-  Einheitlicher Header für alle Tabs mit bolde Typografie (`headlineLarge`, `FontWeight.Black`) und Spring-Eingangsanimation.
+  Einheitlicher Header für alle Tabs mit bolde Typografie (`headlineLarge`, `FontWeight.Black`) ohne 1-Frame-Verzögerung für flüssige Screen-Transitions.
 - **[`AirPodsGenerationBadge.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/AirPodsGenerationBadge.kt):**  
   Interaktives Badge mit Vektorsilhouetten aller 5 AirPods-Generationen.
 - **[`AirPodsHeroIllustration.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/AirPodsHeroIllustration.kt):**  
-  Material 3 Expressive Vektor-Illustrationen für Pop-up und Detailansichten: **`AnimatedLeftAirPod`**, **`AnimatedRightAirPod`** und **`AnimatedAirPodsCase`** (mit aktiver, pulsierender **LED-Statusleuchte**).
+  Material 3 Expressive Vektor-Illustrationen für Pop-up und Detailansichten: **`AnimatedLeftAirPod`**, **`AnimatedRightAirPod`** und **`AnimatedAirPodsCase`** mit 0 Rekompositionen während der 3D-Schwebe-Animation durch Deferred Reads in `graphicsLayer`.
+- **[`AudioWaveformVisualizer.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/AudioWaveformVisualizer.kt):**  
+  Zero-Allocation-Wellenform-Visualizer mit `remember(barCount)` Hüllkurven-Cache.
+- **[`MorphingShape.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/MorphingShape.kt):**  
+  Allokationsfreie AndroidX-Polygon-Morphing-Komponente mit wiederverwendbaren FloatArray-Bounds.
 - **[`SpatialMotionSpec.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/SpatialMotionSpec.kt) & [`AppHaptics.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/AppHaptics.kt):**  
   Zentrale Definition für `androidpodsSpatialSpec()` Federphysik und taktiles haptisches Feedback.
 
@@ -119,17 +123,19 @@ dev.androidpods
 - **[`AirPodsBatteryPopup.kt`](app/src/main/kotlin/dev/androidpods/feature/popup/AirPodsBatteryPopup.kt) & [`BatteryPopupActivity.kt`](app/src/main/kotlin/dev/androidpods/feature/popup/BatteryPopupActivity.kt):**  
   Material 3 Expressive **AirPods Battery Pop-up** Bottom Card mit Hero-Trio (`AirPodsExpressiveTrio`), Live-Akkustands-Pillars, Lade-Blitzen (`⚡`), Trageerkennungs-Indikatoren und 100% transparentem Hintergrund ohne künstliche Abdunklung.
 - **[`HomeScreen.kt`](app/src/main/kotlin/dev/androidpods/feature/home/HomeScreen.kt):**  
-  Brand-Hero mit modellabhängiger Grafik, Live-Waveform-Equalizer, `UnifiedBatteryPillar`-Trio und interaktiven Quick-Action-Cards (Head Gestures, Spatial IMU Stream), die direkt zu den Controls-Einstellungen navigieren.
+  Brand-Hero mit modellabhängiger Grafik, Live-Waveform-Equalizer, `UnifiedBatteryPillar`-Trio und `ConnectionBadge` (RenderNode Alpha).
 - **[`ControlsScreen.kt`](app/src/main/kotlin/dev/androidpods/feature/controls/ControlsScreen.kt):**  
-  Expressiver Steuerungs-Tab für Spatial Audio, Kopfgesten, Find My Suchton und Druck-/Haltezeiten. Unterstützt gezielte Deep-Navigation (`ControlsSection`) via Jetpack Compose `BringIntoViewRequester`.
+  Expressiver Steuerungs-Tab für Spatial Audio, Kopfgesten, Find My Suchton und Druck-/Haltezeiten. Bereinigt um synchrone Binder-IPCs in der Komposition.
+- **[`SpatialMotionVisualizer.kt`](app/src/main/kotlin/dev/androidpods/feature/spatial/SpatialMotionVisualizer.kt):**  
+  3D-Kopforientierungs-Visualizer mit automatischer `Lifecycle`-Abschaltung des 50Hz-Sensorstreams bei `ON_STOP` im Hintergrund.
+- **[`AirPodsTileService.kt`](app/src/main/kotlin/dev/androidpods/feature/tiles/AirPodsTileService.kt):**  
+  Quick Settings Tile mit `distinctUntilChangedBy`-Filterung gegen IPC-Überlastung bei IMU-Streams.
+- **[`AppNavigation.kt`](app/src/main/kotlin/dev/androidpods/feature/navigation/AppNavigation.kt):**  
+  Schwebende **Floating Navigation Pill** mit optimierter Layout-Messung ohne verschachtelte `animateContentSize`.
 - **[`Notifications`](app/src/main/kotlin/dev/androidpods/feature/notifications/):**  
   Lautlose Akku-Benachrichtigung und Heads-Up-Verbindungsbanner mit `PendingIntent` zum direkten Zurückkehren in die App.
 - **[`BatteryWidget.kt`](app/src/main/kotlin/dev/androidpods/feature/widgets/BatteryWidget.kt) & [`WidgetsScreen.kt`](app/src/main/kotlin/dev/androidpods/feature/widgets/WidgetsScreen.kt):**  
   Android Glance Home-Screen Widget und In-App-Live-Vorschau.
-- **[`AirPodsTileService.kt`](app/src/main/kotlin/dev/androidpods/feature/tiles/AirPodsTileService.kt):**  
-  Android Quick Settings Tile mit Status- und Akkuanzeige.
-- **[`AppNavigation.kt`](app/src/main/kotlin/dev/androidpods/feature/navigation/AppNavigation.kt):**  
-  Schwebende **Floating Navigation Pill** mit Screen-Transitions und `StatusBarScrim`.
 
 ---
 
@@ -141,11 +147,13 @@ dev.androidpods
    Nicht unterstützte Features müssen ausgeblendet oder ehrlich erklärt werden.
 3. **Pacing im AAP-Handshake:**  
    Das `delay(200)` zwischen Paketen in `AapSession.start()` ist hardware-bedingt notwendig. Nicht entfernen.
-4. **Verifikations-Befehle:**
+4. **Performance & Zero-Allocation Rule:**  
+   Animationen müssen kontinuierliche State-Reads in `graphicsLayer { ... }`-Lambdas kapseln. Zeichen-Funktionen (`Canvas`, `DrawScope`) dürfen keine `Path`-, Array- oder `Rect`-Objekte pro Frame allokieren.
+5. **Verifikations-Befehle:**
    ```bash
    ./gradlew :app:assembleDebug          # Debug-APK bauen
-   ./gradlew :app:testDebugUnitTest      # JVM Unit-Tests
-   ./gradlew :app:lintDebug              # Android Lint
+   ./gradlew :app:testDebugUnitTest      # JVM Unit-Tests (67 Tests)
+   ./gradlew :app:lintDebug              # Android Lint (0 Fehler)
    ```
 
 ---

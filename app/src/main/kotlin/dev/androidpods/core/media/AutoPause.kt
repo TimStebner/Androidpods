@@ -12,6 +12,7 @@ import dev.androidpods.core.data.AirPodsState
 import dev.androidpods.core.data.AppSettingsRepositoryProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -25,6 +26,7 @@ fun observeAutoPause(context: Context, states: Flow<AirPodsState>, scope: Corout
     var autoPausedByUs = false
 
     states
+        .distinctUntilChangedBy { it.connection to it.earDetection }
         .onEach { state ->
             if (state.connection !is AirPodsTransport.ConnectionState.Connected) {
                 previous = null
