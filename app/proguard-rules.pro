@@ -12,6 +12,16 @@
 -keep class androidx.glance.** { *; }
 -dontwarn androidx.glance.**
 
+# WorkManager & Room (used transitively by Glance App Widgets)
+-keep class * extends androidx.room.RoomDatabase {
+    public <init>();
+}
+-keep class androidx.work.impl.WorkDatabase_Impl {
+    public <init>();
+}
+-keep class androidx.work.** { *; }
+-dontwarn androidx.work.**
+
 # DataStore Preferences
 -keep class androidx.datastore.** { *; }
 -dontwarn androidx.datastore.**
