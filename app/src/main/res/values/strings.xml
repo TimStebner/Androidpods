@@ -158,7 +158,7 @@
     <string name="settings_logging_desc">Log AAP packet events to Android logcat for troubleshooting.</string>
     <string name="settings_about_header">About</string>
     <string name="settings_version_title">Version</string>
-    <string name="settings_version_value">0.1.0-mvp</string>
+    <string name="settings_version_value">0.1.0-alpha</string>
     <string name="settings_license_title">License</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_subtitle">Preferences &amp; Diagnostics</string>

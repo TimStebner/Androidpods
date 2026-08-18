@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.androidpods.app.BuildConfig
 import dev.androidpods.app.R
 import dev.androidpods.core.data.AppSettings
 import dev.androidpods.core.data.AppSettingsRepositoryProvider
@@ -313,7 +314,7 @@ internal fun SettingsScreenContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(text = stringResource(R.string.settings_version_title), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = stringResource(R.string.settings_version_value), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
