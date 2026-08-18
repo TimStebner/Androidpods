@@ -5,6 +5,16 @@
     public static int i(...);
 }
 
--keepclassmembers class * extends androidx.room.RoomDatabase {
-    public <init>();
-}
+# Jetpack Glance & App Widgets (ensures RemoteViews composition & workers are retained in release builds)
+-keep class * extends androidx.glance.appwidget.GlanceAppWidget { *; }
+-keep class * extends androidx.glance.appwidget.GlanceAppWidgetReceiver { *; }
+-keep class androidx.glance.appwidget.** { *; }
+-keep class androidx.glance.** { *; }
+-dontwarn androidx.glance.**
+
+# DataStore Preferences
+-keep class androidx.datastore.** { *; }
+-dontwarn androidx.datastore.**
+
+# HiddenApiBypass (classic L2CAP reflection)
+-keep class org.lsposed.hiddenapibypass.** { *; }

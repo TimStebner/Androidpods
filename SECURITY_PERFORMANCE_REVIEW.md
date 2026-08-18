@@ -7,56 +7,83 @@
 
 ## Ergebnis
 
-**Deployment-Urteil: Freigabe für Internal / Closed Testing (Release Candidate bereit).**
+**Deployment-Urteil: Vollständige Freigabe für Internal / Closed Testing auf Google Play (Release Candidate bereit).**
 
-Alle im vorherigen Audit festgestellten technischen Performance- und Lifecycle-Gates wurden behoben und auf Code-, Test- und Build-Ebene verifiziert. Die Ursachen für das Native-/System-PSS-Wachstum (`launchMode="singleTask"` zur Verhinderung von Activity-Duplikationen im Hintergrund, Beseitigung aller `Path()`-Allokationen in Draw-Loops, Recomposition-Isolation des 50-Hz-Motion-Streams) sowie die Frame-Overruns (Umstellung auf hochperformante, jitterfreie Screen-Transitionen) sind vollständig adressiert. Die Signing-Konfiguration ist in Gradle integriert, und alle 87 Unit-Tests sowie Android Lint (0 Fehler) laufen fehlerfrei durch.
+Alle im Audit geprüften technischen Sicherheits-, Datenschutz-, Performance- und Lifecycle-Kriterien wurden auf Code-, Test- und Build-Ebene verifiziert. Die Ursachen für das Native-/System-PSS-Wachstum (`launchMode="singleTask"`, Beseitigung aller `Path()`-Allokationen in Draw-Loops, Recomposition-Isolation des 50-Hz-Motion-Streams) sowie die Frame-Overruns (Umstellung auf hochperformante Fade-Transitionen) sind vollständig adressiert. Die Signing-Konfiguration ist in Gradle integriert, alle 88 Unit-Tests sowie Android Lint (0 Fehler) laufen fehlerfrei durch, und das minifizierte Release-AAB (5,7 MB) wurde erfolgreich gebaut.
 
-## Behobene Release-Gates
+---
 
-### 1. Native-/System-PSS-Wachstum (Gate 1 behoben)
-- **`MainActivity` `singleTask`:** In [`AndroidManifest.xml`](app/src/main/AndroidManifest.xml) wurde `android:launchMode="singleTask"` konfiguriert. Dadurch werden bei Benchmark- und System-Re-Launches keine redundanten Activity-Instanzen samt separatem Compose ViewTree, RenderNodes und nativen Skia-Grafikpuffern mehr im Native Heap akkumuliert.
-- **Zero-Allocation Canvas Drawings:** In [`AirPodsGenerationBadge.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/AirPodsGenerationBadge.kt) und [`DeviceIllustration.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/DeviceIllustration.kt) wurden sämtliche `Path()`-Instanziierungen aus den DrawScope-Funktionen entfernt und durch gecachte `remember { Path() }`-Objekte mit `.rewind()` ersetzt.
-- **50-Hz Recomposition & Spring Isolation:** In [`SpatialMotionVisualizer.kt`](app/src/main/kotlin/dev/androidpods/feature/spatial/SpatialMotionVisualizer.kt) beobachtet die Card nur noch den Verbindungsstatus. 50-Hz-Sensoränderungen werden direkt im `Modifier.graphicsLayer { ... }` (Deferred State Read) auf RenderNode-Ebene gerendert, ohne Spring-Re-Allokation oder Rekomposition der Card.
-- **StateFlow Allokationsoptimierung:** In [`AutoPause.kt`](app/src/main/kotlin/dev/androidpods/core/media/AutoPause.kt) wurde `distinctUntilChangedBy` mit temporären `Pair`-Allokationen durch einen allokationsfreien Prädikatsvergleich ersetzt.
+## 1. Security- und Datenschutz-Audit
 
-### 2. p99 Frame Overruns (Gate 2 behoben)
-- **Sanfte Bildschirmübergänge:** In [`AppNavigation.kt`](app/src/main/kotlin/dev/androidpods/feature/navigation/AppNavigation.kt) wurden ressourcenintensive Full-Screen Spring-Translationen durch eine optimierte Fade-Transition (`fadeIn(tween(180, easing = FastOutSlowInEasing)) togetherWith fadeOut(tween(120, easing = FastOutSlowInEasing))`) ersetzt.
-- **Pill-Animationen:** Die Floating Navigation Pill verwendet schlanke `tween(200)` Easing-Kurven für Grössen- und Einblendanimationen, wodurch Frame-Drops unter 120 Hz zuverlässig vermieden werden.
+### 1.1 Berechtigungs- und Angriffsflächen-Isolation ([`AndroidManifest.xml`](app/src/main/AndroidManifest.xml))
+- **Keine Internetberechtigung:** Die App fordert kein `android.permission.INTERNET` an. Unbefugte Datenübertragungen oder Telemetrie an Cloud-Dienste sind auf Betriebssystemebene unmöglich.
+- **Bluetooth-Datenschutz (`neverForLocation`):** `BLUETOOTH_SCAN` ist mit `android:usesPermissionFlags="neverForLocation"` deklariert. Standortberechtigungen (`ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION`) werden weder angefordert noch benötigt.
+- **Gekapselte Telefonie-Berechtigungen:** `READ_PHONE_STATE` und `ANSWER_PHONE_CALLS` werden ausschließlich in [`CallGestureManager.kt`](app/src/main/kotlin/dev/androidpods/core/telecom/CallGestureManager.kt) für freihändige Kopfbewegungs-Gesten bei Anrufen (Nicken = Annehmen, Schütteln = Ablehnen) verwendet. Es werden keinerlei Rufnummern, Kontakte, Anruflisten oder Audio-Streams erfasst oder gespeichert.
+- **Exportierte Komponenten & Schutz:**
+  - `MainActivity`: `android:exported="true"`, geschützt als Standard-Launcher.
+  - `BatteryPopupActivity`: `android:exported="false"`, `taskAffinity=""`, `excludeFromRecents="true"`. Das Pop-up kann nicht von Drittanbieter-Apps von außen angesteuert oder missbraucht werden.
+  - `AirPodsPresenceService`: `android:exported="true"`, geschützt durch `android:permission="android.permission.BIND_COMPANION_DEVICE_SERVICE"`. Nur der Android-Systemdienst `CompanionDeviceManager` kann diesen Service binden.
+  - `AirPodsTileService`: `android:exported="true"`, geschützt durch `android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"`. Nur das Android System UI kann das Quick Settings Tile binden.
+  - `BatteryWidgetReceiver`: `android:exported="true"`, Standard-Receiver für Glance AppWidget-Updates (`android.appwidget.action.APPWIDGET_UPDATE`).
+- **Sichere PendingIntents:** Alle erzeugten `PendingIntent`-Instanzen ([`BatteryNotification.kt`](app/src/main/kotlin/dev/androidpods/feature/notifications/BatteryNotification.kt), [`ConnectionNotification.kt`](app/src/main/kotlin/dev/androidpods/feature/notifications/ConnectionNotification.kt), [`AirPodsTileService.kt`](app/src/main/kotlin/dev/androidpods/feature/tiles/AirPodsTileService.kt)) nutzen explizit `PendingIntent.FLAG_IMMUTABLE` in Kombination mit `FLAG_UPDATE_CURRENT`.
 
-### 3. Motion-Stream Lifecycle & Hardware-Stop (Gate 3 behoben)
-- **`NonCancellable` Teardown:** In [`AirPodsRepository.kt`](app/src/main/kotlin/dev/androidpods/core/data/AirPodsRepository.kt) führt `stopMotionStream()` die Opcode-Pakete `0x10` und `0x12` innerhalb von `withContext(NonCancellable)` aus.
-- **Langlebiger Scope:** `requestStopMotionStream()` startet den Stopp-Befehl auf dem Repository-eigenen Process-Scope, sodass beim Verlassen von Composables oder beim Hintergrundwechsel (`DisposableEffect` / `ON_STOP`) die Hardware-Abschaltung garantiert zu Ende geführt wird.
-- **Automatischer Reset bei Disconnect:** Bei Verlust der Bluetooth-Verbindung werden `motionStreamActive` und `headOrientation` im Repository unmittelbar zurückgesetzt.
+### 1.2 Datenspeicherung & Backup-Isolation ([`data_extraction_rules.xml`](app/src/main/res/xml/data_extraction_rules.xml))
+- Im Cloud-Backup und Gerätetransfer werden ausschließlich Nutzer-Präferenzen (`app_settings.preferences_pb`) einbezogen.
+- Hardware-bezogene Caches wie `tier_probe_cache.preferences_pb` oder temporäre Bluetooth-Zustände sind explizit vom Backup ausgeschlossen.
 
-### 4. Release-Signing & Gradle-Konfiguration (Gate 4 behoben)
-- In [`app/build.gradle.kts`](app/build.gradle.kts) wurde `signingConfigs` für Release-Builds implementiert. Die Signierung kann über Umgebungsvariablen (`KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`) oder Gradle-Properties für Offline-Release-Signierung und Google Play Upload bereitgestellt werden.
-- Release AAB (`app-release.aab`, 4.6 MB) mit vollständiger R8-Minifizierung und Resource Shrinking erfolgreich gebaut.
+### 1.3 Non-SDK Interface & Reflection-Sicherheit ([ADR-0001](docs/adr/0001-tier-b-hidden-l2cap-socket.md))
+- [`AapTransport.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/AapTransport.kt) kapselt `HiddenApiBypass` isoliert für den klassischen L2CAP-Socket auf PSM `0x1001`.
+- Alle Aufrufe sind in `runCatching` / `try-catch` eingebettet. Schlägt der Socket fehl oder wird er von der Plattform blockiert, stürzt die App nicht ab, sondern fällt sauber auf `ConnectionState.Failed` zurück.
 
-## Security und Datenschutz
+### 1.4 Log- und Informationsabfluss-Schutz ([`proguard-rules.pro`](app/proguard-rules.pro))
+- [`ProtocolLogging.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/ProtocolLogging.kt) kapselt Paket-Logs strikt hinter `BuildConfig.DEBUG && rawPacketLoggingEnabled`. In Release-Builds (`BuildConfig.DEBUG = false`) werden keine Paketdaten verarbeitet oder geloggt.
+- Die R8/Proguard-Regel `-assumenosideeffects class android.util.Log { public static int v(...); public static int d(...); public static int i(...); }` entfernt alle Verbose-, Debug- und Info-Logaufrufe im Release-Bytecode.
+- Alle Test-Fixtures ([`session-start-capture.txt`](app/src/test/resources/fixtures/aap/session-start-capture.txt)) enthalten ausschließlich synthetische Platzhalter-Seriennummern (`TESTSER001`, `TESTLEFT0000000001`, `TESTRIGHT000000001`).
 
-- **Synthetische Fixtures:** Alle MAC-Adressen und Seriennummern in Tests und Fixtures sind anonymisiert.
-- **Keine Tracking-/Cloud-Übertragungen:** Die App enthält keine Tracking-Bibliotheken, keine Werbenetzwerke und keine Netzwerk-Permissions (außer lokaler Bluetooth-/CompanionDevice-Kommunikation).
-- **Berechtigungsisolation:** `READ_PHONE_STATE` und `ANSWER_PHONE_CALLS` werden ausschließlich für Freisprech-Kopfbewegungen (Kopfnicken zum Annehmen, Kopfschütteln zum Ablehnen bei AirPods 4 / Pro) genutzt.
-- **Dependency Security:** 0 Schwachstellen im Abhängigkeitsgraphen (OSV-geprüft).
+---
 
-## Verifikationsübersicht
+## 2. Performance-, Memory- und Battery-Audit
 
-| Prüfung | Ergebnis |
-|---|---:|
-| JVM-Unit-Tests | **87 / 87 bestanden** |
-| Android Lint | **0 Fehler** |
-| Release Lint Vital | **0 Fehler** |
-| Release AAB | Gebaut (**4,6 MB**, R8 optimiert) |
-| Debug APK | Gebaut (68 MB, Unminified Test Build) |
-| Baseline Profile | Enthalten |
+### 2.1 Zero-Allocation Rendering & 120 Hz Compose Optimierung
+- **Canvas-Pfad-Allokationen:** In [`DeviceIllustration.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/DeviceIllustration.kt), [`AirPodsGenerationBadge.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/AirPodsGenerationBadge.kt) und [`AirPodsHeroIllustration.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/AirPodsHeroIllustration.kt) werden keine `Path()`-Objekte pro Frame erzeugt. Stattdessen werden `remember { Path() }`-Instanzen genutzt und via `.rewind()` in Draw-Loops zurückgesetzt.
+- **Deferred State Reads (RenderNode Isolation):**
+  - In [`SpatialMotionVisualizer.kt`](app/src/main/kotlin/dev/androidpods/feature/spatial/SpatialMotionVisualizer.kt) (`HeadOrientation3DView`) und [`AirPodsHeroIllustration.kt`](app/src/main/kotlin/dev/androidpods/core/designsystem/AirPodsHeroIllustration.kt) (`AnimatedAirPodExpressiveItem`) werden 50-Hz-Sensorupdates und Schwebungsanimationen ausschließlich im `Modifier.graphicsLayer { ... }`-Lambda gelesen. Das verhindert Recompositions der Composables bei 50-Hz-Datenströmen.
+  - Statische Zeichenelemente (Gradients, Strokes) im 3D-Visualizer sind über `Modifier.drawWithCache` gecacht.
+- **Jank-freie Screen-Transitionen:** [`AppNavigation.kt`](app/src/main/kotlin/dev/androidpods/feature/navigation/AppNavigation.kt) verwendet performante Fade-Transitionen (`FastOutSlowInEasing`), wodurch Frame-Drops unter 120 Hz verhindert werden.
 
-## Bereitstellungsschritte für Google Play
+### 2.2 Lifecycle, Memory Leaks & Background Battery Management
+- **`singleTask` LaunchMode:** `MainActivity` ist auf `launchMode="singleTask"` konfiguriert. Dies verhindert multiple parallele Activity-Instanzen, redundante Compose ViewTrees und PSS-Heap-Wachstum.
+- **Kein dauerhaftes BLE-Polling:** Der Aufwach-Mechanismus läuft ereignisgesteuert über `AirPodsPresenceService` (`CompanionDeviceManager`).
+- **Vermeidung von Socket-Timeouts (`isDeviceAclConnected`):** [`AapTransport.kt`](app/src/main/kotlin/dev/androidpods/core/bluetooth/AapTransport.kt) prüft vor Socket-Erstellung die aktive Bluetooth-ACL-Verbindung. Liegen die AirPods im geschlossenen Ladecase, wird kein blockierender Verbindungsversuch mit Timeout unternommen.
+- **Sichere 50-Hz Hardware-Abschaltung:**
+  - Verlässt der Nutzer den Spatial-Tab oder geht die App in den Hintergrund (`ON_STOP`), beendet [`SpatialMotionVisualizer.kt`](app/src/main/kotlin/dev/androidpods/feature/spatial/SpatialMotionVisualizer.kt) über `DisposableEffect` und [`AirPodsRepository.kt`](app/src/main/kotlin/dev/androidpods/core/data/AirPodsRepository.kt) (`withContext(NonCancellable)`) den Sensorstream zuverlässig auf dem Kopfhörer.
+- **IPC-Schutz mit `distinctUntilChanged`:**
+  - [`AirPodsTileService.kt`](app/src/main/kotlin/dev/androidpods/feature/tiles/AirPodsTileService.kt), [`BatteryWidget.kt`](app/src/main/kotlin/dev/androidpods/feature/widgets/BatteryWidget.kt), [`NotificationUpdates.kt`](app/src/main/kotlin/dev/androidpods/feature/notifications/NotificationUpdates.kt) und [`AutoPause.kt`](app/src/main/kotlin/dev/androidpods/core/media/AutoPause.kt) nutzen `distinctUntilChanged`, sodass IPC-Aufrufe (Binder, System Notifications, RemoteViews) nur bei tatsächlichen Statusänderungen erfolgen.
+- **Ressourcenfreigabe im Audio-Track:** [`ChimePlayer.kt`](app/src/main/kotlin/dev/androidpods/core/audio/ChimePlayer.kt) stoppt und released die `AudioTrack`-Instanz nach Beenden des Suchtons deterministisch im `finally`-Block.
 
-1. **Signierung:** `app-release.aab` mit dem vorgesehenen Release-/Upload-Key signieren.
+---
+
+## 3. Verifikationsübersicht
+
+| Prüfung | Befehl | Ergebnis |
+|---|---|---:|
+| **JVM-Unit-Tests** | `./gradlew :app:testDebugUnitTest --rerun-tasks` | **88 / 88 bestanden** |
+| **Android Lint** | `./gradlew :app:lintDebug` | **0 Fehler, 0 Warnungen** |
+| **Release Lint Vital** | `./gradlew :app:lintVitalRelease` | **0 Fehler** |
+| **Release AAB Bundle** | `./gradlew :app:bundleRelease` | **5,7 MB** (R8 minifiziert & optimiert) |
+| **Debug APK** | `./gradlew :app:assembleDebug` | **68 MB** (Unminified Test Build) |
+| **Baseline Profile** | `app/src/main/baseline-prof.txt` | Enthalten |
+
+---
+
+## 4. Bereitstellungsschritte für Google Play
+
+1. **Signierung:** `app-release.aab` mit dem vorgesehenen Release-/Upload-Key signieren (via Umgebungsvariablen `KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` oder Gradle-Properties).
 2. **Google Play Console:** AAB im Track **Internal Testing** oder **Closed Testing** hochladen.
 3. **Policy-Deklarationen:**
    - *Telefonstatus & Anrufverwaltung:* Erklärung für Hands-Free-Kopfbewegungssteuerung (`CallGestureManager`).
    - *Companion Device Manager:* Hintergrund-Präsenzerkennung ohne BLE-Dauer-Scanning.
    - *L2CAP Non-SDK Socket:* Bereitstellung der Begründung für AAP-Protokollkommunikation über PSM `0x1001`.
+   - *Datensicherheit (Data Safety):* Keine Erfassung oder Übertragung von Nutzerdaten außerhalb des Geräts.
 4. **Pre-Launch Report:** Automatisierte Geräteprüfungen auf Google Play abwarten.
 5. **Produktions-Release (`v0.1.0`):** Nach erfolgreichem Closed Test Freigabe auf den Produktions-Track und Veröffentlichung des signierten GitHub-Releases mit Quellcode unter GPLv3.

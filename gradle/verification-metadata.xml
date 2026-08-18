@@ -3,6 +3,12 @@
    <configuration>
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
+      <trusted-artifacts>
+         <trust file=".*-sources[.]jar" regex="true" reason="IDE source navigation"/>
+         <trust file=".*-javadoc[.]jar" regex="true" reason="IDE documentation"/>
+         <trust file=".*-src[.]zip" regex="true" reason="IDE Gradle source navigation"/>
+         <trust file=".*-sources[.]zip" regex="true" reason="IDE source navigation"/>
+      </trusted-artifacts>
    </configuration>
    <components>
       <component group="androidx.activity" name="activity" version="1.13.0">

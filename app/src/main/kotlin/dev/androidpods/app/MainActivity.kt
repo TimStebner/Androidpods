@@ -52,6 +52,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        isForeground = true
+    }
+
+    override fun onStop() {
+        super.onStop()
+        isForeground = false
+    }
+
     override fun onResume() {
         super.onResume()
         dev.androidpods.core.telecom.CallGestureManagerProvider.registerIfPossible()
@@ -59,5 +69,10 @@ class MainActivity : ComponentActivity() {
         if (connection != AirPodsTransport.ConnectionState.Connected && connection != AirPodsTransport.ConnectionState.Connecting) {
             resumeObservingAssociatedDevices(this)
         }
+    }
+
+    companion object {
+        var isForeground: Boolean = false
+            internal set
     }
 }

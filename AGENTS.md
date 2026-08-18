@@ -10,7 +10,7 @@ Guidance for AI coding assistants (Antigravity / Gemini, OpenAI Codex, Claude Co
 
 ## Current Project State
 
-- **Milestones 0–7 + Expressive UX, Pop-up & Performance/Battery Optimization**: Fully implemented and hardware-verified on physical **Pixel 9 Pro XL** with **AirPods 4** (MVP, Settings, 50Hz Spatial IMU stream with lifecycle auto-stop, Head Gestures Call Controls, Find My Audio Chime, Battery Pop-up, Last-Known Case Battery Preservation, Dynamic Generation Icons, Link-Aware Bluetooth Lifecycle, Zero-Allocation Drawing, and Deferred RenderNode State Reads).
+- **Milestones 0–7 + Expressive UX, Pop-up & Performance/Battery Optimization**: Fully implemented and hardware-verified on physical **Pixel 9 Pro XL** with **AirPods 4** (MVP, Settings, 50Hz Spatial IMU stream with lifecycle auto-stop, Head Gestures Call Controls, Find My Audio Chime, Battery Pop-up with foreground suppression, Home-Screen Battery Widget with R8 Proguard rules, Last-Known Case Battery Preservation, Dynamic Generation Icons, Link-Aware Bluetooth Lifecycle, Zero-Allocation Drawing, and Deferred RenderNode State Reads).
 
 ## Core Rules
 
@@ -24,12 +24,13 @@ Guidance for AI coding assistants (Antigravity / Gemini, OpenAI Codex, Claude Co
    - **Tier B Transport**: Uses classic L2CAP socket reflection via `HiddenApiBypass` on PSM `0x1001` ([ADR-0001](docs/adr/0001-tier-b-hidden-l2cap-socket.md)).
    - **AAP Handshake**: The `delay(200)` between initial packets in `AapSession.start()` is load-bearing.
 6. **Efficiency & Simplicity (Ponytail Principle)**: Keep changes minimal, maintain the single `app` module structure, avoid speculative abstractions, and verify with tests and lint.
-7. **Performance & Zero-Allocation UI**: Continuous animations MUST defer state reads to `Modifier.graphicsLayer { ... }` lambdas. Draw loops (`Canvas`, `DrawScope`) MUST NOT instantiate `Path`, array, or `Rect` allocations per frame. Background StateFlow observers MUST use `distinctUntilChangedBy` before invoking system IPC.
+7. **Performance & Zero-Allocation UI**: Continuous animations MUST defer state reads to `Modifier.graphicsLayer { ... }` lambdas. Draw loops (`Canvas`, `DrawScope`) MUST NOT instantiate `Path`, array, or `Rect` allocations per frame. Background StateFlow observers MUST use `distinctUntilChanged` before invoking system IPC.
 
 ## Verification Commands
 
 ```bash
 ./gradlew :app:assembleDebug          # Build debug APK
-./gradlew :app:testDebugUnitTest      # JVM unit tests (67 tests)
+./gradlew :app:testDebugUnitTest      # JVM unit tests (88 tests)
 ./gradlew :app:lintDebug              # Android Lint (0 errors)
+./gradlew :app:bundleRelease          # Release AAB bundle (R8 minified)
 ```

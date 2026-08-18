@@ -64,7 +64,7 @@
         <!-- M5 battery widget (§32): read-only, no config activity; see feature.widgets. -->
         <receiver
             android:name="dev.androidpods.feature.widgets.BatteryWidgetReceiver"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

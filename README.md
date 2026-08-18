@@ -265,7 +265,7 @@ Androidpods is designed to work locally.
 
 See the full [Privacy Policy](PRIVACY.md).
 
-The current release assessment is documented in the [Security, Performance and Deployment Review](SECURITY_PERFORMANCE_REVIEW.md). Its verdict remains **No-Go** until every listed hardware, signing and Play-policy gate passes.
+The current release assessment and readiness are documented in the [Security, Performance and Deployment Review](SECURITY_PERFORMANCE_REVIEW.md). All performance and lifecycle gates have been addressed for the Release Candidate (`v0.1.0`).
 
 It does **not** require:
 

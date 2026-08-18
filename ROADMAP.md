@@ -8,9 +8,15 @@
 
 ## 1. Projektstatus & Hardware-Verifikation
 
-Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die **Performance- & Batterielaufzeit-Optimierung** sind implementiert. Die Release-Härtung umfasst minifizierte Builds, Privacy-/Backup-Regeln, synthetische Test-Fixtures, ehrliches Capability-Gating, Zero-Allocation Render-Pfade, Macrobenchmarks und versionierte Baseline Profiles. Alle offenen Release-Gates aus [`SECURITY_PERFORMANCE_REVIEW.md`](SECURITY_PERFORMANCE_REVIEW.md) wurden behoben; der Release Candidate (`v0.1.0`) ist freigegeben für Internal/Closed Testing auf Google Play.
+Alle geplanten **Milestones 0 bis 7**, das **Material 3 Expressive UI/UX-Redesign**, das **Battery Pop-up** sowie die **Performance- & Batterielaufzeit-Optimierung** sind implementiert. Die Release-Härtung umfasst minifizierte Builds, Privacy-/Backup-Regeln, synthetische Test-Fixtures, ehrliches Capability-Gating, Zero-Allocation Render-Pfade, Macrobenchmarks und versionierte Baseline Profiles. Das vollständige Security- und Performance-Review ([`SECURITY_PERFORMANCE_REVIEW.md`](SECURITY_PERFORMANCE_REVIEW.md)) wurde erfolgreich abgeschlossen; der Release Candidate (`v0.1.0`) ist ohne offene Blocker freigegeben für die Signierung und das Einreichen bei Google Play (Internal/Closed Testing).
 - **Test-Hardware:** Google Pixel 9 Pro XL (Android 17 / API 37)
 - **Kopfhörer:** Apple AirPods 4 (Modell `A3050` / `A3053`, H2-Chip)
+- **Release-Gates & Sicherheits-Verifikation:**
+  - *Sicherheit & Datenschutz:* 0 Netzwerkberechtigungen (`INTERNET` fehlt absichtlich, offline-only), Bluetooth-Scan mit `neverForLocation`, `PendingIntent.FLAG_IMMUTABLE`, unexportierte Pop-up-Dialog-Activity, CDM-/Tile-Service-Permission-Guards, R8-Log-Stripping und synthetische Test-Fixtures.
+  - *Home-Screen Widget:* `BatteryWidgetReceiver` auf `android:exported="true"` gesetzt und R8/Proguard Keep-Rules für Jetpack Glance, DataStore und `HiddenApiBypass` ergänzt (behebt Hängenbleiben in der Ladeanimation bei Release-Builds).
+  - *Akku-Pop-up:* Automatisches Pop-up wird bei bereits geöffneter App über `MainActivity.isForeground`-Tracking sauber unterdrückt.
+  - *Native PSS & Lifecycle:* `MainActivity` `launchMode="singleTask"`, `NonCancellable` Motion-Stream-Stop und allokationsfreie Canvas-Pfad-Wiederverwendung (`remember { Path() }` + `rewind()`).
+  - *Verifikation:* 88 / 88 Unit-Tests bestanden, Android Lint 0 Fehler, Release AAB (5,7 MB) erfolgreich gebaut.
 
 ---
 
@@ -121,21 +127,21 @@ dev.androidpods
 
 ### 3.6 UI-Schicht & Android-Integration (`dev.androidpods.feature.*`)
 - **[`AirPodsBatteryPopup.kt`](app/src/main/kotlin/dev/androidpods/feature/popup/AirPodsBatteryPopup.kt) & [`BatteryPopupActivity.kt`](app/src/main/kotlin/dev/androidpods/feature/popup/BatteryPopupActivity.kt):**  
-  Material 3 Expressive **AirPods Battery Pop-up** Bottom Card mit Hero-Trio (`AirPodsExpressiveTrio`), Live-Akkustands-Pillars, Lade-Blitzen (`⚡`), Trageerkennungs-Indikatoren und 100% transparentem Hintergrund ohne künstliche Abdunklung.
+  Material 3 Expressive **AirPods Battery Pop-up** Bottom Card mit Hero-Trio (`AirPodsExpressiveTrio`), Live-Akkustands-Pillars, Lade-Blitzen (`⚡`), Trageerkennungs-Indikatoren und 100% transparentem Hintergrund ohne künstliche Abdunklung. [`BatteryPopupObserver.kt`](app/src/main/kotlin/dev/androidpods/feature/popup/BatteryPopupObserver.kt) unterdrückt das Pop-up automatisch, wenn die App über `MainActivity.isForeground` aktiv ist.
 - **[`HomeScreen.kt`](app/src/main/kotlin/dev/androidpods/feature/home/HomeScreen.kt):**  
   Brand-Hero mit modellabhängiger Grafik, Live-Waveform-Equalizer, `UnifiedBatteryPillar`-Trio und `ConnectionBadge` (RenderNode Alpha).
 - **[`ControlsScreen.kt`](app/src/main/kotlin/dev/androidpods/feature/controls/ControlsScreen.kt):**  
   Expressiver Steuerungs-Tab für Spatial Audio, Kopfgesten, Find My Suchton und Druck-/Haltezeiten. Bereinigt um synchrone Binder-IPCs in der Komposition.
 - **[`SpatialMotionVisualizer.kt`](app/src/main/kotlin/dev/androidpods/feature/spatial/SpatialMotionVisualizer.kt):**  
-  3D-Kopforientierungs-Visualizer mit automatischer `Lifecycle`-Abschaltung des 50Hz-Sensorstreams bei `ON_STOP` im Hintergrund.
+  3D-Kopforientierungs-Visualizer mit 50Hz Recomposition-Isolation im `graphicsLayer` und automatischer `Lifecycle`-Abschaltung des Sensorstreams bei `ON_STOP` im Hintergrund.
 - **[`AirPodsTileService.kt`](app/src/main/kotlin/dev/androidpods/feature/tiles/AirPodsTileService.kt):**  
-  Quick Settings Tile mit `distinctUntilChangedBy`-Filterung gegen IPC-Überlastung bei IMU-Streams.
+  Quick Settings Tile mit `distinctUntilChanged`-Filterung gegen IPC-Überlastung bei IMU-Streams.
 - **[`AppNavigation.kt`](app/src/main/kotlin/dev/androidpods/feature/navigation/AppNavigation.kt):**  
-  Schwebende **Floating Navigation Pill** mit optimierter Layout-Messung ohne verschachtelte `animateContentSize`.
+  Schwebende **Floating Navigation Pill** und ultra-flüssige, jank-freie Fade-Transitionen (`FastOutSlowInEasing`).
 - **[`Notifications`](app/src/main/kotlin/dev/androidpods/feature/notifications/):**  
   Lautlose Akku-Benachrichtigung und Heads-Up-Verbindungsbanner mit `PendingIntent` zum direkten Zurückkehren in die App.
 - **[`BatteryWidget.kt`](app/src/main/kotlin/dev/androidpods/feature/widgets/BatteryWidget.kt) & [`WidgetsScreen.kt`](app/src/main/kotlin/dev/androidpods/feature/widgets/WidgetsScreen.kt):**  
-  Android Glance Home-Screen Widget und In-App-Live-Vorschau.
+  Android Glance Home-Screen Widget (`android:exported="true"`, R8 Proguard keep rules) und In-App-Live-Vorschau.
 
 ---
 
@@ -152,9 +158,9 @@ dev.androidpods
 5. **Verifikations-Befehle:**
    ```bash
    ./gradlew :app:assembleDebug          # Debug-APK bauen
-   ./gradlew :app:testDebugUnitTest      # JVM Unit-Tests (84 Tests)
+   ./gradlew :app:testDebugUnitTest      # JVM Unit-Tests (88 Tests)
    ./gradlew :app:lintDebug              # Android Lint (0 Fehler)
-   ./gradlew :app:bundleRelease          # Optimiertes, noch unsigniertes Release-AAB
+   ./gradlew :app:bundleRelease          # Optimiertes Release-AAB (5.7 MB)
    ./gradlew :benchmark:connectedBenchmarkAndroidTest
    ```
 

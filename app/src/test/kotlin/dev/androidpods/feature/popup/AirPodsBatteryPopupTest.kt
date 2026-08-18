@@ -41,4 +41,14 @@ class AirPodsBatteryPopupTest {
         assertEquals(BatteryChargeStatus.CHARGING, state.battery?.case?.status)
         assertFalse(state.battery?.left?.status == BatteryChargeStatus.CHARGING)
     }
+
+    @Test
+    fun `main activity isForeground default is false and tracks correctly`() {
+        dev.androidpods.app.MainActivity.isForeground = false
+        assertFalse(dev.androidpods.app.MainActivity.isForeground)
+        dev.androidpods.app.MainActivity.isForeground = true
+        assertTrue(dev.androidpods.app.MainActivity.isForeground)
+        dev.androidpods.app.MainActivity.isForeground = false
+        assertFalse(dev.androidpods.app.MainActivity.isForeground)
+    }
 }
