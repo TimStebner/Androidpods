@@ -1,6 +1,13 @@
 # AGENTS.md
 
-Guidance for AI coding assistants (Antigravity / Gemini, OpenAI Codex, Claude Code) working in this repository.
+Track progress in `PROGRESS.md`,not in your head. Update it when a phase starts and when it finishes.Use `PROGRESS.md` as your persistent memory to document the current plan, the current work step, what has been completed, and any issues.`PROGRESS.md` is going to be used as the persistent memory for this project and is also used by CLAUDE CODE.
+
+## Skill, Plugin & Workflow Selection
+
+Before starting any task, **actively evaluate which available skills, plugins, tools, MCP servers, subagents, and predefined workflows are relevant to the current task**. Inspect their descriptions when necessary and load/use the most appropriate ones **before beginning the actual work**. Do not rely only on tools already in context. Re-evaluate your selection whenever the task changes, becomes blocked, or a specialized capability could improve correctness, efficiency, or quality.
+
+**Rule:** If a relevant skill, plugin, tool, or workflow exists, prefer using it over improvising an equivalent process yourself.
+Do not load everything blindly. Select the smallest set of relevant capabilities that best fits the task.
 
 ## Quick Orientation
 
